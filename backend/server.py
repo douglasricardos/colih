@@ -1460,19 +1460,7 @@ def deletar_usuario(uid: str):
         return {"ok": True}
     except Exception as e:
         print("Erro deletar usuario", e)
-        return {"ok": False}
-
-
-
-import os
-frontend_path = os.path.join(BASE_DIR.parent, 'frontend')
-if os.path.exists(frontend_path):
-    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
-else:
-    print(f"ATENÇÃO: Pasta frontend não encontrada em {frontend_path}")
-
-
-# ─── ROTAS RESTAURADAS DA COLIH ──────────────────────────────────────────────────
+        return {"ok": False}# ─── ROTAS RESTAURADAS DA COLIH ──────────────────────────────────────────────────
 @app.get("/api/colih/medicos")
 def api_get_colih_medicos():
     if not getattr(supabase, 'table', None): return []
@@ -1518,8 +1506,68 @@ def api_post_config_hlc_dict(body: dict):
 
 @app.get("/api/config/hlc-stats")
 def api_get_config_hlc_stats():
-    # Placeholder to prevent 404
-    return {}
+    config_file = DATA_DIR / "hlc_dict.json"
+    hlc_dict = {}
+    if config_file.exists():
+        try:
+            import json
+            with open(config_file, "r", encoding="utf-8") as f:
+                hlc_dict = json.load(f)
+        except:
+            pass
+            
+    # Criar um dict reverso para busca mais rapida: HLC_Name -> [CNES_Name1, CNES_Name2...]
+    cnes_map = {}
+    for cnes_name, hlc_name in hlc_dict.items():
+        hlc_lower = hlc_name.lower().strip()
+        if hlc_lower not in cnes_map:
+            cnes_map[hlc_lower] = []
+        cnes_map[hlc_lower].append(cnes_name.lower().strip())
+        
+    targets = [
+        "Cirurgia cardíaca", "Cirurgia torácica", "Cirurgia geral", "Ortopedia", 
+        "Cirurgia de trauma", "Ginecologia", "Obstetrícia", "Anestesiologia",
+        "Medicina intensiva", "Hematologia", "Oncologia clínica", "Gastroenterologia",
+        "Coloproctologia", "Medicina de emergência", "Medicina hospitalar", "Nefrologia",
+        "Neonatologia", "Neurocirurgia", "Otorrinolaringologia", "Pneumologia", 
+        "Radiologia intervencionista", "Tratamento de queimados", "Urologia"
+    ]
+    
+    counts = {t: 0 for t in targets}
+    
+    try:
+        medicos = get_medicos_cache().get("medicos", [])
+    except Exception as e:
+        print("Erro ao buscar medicos do cache para stats:", e)
+        medicos = []
+        
+    for m in medicos:
+        esp = (m.get("especialidade") or "").lower()
+        cbo = (m.get("cbo") or "").lower()
+        if not esp and not cbo: continue
+        
+        for t in targets:
+            t_lower = t.lower()
+            ct_list = cnes_map.get(t_lower, [])
+            # match if any of the mapped CNES names is in the doctor's specialty/cbo
+            if any(ct in esp for ct in ct_list) or t_lower in esp or t_lower in cbo:
+                counts[t] += 1
+                
+    return counts
+
+
+
+
+
+
+import os
+frontend_path = os.path.join(BASE_DIR.parent, 'frontend')
+if os.path.exists(frontend_path):
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
+else:
+    print(f"ATENÇÃO: Pasta frontend não encontrada em {frontend_path}")
+
+
 
 
 if __name__ == "__main__":
