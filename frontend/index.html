@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>COLIH BA Salvador - Médicos Cooperadores</title>
+  <meta name="description" content="Sistema de captação de médicos cooperadores para a COLIH BA Salvador. Pesquise hospitais, profissionais e gerencie o pipeline de contatos." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="/style.css?v=14">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+
+
+
+<div style="display: flex; height: 100vh; overflow: hidden;">
+  <!-- ─── SIDEBAR ESQUERDA (GLPI Style) ───────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <img src="logo-colih-portal.png" alt="COLIH" style="max-height: 40px; margin-bottom: 5px;"><br>
+      COLIH Salvador
+    </div>
+    
+    <!-- MODULE: SUS -->
+    <ul class="sidebar-menu" id="sidebar-sus">
+      <li class="menu-group" onclick="toggleGroup('sus')" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+        Dados do SUS <i data-lucide="chevron-down" id="icon-sus"></i>
+      </li>
+      <div id="group-sus">
+        <li class="menu-item" onclick="openTab('hospitais', this)"><i data-lucide="building-2"></i> Instituições</li>
+        <li class="menu-item" onclick="openTab('medicos', this)"><i data-lucide="stethoscope"></i> Profissionais</li>
+        <li class="menu-item" onclick="openTab('pipeline', this)"><i data-lucide="list-todo"></i> Pipeline (HLC) <span class="tab-badge" id="pipeline-count">0</span></li>
+        <li class="menu-item active" onclick="openTab('stats', this)"><i data-lucide="bar-chart-3"></i> Captação / HLC</li>
+        <li class="menu-item" onclick="openTab('calendario', this)"><i data-lucide="calendar-days"></i> Calendário de Visitas</li>
+      </div>
+    </ul>
+
+    <!-- MODULE: COLIH -->
+    <ul class="sidebar-menu" id="sidebar-colih">
+      <li class="menu-group" onclick="toggleGroup('colih')" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+        Dados COLIH <i data-lucide="chevron-down" id="icon-colih"></i>
+      </li>
+      <div id="group-colih">
+        <li class="menu-item" onclick="openTab('colih-medicos', this)"><i data-lucide="users"></i> Lista de Médicos</li>
+        <li class="menu-item" onclick="openTab('colih-membros', this)"><i data-lucide="users"></i> Membros</li>
+        <li class="menu-item" onclick="openTab('contatos', this)"><i data-lucide="phone"></i> Histórico Contatos</li>
+      </div>
+    </ul>
+
+    <!-- MODULE: CONFIG -->
+    <ul class="sidebar-menu" id="sidebar-config">
+      <li class="menu-group" onclick="toggleGroup('config')" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+        Configurações <i data-lucide="chevron-right" id="icon-config"></i>
+      </li>
+      <div id="group-config" style="display:none;">
+        <li class="menu-item" onclick="openTab('config-hlc', this)"><i data-lucide="book"></i> Dicionário HLC-9</li>
+        <li class="menu-item" onclick="openTab('config-cnes', this)"><i data-lucide="map-pin"></i> Escopo CNES</li>
+        <li class="menu-item" onclick="openTab('config-apoio', this)"><i data-lucide="settings"></i> Termos de Apoio</li>
+        <li class="menu-item" onclick="openTab('config-usuarios', this)"><i data-lucide="user-cog"></i> Usuários</li>
+        <li class="menu-item" onclick="openTab('config-comunicacao', this)"><i data-lucide="message-square"></i> Comunicação</li>
+        <li class="menu-item" onclick="openTab('config-logs', this)"><i data-lucide="file-clock"></i> Logs</li>
+      </div>
+    </ul>
+    
+    <!-- SIDEBAR STATUS FOOTER (COMPACT & DYNAMIC) -->
+    <div style="margin-top: auto; padding: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 8px;">
+      
+      <!-- CNES MASTER BUTTON -->
+      <button onclick="document.getElementById('cnesDetailsModal').style.display='flex'" style="width:100%; display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:8px 12px; cursor:pointer; transition:0.2s; color:#94a3b8; font-family:inherit;" onmouseover="this.style.background='rgba(0,0,0,0.4)'" onmouseout="this.style.background='rgba(0,0,0,0.25)'">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i data-lucide="database" style="width:14px; height:14px;"></i>
+          <span style="font-size:11px; font-weight:700; letter-spacing:0.5px;">CNES</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span id="cnesStatusCompact" style="font-size:10px; font-weight:600; color:#ffaa00;">Aguarde...</span>
+          <div id="cnesStatusDot" style="width:6px; height:6px; border-radius:50%; background:#ffaa00; box-shadow:0 0 5px #ffaa00;"></div>
+        </div>
+      </button>
+
+      <!-- COLIH.MED MASTER BUTTON -->
+      <button onclick="document.getElementById('colihDetailsModal').style.display='flex'" style="width:100%; display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:8px 12px; cursor:pointer; transition:0.2s; color:#94a3b8; font-family:inherit;" onmouseover="this.style.background='rgba(0,0,0,0.4)'" onmouseout="this.style.background='rgba(0,0,0,0.25)'">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i data-lucide="server" style="width:14px; height:14px;"></i>
+          <span style="font-size:11px; font-weight:700; letter-spacing:0.5px;">COLIH.MED</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span id="colihStatusCompact" style="font-size:10px; font-weight:600; color:#22c55e;">Online</span>
+          <div style="width:6px; height:6px; border-radius:50%; background:#22c55e; box-shadow:0 0 5px #22c55e;"></div>
+        </div>
+      </button>
+
+    </div>
+  </aside>
+
+  <!-- CNES DETAILS MODAL -->
+  <div class="modal-overlay" id="cnesDetailsModal" style="z-index:9999;">
+    <div class="modal-content" style="max-width: 400px; background:var(--bg-card); color:var(--text-primary); border-radius:12px; padding:24px;">
+      <h2 style="font-size:18px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:16px;">
+        <div><i data-lucide="database" style="color:var(--accent-blue); margin-right:8px; vertical-align:middle;"></i> Status CNES (Datasus)</div>
+        <button class="btn-icon" onclick="document.getElementById('cnesDetailsModal').style.display='none'"><i data-lucide="x"></i></button>
+      </h2>
+      <div style="display:flex; flex-direction:column; gap:12px; font-size:14px;">
+        <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-surface); border-radius:8px;">
+           <span style="color:var(--text-secondary);"><i data-lucide="activity" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;"></i> Estado Atual</span>
+           <span id="modal-cnes-status" style="font-weight:700; color:#ffaa00;">Sincronizando...</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border-color);">
+           <span style="color:var(--text-secondary);"><i data-lucide="calendar" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;"></i> Atualizado em</span>
+           <span id="data-atualizacao" style="font-weight:600;">--</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border-color);">
+           <span style="color:var(--text-secondary);"><i data-lucide="clock" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;"></i> Competência</span>
+           <span id="competencia-valor" style="font-weight:600;">--</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border-color);">
+           <span style="color:var(--text-secondary);"><i data-lucide="stethoscope" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;"></i> Médicos na Base</span>
+           <span id="total-medicos-valor" style="font-weight:700; color:var(--accent-blue);">--</span>
+        </div>
+        <div id="syncStatusDetails" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLIH DETAILS MODAL -->
+  <div class="modal-overlay" id="colihDetailsModal" style="z-index:9999;">
+    <div class="modal-content" style="max-width: 400px; background:var(--bg-card); color:var(--text-primary); border-radius:12px; padding:24px;">
+      <h2 style="font-size:18px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:16px;">
+        <div><i data-lucide="server" style="color:#22c55e; margin-right:8px; vertical-align:middle;"></i> Banco de Dados COLIH.MED</div>
+        <button class="btn-icon" onclick="document.getElementById('colihDetailsModal').style.display='none'"><i data-lucide="x"></i></button>
+      </h2>
+      <div style="display:flex; flex-direction:column; gap:12px; font-size:14px;">
+        <div style="display:flex; justify-content:space-between; padding:10px; background:rgba(34,197,94,0.1); border-radius:8px; border:1px solid rgba(34,197,94,0.2);">
+           <span style="color:var(--text-secondary);"><i data-lucide="activity" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;"></i> Conexão Local</span>
+           <span style="font-weight:700; color:#22c55e;">Online e Ativa</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border-color);">
+           <span style="color:var(--text-secondary);"><i data-lucide="users" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;"></i> Membros Cadastrados</span>
+           <span id="colih-membros-count" style="font-weight:600;">Verificando...</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border-color);">
+           <span style="color:var(--text-secondary);"><i data-lucide="handshake" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;"></i> Cooperadores Ativos</span>
+           <span id="colih-coop-count" style="font-weight:600;">Verificando...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ─── CONTEÚDO PRINCIPAL ────────────────────────────────────── -->
+  <main class="main-content" style="flex: 1; overflow-y: auto; background-color: #f8fafc;">
+
+    
+
+
+
+  <!-- ─── ABA: BUSCAR INSTITUIÇÕES ───────────────────────────────────── -->
+  <section class="tab-panel" id="tab-hospitais">
+    
+
+    <!-- Search Bar Redesign -->
+    <div class="search-bar" style="display:flex; flex-direction:column; gap:16px; background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border-color); box-shadow:0 1px 3px rgba(0,0,0,0.05); margin-top:20px;">
+        
+        <!-- Linha 1: Título e Visão -->
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+            <div style="font-weight:700; color:var(--text-primary); font-size:16px;">🔍 Busca e Segmentação</div>
+            <div>
+                <span style="font-size:12px; font-weight:600; color:var(--text-secondary); margin-right:8px;">Visão:</span>
+                <button class="btn-secondary" id="btn-toggle-map" onclick="window.toggleMap()" style="padding:6px 16px; font-weight:700;" title="Ver no Mapa">🌐 Mapa</button>
+            </div>
+        </div>
+
+        <!-- Linha 2: Filtros Avançados -->
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Filtros Avançados</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <select id="filter-tipo" class="filter-select" onchange="window.updateFiltersUI(); buscarHospitais();" style="width:160px; flex-grow:1;">
+                    <option value="">Qualquer Tipo de Instituição</option>
+                    <option value="HOSPITAL GERAL">Hospital Geral</option>
+                    <option value="HOSPITAL ESPECIALIZADO">Hospital Especializado</option>
+                    <option value="HOSPITAL DIA">Hospital Dia</option>
+                    <option value="PRONTO SOCORRO GERAL">Pronto Socorro Geral</option>
+                    <option value="PRONTO SOCORRO ESPECIALIZADO">Pronto Socorro Especializado</option>
+                    <option value="PRONTO ATENDIMENTO (UPA)">Pronto Atendimento (UPA)</option>
+                    <option value="CLÍNICA / CENTRO DE ESPECIALIDADE">Clínica / Especialidades</option>
+                    <option value="FARMÁCIA">Farmácia</option>
+                    <option value="UNIDADE DE APOIO DIAGNOSE E TERAPIA">Diagnóstico/Imagem</option>
+                    <option value="LABORATÓRIO DE SAÚDE PÚBLICA">Laboratório</option>
+                    <option value="CENTRO DE SAÚDE / UBS">Unidade Básica de Saúde</option>
+                    <option value="POLICLÍNICA">Policlínica</option>
+                </select>
+                
+                <div style="width:180px; flex-grow:1;">
+                    <!-- TomSelect will be initialized here -->
+                    <select id="filter-distrito" class="filter-select" placeholder="Qualquer Distrito..."><option value="">Qualquer Distrito...</option></select>
+                </div>
+                
+                <select id="filter-complexidade" class="filter-select" onchange="buscarHospitais()" style="width:200px; flex-grow:1;">
+                    <option value="">Qualquer Complexidade</option>
+                    <option value="Alta Complexidade">Alta Complexidade</option>
+                    <option value="Média-Alta Complexidade">Média-Alta Complexidade</option>
+                    <option value="Média Complexidade">Média Complexidade</option>
+                    <option value="Atenção Básica">Atenção Básica</option>
+                </select>
+                
+                <select id="filter-tmo" class="filter-select" onchange="buscarHospitais()" style="width:180px; flex-grow:1;">
+                    <option value="">Faz Transplante (TMO)?</option>
+                    <option value="S">Sim, Faz TMO</option>
+                </select>
+                
+                <select id="filter-pbm" class="filter-select" onchange="buscarHospitais()" style="width:180px; flex-grow:1;">
+                    <option value="">PBM Implantado?</option>
+                    <option value="S">Sim, Possui PBM</option>
+                </select>
+                
+                <select id="filter-apoio" class="filter-select" onchange="buscarHospitais()" style="width:180px; display:none; flex-grow:1;">
+                    <option value="">Equipamentos de Apoio à COLIH (Ambos)</option>
+                    <option value="s">Sim (Possui)</option>
+                    <option value="n">Não (Não Possui)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Linha 3: Busca por Nome -->
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+            <div style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Nome da Instituição</div>
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="filter-nome" class="search-input" placeholder="Digite o nome do estabelecimento..." onkeydown="if(event.key==='Enter') buscarHospitais()" style="flex-grow:1;">
+                <button class="btn-primary" onclick="buscarHospitais()" style="padding:10px 24px;">Buscar</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Mapa Container -->
+    <div id="map-container" style="display:none; width:100%; height:calc(100vh - 250px); border-radius:8px; margin-top:16px; border:1px solid var(--border-color); z-index:1;"></div>
+
+    <div class="fonte-info-bar" id="hosp-fonte-bar" style="display:none">
+      <span class="fonte-icon">ℹ️</span>
+      <span id="hosp-fonte-text"></span>
+    </div>
+
+    <div id="hosp-results" class="results-area"></div>
+
+    <!-- Card de detalhe do hospital -->
+    <div id="hosp-detail" class="detail-panel" style="display:none">
+      <div class="detail-header">
+        <button class="btn-back" onclick="fecharDetalheHospital()">← Voltar</button>
+        <div id="hosp-detail-title"></div>
+      </div>
+
+      <div class="detail-body">
+        <!-- Tabs Header -->
+        <div class="tabs-header">
+          <button class="tab-btn active" onclick="switchTab('tab-hosp-info', this)">🏥 Informações</button>
+          <button class="tab-btn" onclick="switchTab('tab-hosp-esps', this)">🩺 Especialidades</button>
+          <button class="tab-btn" onclick="switchTab('tab-hosp-prof', this)">👥 Médicos</button>
+        </div>
+
+        <!-- Aba: Info -->
+        <div id="tab-hosp-info" class="tab-content active">
+          <div id="hosp-info-card" class="info-card"></div>
+          <h3 style="margin-top:20px; margin-bottom:10px; font-size:16px;">🛏️ Recursos do Hospital</h3>
+          <div id="hosp-rec-card" class="info-card"></div>
+        </div>
+
+        <!-- Aba: Especialidades -->
+        <div id="tab-hosp-esps" class="tab-content">
+          <div id="hosp-esps-card" class="info-card" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+        </div>
+
+        <!-- Aba: Profissionais -->
+        <div id="tab-hosp-prof" class="tab-content">
+          <div class="profissionais-section">
+            <div class="section-title-row">
+              <h2>👥 Profissionais Médicos</h2>
+              <div class="prof-filter-wrap">
+                <input type="text" id="prof-filter-input" placeholder="Filtrar por nome ou especialidade..."
+                  class="filter-input" oninput="filtrarProfissionais()" />
+                <span id="prof-count" class="count-chip"></span>
+              </div>
+            </div>
+
+            <div class="fonte-info-bar small">
+              <span class="fonte-icon">ℹ️</span>
+              <span id="prof-fonte-text"></span>
+            </div>
+
+            <div id="prof-table-wrap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ABA: BUSCAR MÉDICO ───────────────────────────────────── -->
+  <section class="tab-panel" id="tab-medicos">
+    
+
+    <div class="search-bar">
+      <div class="search-field-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="med-nome-input" placeholder="Nome do médico..."
+          class="search-input" oninput="debounce(buscarMedicos, 350)()" />
+        <div style="position:relative; width:220px; flex-shrink:0;" class="custom-dropdown-container" id="dropdown-med-hosp">
+            <input type="text" id="med-hosp-input" placeholder="Hospital / Estabelecimento..." autocomplete="off" oninput="filtrarDropdownMedHosp()" onfocus="abrirDropdownMedHosp()" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;">
+            <div id="med-hosp-list-box" class="dropdown-list-box" style="display:none; position:absolute; top:100%; left:0; right:0; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; margin-top:4px; max-height:200px; overflow-y:auto; z-index:100; box-shadow:0 4px 6px rgba(0,0,0,0.1);"></div>
+        </div>
+        <div style="position:relative; width:220px; flex-shrink:0;" class="custom-dropdown-container" id="dropdown-med-esp">
+            <input type="text" id="med-esp-input" placeholder="Qualquer Especialidade..." autocomplete="off" oninput="filtrarDropdownMedEsp()" onfocus="abrirDropdownMedEsp()" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;">
+            <div id="med-esp-list-box" class="dropdown-list-box" style="display:none; position:absolute; top:100%; left:0; right:0; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; margin-top:4px; max-height:200px; overflow-y:auto; z-index:100; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+            </div>
+            <!-- Hidden input to store the actual value so JS can easily read it like it used to read the select -->
+            <input type="hidden" id="med-esp-select" value="">
+        </div>
+        <button class="btn-primary" onclick="buscarMedicos()">Buscar</button>
+      </div>
+    </div>
+
+    <div class="fonte-info-bar" id="med-fonte-bar" style="display:none">
+      <span class="fonte-icon">ℹ️</span>
+      <span id="med-fonte-text"></span>
+    </div>
+
+    <div id="med-results" class="results-area"></div>
+
+    <!-- Modal detalhe do médico -->
+    <div id="med-detail" class="detail-panel" style="display:none">
+      <div class="detail-header">
+        <button class="btn-back" onclick="fecharDetalheMedico()">← Voltar</button>
+        <div id="med-detail-title"></div>
+      </div>
+
+      <div class="detail-body">
+        <div class="med-cards-row">
+          <!-- Card dados CNES -->
+          <div class="info-card glass flex-1" id="med-cnes-card"></div>
+          <!-- Card CFM (se disponível) -->
+          <div class="info-card glass flex-1" id="med-cfm-card"></div>
+          <!-- Card Currículo & Registro -->
+          <div class="info-card glass flex-1" id="med-curriculo-card" style="min-width:280px;"></div>
+        </div>
+
+        <!-- Vínculos -->
+        <div class="vinculos-section">
+          <div class="section-title-row">
+            <h2>🏥 Instituições de Saúde Vinculadas</h2>
+            <span class="fonte-chip" id="vinc-fonte-chip"></span>
+          </div>
+          <div id="vinculos-table-wrap"></div>
+        </div>
+
+        <!-- Ações de captação -->
+        <div class="captacao-actions" id="captacao-actions-wrap"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ABA: PIPELINE ────────────────────────────────────────── -->
+  <section class="tab-panel" id="tab-pipeline">
+    
+
+    <!-- Filtros e ações -->
+    <div class="pipeline-toolbar">
+      <div class="toolbar-filters">
+        <select id="pipe-status-filter" class="filter-select" onchange="carregarPipeline()">
+          <option value="">Todos os status</option>
+          <option value="novo">🔵 Novo</option>
+          <option value="em_contato">🟡 Em Contato</option>
+          <option value="aguardando">🟠 Aguardando Resposta</option>
+          <option value="reuniao">🟣 Reunião Agendada</option>
+          <option value="cooperador">🟢 Cooperador</option>
+          <option value="recusou">🔴 Recusou</option>
+        </select>
+        <select id="pipe-resp-filter" class="filter-select" onchange="carregarPipeline()">
+          <option value="">Todos os responsáveis</option>
+        </select>
+        <input type="text" id="pipe-search" placeholder="Buscar por nome..." class="filter-input short"
+          oninput="debounce(filtrarPipelineLocal, 300)()" />
+        <style>
+          .hospital-card:active { transform: scale(0.98); }
+          .hospital-card h3 { font-size: 16px; margin-bottom: 5px; color: var(--text-primary); }
+          .hospital-card p { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+
+          /* Tabs UI */
+          .tabs-header { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
+          .tab-btn { flex: 1; background: none; border: none; padding: 10px; color: var(--text-secondary); font-weight: 500; cursor: pointer; transition: 0.2s; border-bottom: 2px solid transparent; }
+          .tab-btn:hover { color: var(--text-primary); }
+          .tab-btn.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
+          .tab-content { display: none; }
+          .tab-content.active { display: block; animation: fade-in 0.3s; }
+        
+.dropdown-list-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+}
+.dropdown-list-item:hover {
+    background: var(--bg-hover);
+}
+.dropdown-list-item:last-child {
+    border-bottom: none;
+}
+
+</style>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn-secondary" onclick="exportarCSV()">⬇️ Exportar CSV</button>
+      </div>
+    </div>
+
+    <!-- Status summary cards -->
+    <div class="status-summary" id="status-summary"></div>
+
+    <div class="fonte-info-bar" id="pipe-fonte-bar" style="display:none">
+      <span class="fonte-icon">ℹ️</span>
+      <span id="pipe-fonte-text"></span>
+    </div>
+
+    <div id="pipeline-table-wrap" class="results-area"></div>
+  </section>
+
+  <!-- ─── ABA: MAPEAMENTO HLC-9 ────────────────────────────────── -->
+  <section class="tab-panel" id="tab-mapeamento">
+    
+    
+    <div class="info-card glass" style="margin-top:20px; font-size:14px;">
+      <h3>📖 Dicionário de Conversão Ativo</h3>
+      <p style="color:var(--text-secondary); margin-bottom: 15px;">Os mapeamentos abaixo são utilizados automaticamente ao extrair os dados do Governo. Se um médico possuir a especialidade da esquerda, o sistema anexará a etiqueta roxa da direita na ficha dele.</p>
+      <div id="mapeamento-lista" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; padding:10px; max-height:400px; overflow-y:auto; background:var(--bg-lighter); border-radius:8px;">
+        <div style="text-align:center; color:var(--text-muted)">Carregando dicionário...</div>
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- ─── ABA: COLIH MEDICOS ───────────────────────────────────── -->
+  <section class="tab-panel" id="tab-colih-medicos">
+    <div class="panel-header" style="background: linear-gradient(135deg, rgba(255, 170, 0, 0.1), transparent); border-bottom: 1px solid rgba(255, 170, 0, 0.2);">
+      <h1>🤝 Lista de Médicos</h1>
+      <p>Lista de médicos cadastrados na base de dados da COLIH. Atualizada a partir do sistema oficial.</p>
+    </div>
+    <div class="search-bar" style="display:flex; gap:10px; flex-wrap:wrap;">
+      <input type="text" id="busca-colih-medico" placeholder="Filtrar médicos..." onkeyup="renderColihMedicos()" style="flex:1; min-width:200px;">
+      <select id="filtro-colih-especialidade" onchange="renderColihMedicos()" style="padding:12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary);">
+          <option value="">Todas as Especialidades</option>
+      </select>
+      <select id="filtro-colih-visita" onchange="renderColihMedicos()" style="padding:12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary);">
+          <option value="">Qualquer Data</option>
+          <option value="recentes">Recentes (Até 6 meses)</option>
+          <option value="antigos">Mais de 6 meses (Defasados)</option>
+      </select>
+    </div>
+    <div id="colih-medicos-count" style="margin-top:10px; font-size:13px; color:var(--text-secondary); font-weight:600;">Carregando médicos...</div>
+    <div class="results-grid" id="colih-medicos-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));"></div>
+  </section>
+
+  <!-- ─── ABA: COLIH MEMBROS ───────────────────────────────────── -->
+  <section class="tab-panel" id="tab-colih-membros">
+    <div class="panel-header" style="background: linear-gradient(135deg, rgba(255, 170, 0, 0.1), transparent); border-bottom: 1px solid rgba(255, 170, 0, 0.2);">
+      <h1>👥 Membros</h1>
+      <p>Membros do comitê com validação de geolocalização para mapa de prospectos.</p>
+    </div>
+    <div class="search-bar" style="display:flex; gap:10px; flex-wrap:wrap;">
+      <input type="text" id="busca-colih-membro" placeholder="Filtrar membros..." onkeyup="renderColihMembros()" style="flex:1; min-width:200px;">
+      <select id="filtro-colih-regiao" onchange="renderColihMembros()" style="padding:12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary);">
+          <option value="">Todos os Grupos (Regiões)</option>
+      </select>
+      <select id="filtro-colih-geo" onchange="renderColihMembros()" style="padding:12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary);">
+          <option value="">Status do Mapa (Qualquer)</option>
+          <option value="validada">📍 Validada no Mapa</option>
+          <option value="pendente">⚠️ Pendente de Validação</option>
+      </select>
+    </div>
+    <div id="colih-membros-results-count" style="margin-top:10px; font-size:13px; color:var(--text-secondary); font-weight:600;">Carregando membros...</div>
+    <div class="results-grid" id="colih-membros-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); margin-top:20px;"></div>
+  </section>
+
+  <!-- ─── ABA: ESTATÍSTICAS ────────────────────────────────────── -->
+  <section class="tab-panel active" id="tab-stats">
+    <div class="panel-header" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent); border-bottom: 1px solid rgba(16, 185, 129, 0.2);">
+      <h1>🎯 Dashboard Inteligente de Captação</h1>
+      <p>Gamificação e prospecção HLC-9. Identifique lacunas na rede (red flags) e priorize alvos estratégicos.</p>
+    </div>
+
+    <!-- Gamification Cards -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:16px; margin-top:20px;">
+        <div style="background:var(--bg-card); padding:20px; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+            <div style="font-size:36px; font-weight:800; color:#10b981;" id="dash-cobertura-pct">0%</div>
+            <div style="font-size:14px; font-weight:600; color:var(--text-secondary); text-transform:uppercase;">Especialidades HLC-9 Cobertas</div>
+        </div>
+        <div style="background:var(--bg-card); padding:20px; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+            <div style="font-size:36px; font-weight:800; color:#3b82f6;" id="dash-total-coop">0</div>
+            <div style="font-size:14px; font-weight:600; color:var(--text-secondary); text-transform:uppercase;">Total de Cooperadores Identificados</div>
+        </div>
+        <div style="background:var(--bg-card); padding:20px; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+            <div style="font-size:36px; font-weight:800; color:#ef4444;" id="dash-red-flags">0</div>
+            <div style="font-size:14px; font-weight:600; color:var(--text-secondary); text-transform:uppercase;">Especialidades HLC-9 Sem Cooperador</div>
+        </div>
+    </div>
+
+    <!-- Alertas Vermelhos -->
+    <div style="margin-top:24px;">
+        <h3 style="display:flex; align-items:center; gap:8px; color:#ef4444;"><i data-lucide="circle"></i> Prioridade Máxima (Sem Cobertura COLIH)</h3>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">Estas especialidades do dicionário HLC-9 não possuem nenhum cooperador na base atual.</p>
+        <div id="dash-red-list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+    </div>
+    
+    <div id="dash-priority-list" style="margin-top:24px; background:var(--bg-card); padding:20px; border-radius:12px; border:1px solid var(--border-color); grid-column: span 3;"></div>
+
+    <!-- Hospitais Alvos -->
+    <div style="margin-top:24px;">
+        <h3 style="display:flex; align-items:center; gap:8px; color:#f59e0b;"><i data-lucide="circle"></i> Hospitais Alvo (Alta Complexidade)</h3>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">Hospitais com alta complexidade onde podemos prospectar os especialistas ausentes.</p>
+        <div id="dash-targets-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px;"></div>
+    </div>
+
+    <div style="margin-top:24px;">
+        <h3 style="display:flex; align-items:center; gap:8px; color:#8b5cf6;"><i data-lucide="circle"></i> Hospitais Alvo (Média Complexidade)</h3>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">Hospitais com média complexidade focados nos mesmos especialistas.</p>
+        <div id="dash-targets-med-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px;"></div>
+    </div>
+  </section>
+
+  <!-- ⚙️ ABA: CONFIGURAÇÕES ⚙️ -->
+  
+  <!-- ⚙️ CONFIG: DICIONÁRIO HLC-9 ⚙️ -->
+  <section class="tab-panel" id="tab-config-hlc">
+    
+    <div style="background:var(--bg-card); border-radius:12px; padding:20px; border:1px solid var(--border-color); margin-top:20px;">
+        <div style="display:flex; gap:10px; margin-bottom:15px; position:relative;">
+            
+            <div style="flex:1; position:relative;" class="custom-dropdown-container" id="dropdown-cnes">
+                <input type="text" id="hlc-key-input" placeholder="Especialidade CNES (Pesquise...)" autocomplete="off" oninput="filtrarDropdownCNES()" onfocus="abrirDropdownCNES()" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary);">
+                <div id="cnes-list-box" class="dropdown-list-box" style="display:none; position:absolute; top:100%; left:0; right:0; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; margin-top:4px; max-height:200px; overflow-y:auto; z-index:100; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                </div>
+            </div>
+            
+            <div style="flex:1; position:relative;" class="custom-dropdown-container" id="dropdown-hlc">
+                <input type="text" id="hlc-val-input" placeholder="Classificação HLC-9 (Ex: Cirurgia geral)" autocomplete="off" oninput="filtrarDropdownHLC()" onfocus="abrirDropdownHLC()" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary);">
+                <div id="hlc-list-box" class="dropdown-list-box" style="display:none; position:absolute; top:100%; left:0; right:0; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; margin-top:4px; max-height:200px; overflow-y:auto; z-index:100; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                </div>
+            </div>
+            
+            <button id="btn-adicionar-hlc" class="btn-primary" onclick="adicionarHlcDict()">Adicionar</button>
+        </div>
+        
+        <div id="hlc-cards-container" style="display:flex; flex-direction:column; gap:16px; margin-top:20px;">
+            <!-- Rendered via JS -->
+        </div>
+        
+        <details style="margin-top:20px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+            <summary style="font-weight:600; cursor:pointer; color:var(--text-secondary); outline:none;">
+                Especialidades do SUS Não Mapeadas (<span id="unmapped-cnes-count">0</span>)
+            </summary>
+            <div id="unmapped-cnes-list" style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;">
+                <!-- Rendered via JS -->
+            </div>
+        </details>
+        
+        <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+            <button class="btn-primary" onclick="salvarHlcDict()">💾 Salvar Dicionário</button>
+        </div>
+    </div>
+</section>
+
+
+  <!-- ⚙️ CONFIG: ESCOPO CNES ⚙️ -->
+  <section class="tab-panel" id="tab-config-cnes">
+    
+    <div style="background:var(--bg-card); border-radius:12px; padding:20px; border:1px solid var(--border-color); margin-top:20px; max-width:600px;">
+        <div style="margin-bottom:15px;">
+            <label style="display:block; font-weight:700; color:var(--text-secondary); margin-bottom:5px;">Estado (UF)</label>
+            <select id="config-uf" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:16px;">
+                <option value="BA">BA - Bahia</option>
+                <option value="SP">SP - São Paulo</option>
+                <option value="RJ">RJ - Rio de Janeiro</option>
+                <option value="MG">MG - Minas Gerais</option>
+                <option value="RS">RS - Rio Grande do Sul</option>
+                <option value="PR">PR - Paraná</option>
+                <option value="SC">SC - Santa Catarina</option>
+                <option value="PE">PE - Pernambuco</option>
+                <option value="CE">CE - Ceará</option>
+                <option value="GO">GO - Goiás</option>
+                <option value="DF">DF - Distrito Federal</option>
+                <option value="ES">ES - Espírito Santo</option>
+                <option value="MT">MT - Mato Grosso</option>
+                <option value="MS">MS - Mato Grosso do Sul</option>
+                <option value="AM">AM - Amazonas</option>
+                <option value="PA">PA - Pará</option>
+                <option value="PB">PB - Paraíba</option>
+                <option value="RN">RN - Rio Grande do Norte</option>
+                <option value="AL">AL - Alagoas</option>
+                <option value="SE">SE - Sergipe</option>
+                <option value="PI">PI - Piauí</option>
+                <option value="MA">MA - Maranhão</option>
+                <option value="TO">TO - Tocantins</option>
+                <option value="RO">RO - Rondônia</option>
+                <option value="RR">RR - Roraima</option>
+                <option value="AC">AC - Acre</option>
+                <option value="AP">AP - Amapá</option>
+            </select>
+        </div>
+        <div style="margin-bottom:15px;">
+            <label style="display:block; font-weight:700; color:var(--text-secondary); margin-bottom:5px;">Códigos IBGE (Separados por vírgula)</label>
+            <input type="text" id="config-municipios" placeholder="Ex: 292740, 291920 (Deixe em branco para o estado todo)" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;">
+            <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">Atenção: Apenas os hospitais e médicos destes municípios serão lidos e importados na próxima sincronização do CNES.</p>
+        </div>
+        <div style="text-align:right;">
+            <button class="btn-primary" onclick="salvarConfigEscopo()">💾 Salvar Escopo</button>
+        </div>
+    </div>
+  </section>
+
+  <!-- ⚙️ CONFIG: TERMOS DE EQUIPAMENTOS DE APOIO ⚙️ -->
+  <section class="tab-panel" id="tab-config-apoio">
+    <div class="panel-header">
+      <h1><i data-lucide="settings-2" style="color:var(--accent-blue); vertical-align:middle; margin-right:8px;"></i> Termos de Apoio</h1>
+      <p>Configure as palavras-chave para detectar equipamentos de apoio ao paciente na base de dados.</p>
+    </div>
+    <div style="background:var(--bg-card); padding:20px; border-radius:12px; border:1px solid var(--border-color); max-width:600px;">
+        <div style="margin-bottom:15px;">
+            <label style="display:block; font-weight:700; color:var(--text-secondary); margin-bottom:5px;">Termos (Separados por vírgula)</label>
+            <textarea id="config-equip-termos" rows="4" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;"></textarea>
+        </div>
+        <div style="text-align:right;">
+            <button class="btn-primary" onclick="salvarConfiguracoes()" style="padding:10px 20px; font-weight:600;">Salvar Termos</button>
+        </div>
+    </div>
+  </section>
+
+
+
+
+    
+
+    
+
+
+    <!-- ⚙️ ABA: USUÁRIOS ⚙️ -->
+    <section id="tab-config-usuarios" class="tab-panel">
+      <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;"><i data-lucide="user-cog" style="vertical-align:middle; color:var(--accent-blue);"></i> Gestão de Usuários</h2>
+      <div style="background:var(--bg-card); border-radius:12px; padding:20px; border:1px solid var(--border-color); margin-top:20px; display:flex; flex-direction:column; gap:16px;">
+         <div class="form-grid">
+            <div class="form-group">
+               <label>Nome do Usuário</label>
+               <input type="text" id="usr-nome" class="form-control" placeholder="João da Silva" />
+            </div>
+            <div class="form-group">
+               <label>Telefone (WhatsApp)</label>
+               <input type="text" id="usr-tel" class="form-control" placeholder="71999999999" />
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+               <label>Congregação</label>
+               <select id="usr-congregacao" class="form-control">
+                  <option value="">Selecione a congregação...</option>
+               </select>
+            </div>
+         </div>
+         <button class="btn btn-primary" onclick="salvarUsuario()" style="align-self: flex-start;"><i data-lucide="save"></i> Salvar Usuário</button>
+      </div>
+      
+      <h3 style="margin-top:32px; margin-bottom:16px;">Usuários Cadastrados</h3>
+      <div id="usuarios-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:16px;">
+         <p>Carregando...</p>
+      </div>
+    </section>
+
+    <!-- ⚙️ ABA: COMUNICACAO ⚙️ -->
+    <section id="tab-config-comunicacao" class="tab-panel">
+      <h2 style="font-size:24px; font-weight:700; margin-bottom:20px;"><i data-lucide="message-square" style="vertical-align:middle; color:var(--accent-blue);"></i> Configurações de Comunicação</h2>
+      <div style="background:var(--bg-card); border-radius:12px; padding:20px; border:1px solid var(--border-color); margin-top:20px; display:flex; flex-direction:column; gap:16px;">
+         <div class="form-group">
+            <label>Webhook URL (n8n)</label>
+            <input type="text" id="cfg-webhook-url" class="input form-control" placeholder="https://n8n.dominio.com/webhook/..." />
+         </div>
+         <div class="form-group">
+            <label>Instância Evolution API</label>
+            <input type="text" id="cfg-evolution-instance" class="input form-control" placeholder="douglascolih_0003" />
+         </div>
+         <div class="form-group">
+            <label>Template Convite (Membro)</label>
+            <textarea id="cfg-tpl-convite" class="input form-control" rows="4" placeholder="Olá {membro_nome}..."></textarea>
+         </div>
+         <button class="btn-primary" onclick="salvarConfigComunicacao()" style="align-self: flex-start;"><i data-lucide="save"></i> Salvar Comunicação</button>
+      </div>
+    </section>
+
+    <!-- ⚙️ ABA: LOGS ⚙️ -->
+    <section id="tab-config-logs" class="tab-panel">
+      <h2 style="font-size:24px; font-weight:700; margin-bottom:20px;"><i data-lucide="file-clock" style="vertical-align:middle; color:var(--accent-blue);"></i> Histórico e Logs</h2>
+      <div style="background:var(--bg-card); border-radius:12px; padding:20px; border:1px solid var(--border-color); margin-top:20px; display:flex; flex-direction:column; gap:16px;">
+         <div class="form-group">
+            <label>Retenção de Histórico de Visitas (Meses)</label>
+            <select id="cfg-retencao-meses" class="input form-control" style="max-width: 300px;">
+               <option value="1">1 Mês</option>
+               <option value="3">3 Meses</option>
+               <option value="6">6 Meses</option>
+               <option value="12">1 Ano</option>
+               <option value="24">2 Anos</option>
+            </select>
+         </div>
+         <button class="btn-primary" onclick="salvarConfigLogs()" style="align-self: flex-start;"><i data-lucide="save"></i> Salvar Configuração de Logs</button>
+      </div>
+    </section>
+
+</main>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MODAIS -->
+
+<!-- Modal: Editar Coordenadas -->
+<div class="modal-overlay" id="modal-coords" onclick="fecharModal('modal-coords')">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width: 400px;">
+    <div class="modal-header">
+      <h3>📍 Editar Coordenadas</h3>
+      <button class="modal-close" onclick="fecharModal('modal-coords')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="coord-membro-id" />
+      <div class="form-group">
+        <label>Membro</label>
+        <input type="text" id="coord-membro-nome" class="form-control" readonly style="background:var(--bg-card);" />
+      </div>
+      <div class="form-group">
+        <label>Latitude</label>
+        <input type="number" step="any" id="coord-lat" class="form-control" placeholder="Ex: -12.9714" />
+      </div>
+      <div class="form-group">
+        <label>Longitude</label>
+        <input type="number" step="any" id="coord-lon" class="form-control" placeholder="Ex: -38.5014" />
+      </div>
+      <div class="form-group">
+        <label>Endereço / Referência (Opcional)</label>
+        <input type="text" id="coord-endereco" class="form-control" placeholder="Rua, Bairro, Cidade..." />
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-top:10px;">Dica: Você pode copiar as coordenadas clicando com o botão direito no local desejado no Google Maps.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="salvarCoordenadasMembro()" style="width:100%;">Salvar Coordenadas</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: Adicionar ao pipeline -->
+<div class="modal-overlay" id="modal-pipeline" onclick="fecharModal('modal-pipeline')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>➕ Adicionar ao Pipeline</h3>
+      <button class="modal-close" onclick="fecharModal('modal-pipeline')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Médico</label>
+        <input type="text" id="pip-nome" class="form-control" readonly />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Especialidade</label>
+          <input type="text" id="pip-especialidade" class="form-control" readonly />
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label>Hospital Principal</label>
+          <select id="pip-hospital" class="form-control" onchange="verificarHospitalOutro()"></select>
+          
+          <div id="pip-hospital-outro-container" style="display:none; margin-top:8px;">
+             <div style="display:flex; gap:8px;">
+                <input type="text" id="pip-hospital-busca" class="form-control" placeholder="Buscar no CNES (nome ou CNES)..." />
+                <button class="btn btn-secondary" onclick="buscarHospitalCnesAux()">Buscar</button>
+             </div>
+             <div id="pip-hospital-busca-resultados" style="margin-top:8px; display:flex; flex-direction:column; gap:4px; max-height:150px; overflow-y:auto; background:var(--bg-surface); padding:8px; border-radius:4px; border:1px solid var(--border-color);">
+                <span style="font-size:12px; color:var(--text-secondary);">Digite um nome e clique em Buscar.</span>
+             </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Responsável (você)</label>
+          <select id="pip-responsavel" class="form-control">
+            <option value="">Selecionar responsável...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Contato (telefone/WhatsApp)</label>
+          <input type="text" id="pip-contato" class="form-control" placeholder="(71) 9xxxx-xxxx" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notas iniciais</label>
+        <textarea id="pip-notas" class="form-control" rows="3" placeholder="Ex: Secretária disse que atende às quartas..."></textarea>
+      </div>
+      <input type="hidden" id="pip-cns" />
+      <input type="hidden" id="pip-cnes" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="fecharModal('modal-pipeline')">Cancelar</button>
+      <button class="btn-primary" onclick="confirmarPipeline()">Adicionar ao Pipeline</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar entrada do pipeline -->
+<div class="modal-overlay" id="modal-editar" onclick="fecharModal('modal-editar')">
+  <div class="modal-box large" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>✏️ Gerenciar Captação</h3>
+      <button class="modal-close" onclick="fecharModal('modal-editar')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="med-edit-header" id="edit-med-header"></div>
+
+      <div class="tabs-inner">
+        <button class="inner-tab active" onclick="switchInnerTab('tab-status', this)">Status</button>
+        <button class="inner-tab" onclick="switchInnerTab('tab-interacoes', this)">Histórico</button>
+        <button class="inner-tab" onclick="switchInnerTab('tab-crm', this)">CRM / CFM</button>
+        <button class="inner-tab" onclick="switchInnerTab('tab-visitas', this)">Instituição & Visitas</button>
+      </div>
+
+      <!-- Status -->
+      <div class="inner-tab-panel active" id="tab-status">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Status atual</label>
+            <select id="edit-status" class="form-control">
+              <option value="novo">🔵 Novo</option>
+              <option value="em_contato">🟡 Em Contato</option>
+              <option value="aguardando">🟠 Aguardando Resposta</option>
+              <option value="reuniao">🟣 Reunião Agendada</option>
+              <option value="cooperador">🟢 Cooperador Confirmado ✅</option>
+              <option value="recusou">🔴 Recusou ❌</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Responsável</label>
+            <select id="edit-responsavel" class="form-control"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Contato (Telefone / WhatsApp)</label>
+            <div class="input-with-action">
+              <input type="text" id="edit-contato" class="form-control" placeholder="(71) 9xxxx-xxxx" />
+              <button class="btn-whatsapp" id="edit-whatsapp-btn" onclick="abrirWhatsApp()" title="Abrir WhatsApp Web">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notas</label>
+          <textarea id="edit-notas" class="form-control" rows="4" placeholder="Observações sobre o médico, preferências de contato, etc..."></textarea>
+        </div>
+      </div>
+
+      <!-- Histórico de Interações -->
+      <div class="inner-tab-panel" id="tab-interacoes">
+        <div class="add-interacao-form">
+          <h4>Nova Interação</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tipo</label>
+              <select id="int-tipo" class="form-control">
+        <option value="ligacao">📞 Ligação</option>
+                <option value="whatsapp">💬 WhatsApp</option>
+                <option value="email">📧 Email</option>
+                <option value="ligacao">📞 Ligação</option>
+                <option value="whatsapp">💬 WhatsApp</option>
+                <option value="email">📧 Email</option>
+                <option value="visita">🏥 Visita Presencial</option>
+                <option value="outro">🔹 Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Resultado</label>
+              <input type="text" id="int-resultado" class="form-control" placeholder="Ex: Deixou recado, não atendeu..." />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Descrição da interação</label>
+            <textarea id="int-descricao" class="form-control" rows="2"
+              placeholder="Descreva o que aconteceu nesta interação..."></textarea>
+          </div>
+          <button class="btn-primary" onclick="salvarInteracao()">Registrar Interação</button>
+        </div>
+
+        <div id="interacoes-lista" class="interacoes-lista"></div>
+      </div>
+
+      <!-- CRM / CFM -->
+      <div class="inner-tab-panel" id="tab-crm">
+        <div class="cfm-info-box">
+          <div class="cfm-badge">CFM</div>
+          <div>
+            <strong>Consulta ao CFM (Conselho Federal de Medicina)</strong>
+            <p>O número de CRM não está disponível na base CNES. Após identificar o médico, você pode buscar o CRM no <a href="https://portal.cfm.org.br/busca-medicos/" target="_blank">portal CFM</a> e registrá-lo aqui.</p>
+          </div>
+        </div>
+      <!-- Visitas -->
+      <div class="inner-tab-panel" id="tab-visitas">
+         <div class="form-row">
+            <div class="form-group" style="width: 100%;">
+               <label>Vincular Instituição (CNES)</label>
+               <select id="pip-instituicao-cnes" class="form-control" placeholder="Selecione um hospital..."></select>
+            </div>
+         </div>
+         <div class="form-row">
+            <div class="form-group">
+               <label>Telefone da Instituição</label>
+               <input type="text" id="pip-inst-tel" class="form-control" />
+            </div>
+            <div class="form-group">
+               <label>Pessoa de Contato</label>
+               <input type="text" id="pip-inst-contato" class="form-control" />
+            </div>
+         </div>
+         <div class="form-row">
+            <div class="form-group" style="width: 100%;">
+               <label>Grupo / Regional Responsável</label>
+               <select id="pip-inst-grupo" class="form-control">
+                  <option value="">Selecione um grupo...</option>
+               </select>
+            </div>
+         </div>
+         <div class="form-row">
+            <div class="form-group" style="width: 100%;">
+               <label>Notas Adicionais</label>
+               <textarea id="pip-inst-notas" class="form-control" rows="2"></textarea>
+            </div>
+         </div>
+         <div style="display:flex; justify-content:space-between; margin-top:10px;">
+            <button class="btn-secondary btn-sm" onclick="salvarInstituicaoPipeline()"><i data-lucide="save"></i> Salvar Local</button>
+            <button class="btn-primary btn-sm" onclick="abrirModalAgendarVisita()" id="btn-agendar-visita" style="display:none;"><i data-lucide="calendar-plus"></i> Agendar Visita</button>
+         </div>
+      </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>CRM</label>
+            <input type="text" id="edit-crm" class="form-control" placeholder="Ex: 12345" />
+          </div>
+          <div class="form-group">
+            <label>Situação no CFM</label>
+            <select id="edit-crm-situacao" class="form-control">
+              <option value="">Não verificado</option>
+              <option value="ativo">✅ Ativo/Regular</option>
+              <option value="aposentado">Aposentado</option>
+              <option value="inativo">Inativo</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+        </div>
+        <a id="cfm-search-link" href="https://portal.cfm.org.br/busca-medicos/" target="_blank" class="btn-secondary cfm-link">
+          🔍 Abrir Portal CFM para buscar CRM
+        </a>
+        <div class="fonte-note">
+          <strong>Fonte dos dados CFM:</strong> Portal Médico CFM — <a href="https://portal.cfm.org.br" target="_blank">portal.cfm.org.br</a><br/>
+          <em>Dados do CRM são inseridos manualmente após consulta ao portal CFM.</em>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-danger" onclick="removerDoPipeline()">🗑️ Remover</button>
+      <div style="flex:1"></div>
+      <button class="btn-secondary" onclick="fecharModal('modal-editar')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarEdicaoPipeline()">💾 Salvar</button>
+    </div>
+
+    <input type="hidden" id="edit-cns" />
+  </div>
+</div>
+
+<!-- Toast de notificação -->
+<div id="toast" class="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SCRIPTS -->
+<script charset="utf-8" src="/app.js?v=57"></script>
+
+<!-- Modal de Status do Servidor -->
+  <div id="syncStatusModal" class="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: #1e1e2d; padding: 2rem; border-radius: 12px; max-width: 500px; width: 90%; border: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+            <i data-lucide="circle"></i> Diagnóstico do Servidor CNES
+        </h3>
+        <div id="syncStatusDetails" style="margin: 1.5rem 0; font-size: 0.95rem; line-height: 1.6; color: #ccc;">
+            Carregando detalhes...
+        </div>
+        <div style="margin-bottom: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+            <label style="font-size: 13px; font-weight: 600; color: #aaa; margin-bottom: 8px; display: block;">Selecione o que deseja sincronizar:</label>
+            <div style="display: flex; gap: 16px;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="syncCheckCnes" checked> 
+                    <span style="font-size: 14px; font-weight: 600;">CNES (Datasus)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="syncCheckColih" checked> 
+                    <span style="font-size: 14px; font-weight: 600; color: #ffaa00;">COLIH (Cooperadores/Membros)</span>
+                </label>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap:wrap;">
+            <button class="btn btn-outline" onclick="document.getElementById('syncStatusModal').style.display='none'">Fechar</button>
+            <button class="btn" onclick="document.getElementById('importZipPanel').style.display = document.getElementById('importZipPanel').style.display === 'none' ? 'flex' : 'none'" 
+                style="background: rgba(100,200,100,0.1); color:#6ee7b7; border:1px solid #6ee7b7; border-radius:8px; padding:8px 16px; cursor:pointer;">
+                <i data-lucide="circle"></i> Importar ZIP Local
+            </button>
+            <button class="btn btn-primary" onclick="forceSyncUpdateMultiple()" id="btnForceSync">
+                <i data-lucide="circle"></i> Forçar Sincronização
+            </button>
+        </div>
+        
+        <!-- COLIH Preview UI -->
+        <div id="syncColihPreviewArea" style="display:none; margin-bottom: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+            <h4 style="margin-top:0; color:#ffaa00;">Revisão de Alterações COLIH</h4>
+            <div id="syncColihDiff" style="font-size:13px; color:#ddd; max-height:150px; overflow-y:auto; margin-bottom:12px; background:rgba(0,0,0,0.2); padding:10px; border-radius:6px;"></div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-primary" onclick="commitColihSync()">Confirmar e Aplicar COLIH</button>
+                <button class="btn btn-outline" onclick="discardColihSync()" style="color:#ef4444; border-color:#ef4444;">Descartar</button>
+            </div>
+        </div>
+
+        <div id="importZipPanel" style="display:none; margin-top:14px; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input id="importZipPath" type="text" placeholder="Cole aqui o caminho completo do ZIP baixado (ex: C:\Users\...\BASE_DE_DADOS_CNES_202605.ZIP)"
+                style="flex:1; min-width:300px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); border-radius:6px; padding:8px 12px; color:white; font-size:13px;" />
+            <button onclick="importarZipLocal()" style="background:#6ee7b7; color:#111; border:none; border-radius:6px; padding:8px 16px; font-weight:700; cursor:pointer;">
+                <i data-lucide="database"></i> Processar
+            </button>
+        </div>
+    </div>
+</div>
+
+
+  <!-- MODAL: AGENDAR VISITA -->
+  <div class="modal-overlay" id="agendarVisitaModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <h2 style="font-size:20px; border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:16px;">
+        <i data-lucide="calendar-plus" style="vertical-align:middle; color:var(--accent-blue);"></i> Agendar Visita
+      </h2>
+      <div class="form-grid">
+         <div class="form-group" style="grid-column: span 2;">
+            <label>Data Exata (Opcional)</label>
+            <input type="date" id="visita-data" class="form-control" />
+         </div>
+         <div class="form-group" style="grid-column: span 2;">
+            <label>Janela de Tempo / Descrição</label>
+            <input type="text" id="visita-janela" class="form-control" placeholder="Ex: Tarde do dia 30/06, ou Semana que vem..." />
+         </div>
+         <div class="form-group" style="grid-column: span 2;">
+            <label>Ordem de Contato (Cascata)</label>
+            <div id="visita-membros-lista" style="background:var(--bg-surface); padding:10px; border-radius:8px; border:1px solid var(--border-color); font-size:14px; color:var(--text-secondary);">
+               Selecione um grupo na aba anterior para ver os membros.
+            </div>
+         </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px; border-top:1px solid var(--border-color); padding-top:16px;">
+        <button class="btn btn-secondary" onclick="document.getElementById('agendarVisitaModal').style.display='none'">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmarAgendamentoVisita()"><i data-lucide="send"></i> Confirmar e Notificar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RESULTADO VISITA -->
+  <div class="modal-overlay" id="resultadoVisitaModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <h2 style="font-size:20px; border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:16px;">
+        <i data-lucide="clipboard-check" style="vertical-align:middle; color:var(--accent-blue);"></i> Resultado da Visita
+      </h2>
+      <input type="hidden" id="res-visita-id" />
+      <div class="form-grid">
+         <div class="form-group" style="grid-column: span 2;">
+            <label>Status Final</label>
+            <select id="res-status" class="form-control" onchange="toggleVisitaMotivo()">
+               <option value="ganho">✅ Ganho (Tornou-se Cooperador)</option>
+               <option value="perdido">❌ Não Sucedida / Perdida</option>
+            </select>
+         </div>
+         
+         <div id="res-motivo-container" style="display:none; grid-column: span 2; display:flex; flex-direction:column; gap:12px;">
+             <div class="form-group">
+                <label>Falha de quem?</label>
+                <select id="res-falha" class="form-control">
+                   <option value="medico">Médico (recusou, não estava, etc)</option>
+                   <option value="membro">Membro (esqueceu, não pôde ir, etc)</option>
+                </select>
+             </div>
+             <div class="form-group">
+                <label>Motivo detalhado</label>
+                <textarea id="res-motivo" class="form-control" rows="2" placeholder="Descreva o que houve..."></textarea>
+             </div>
+             <div class="form-group">
+                <label>O Membro vai continuar tentando visitar este médico?</label>
+                <select id="res-membro-continua" class="form-control">
+                   <option value="true">Sim, manter designação para ele tentar depois</option>
+                   <option value="false">Não, voltar o médico para a fila do Grupo</option>
+                </select>
+             </div>
+         </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px; border-top:1px solid var(--border-color); padding-top:16px;">
+        <button class="btn btn-secondary" onclick="document.getElementById('resultadoVisitaModal').style.display='none'">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarResultadoVisita()"><i data-lucide="save"></i> Salvar</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

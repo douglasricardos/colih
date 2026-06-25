@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="Colih">
+	<meta name="csrf-token" content="ZcYjnYIw4v0hSrIweyAfprqjTxpqd1myCZA8k2vc">
+
+	<link rel="apple-touch-icon" sizes="57x57" href='https://salvador.colih.med.br/apple-icon-57x57.png'>
+	<link rel="apple-touch-icon" sizes="60x60" href='https://salvador.colih.med.br/apple-icon-60x60.png'>
+	<link rel="apple-touch-icon" sizes="72x72" href='https://salvador.colih.med.br/apple-icon-72x72.png'>
+	<link rel="apple-touch-icon" sizes="76x76" href='https://salvador.colih.med.br/apple-icon-76x76.png'>
+	<link rel="apple-touch-icon" sizes="114x114" href='https://salvador.colih.med.br/apple-icon-114x114.png'>
+	<link rel="apple-touch-icon" sizes="120x120" href='https://salvador.colih.med.br/apple-icon-120x120.png'>
+	<link rel="apple-touch-icon" sizes="144x144" href='https://salvador.colih.med.br/apple-icon-144x144.png'>
+	<link rel="apple-touch-icon" sizes="152x152" href='https://salvador.colih.med.br/apple-icon-152x152.png'>
+	<link rel="apple-touch-icon" sizes="180x180" href='https://salvador.colih.med.br/apple-icon-180x180.png'>
+	<link rel="icon" type="image/png" sizes="192x192"  href='https://salvador.colih.med.br/android-icon-192x192.png'>
+	<link rel="icon" type="image/png" sizes="32x32" href='https://salvador.colih.med.br/favicon-32x32.png'>
+	<link rel="icon" type="image/png" sizes="96x96" href='https://salvador.colih.med.br/favicon-96x96.png'>
+	<link rel="icon" type="image/png" sizes="16x16" href='https://salvador.colih.med.br/favicon-16x16.png'>
+	<link rel="manifest" href='https://salvador.colih.med.br/manifest.json'>
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content='https://salvador.colih.med.br/ms-icon-144x144.png'>
+	<meta name="theme-color" content="#ffffff">
+
+	<title>COLIH BA Salvador - Comissão de Ligação com Hospitais</title>
+
+	            <link href="/css/app.css" rel="stylesheet">
+	<style>
+    .hover-effect:hover {
+        background-color: #f8f9fa;
+        color: #007bff;
+		cursor: pointer;
+    }
+	.table td.min-space, .table th.min-space {
+    white-space: nowrap;
+    width: 1%;
+}
+
+</style>
+<style>
+	.crop-img { 
+		width: 100%; 
+		height: 200px; /* Adjust height as needed */ 
+		object-fit: cover; 
+		object-position: center; 
+	}
+</style>
+
+	<!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak] {display: none !important;}[wire\:cloak] {display: none !important;}</style>
+</head>
+
+<body id="page-top" class="sidebar-toggled" data-base-url='https://salvador.colih.med.br'>
+		<div id="wrapper">
+		<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion toggled" id="accordionSidebar">
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="https://salvador.colih.med.br/panel/dashboard">
+        <div class="sidebar-brand-icon">
+            <img src="/img/logo-colih-small.png" title="Colih" >
+        </div>
+        <div class="sidebar-brand-text mx-3">Colih</div>
+    </a>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">
+        Módulos
+    </div>
+
+			<li class="nav-item ">
+			<a class="nav-link" href="https://salvador.colih.med.br/panel/doctors">
+				<i class="fas fa-fw fa-stethoscope"></i>
+				<span>Médicos</span>
+			</a>
+		</li>
+	
+			<li class="nav-item ">
+			<a class="nav-link" href="https://salvador.colih.med.br/panel/hospitals">
+				<i class="fas fa-fw fa-hospital"></i>
+				<span>Instituições</span>
+			</a>
+		</li>
+	
+        		<li class="nav-item ">
+			<a class="nav-link" href="
+			 https://salvador.colih.med.br/panel/visits ">
+				<i class="fas fa-fw fa-calendar"></i>
+				<span>Visitas</span>
+            </a>
+		</li>
+	
+		 
+		<li class="nav-item">
+			<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTrigger" aria-expanded="true" aria-controls="collapseTrigger">
+				<i class="fas fa-fw fa-ambulance"></i>
+				<span>Casos</span>
+			</a>
+			<div id="collapseTrigger" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+				<div class="bg-white py-2 collapse-inner rounded">
+											<a class="collapse-item " href="https://salvador.colih.med.br/panel/triggers-colih">Colih</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/triggers-gvp">GVP</a>
+									</div>
+			</div>
+		</li>
+		
+			<li class="nav-item ">
+			<a class="nav-link" href="https://salvador.colih.med.br/panel/remedies">
+				<i class="fas fa-fw fa-pills"></i>
+				<span>Medicamentos</span>
+			</a>
+		</li>
+	
+			<li class="nav-item">
+			<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMembers" aria-expanded="true" aria-controls="collapseMembers">
+				<i class="fas fa-fw fa-user"></i>
+				<span>Pessoas</span>
+			</a>
+			<div id="collapseMembers" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+				<div class="bg-white py-2 collapse-inner rounded">
+											<a class="collapse-item " href="https://salvador.colih.med.br/panel/users">Membros</a>
+																<a class="collapse-item" href="#" onclick="Swal.fire({title: 'Este recurso mudou de lugar', 
+							text: 'O cadastro de assistentes foi unificado com o cadastro de membros. Selecione \'Assistentes\' no filtro de membros para gerenciar assistentes.',
+							customClass: {
+								confirmButton: 'btn btn-primary mr-2',
+								cancelButton: 'btn btn-secondary',
+								title: 'h4 text-primary mb-2',
+								html: 'h5 text-secondary'
+							},
+							buttonsStyling: false})">
+							Assistentes</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/oncall">Plantões</a>
+																	<a class="collapse-item " href="https://salvador.colih.med.br/panel/easers">Facilitadores</a>
+									</div>
+			</div>
+		</li>
+	
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">
+                Outros
+        </div>
+	
+		<li class="nav-item">
+			<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="true" aria-controls="collapseSettings">
+				<i class="fas fa-fw fa-cog"></i>
+				<span>Configurações</span>
+			</a>
+			<div id="collapseSettings" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+				<div class="bg-white py-2 collapse-inner rounded">
+
+											<a class="collapse-item " href="https://salvador.colih.med.br/panel/specialities">Especialidades</a>
+							
+											<a class="collapse-item " href="https://salvador.colih.med.br/panel/agreements">Convênios</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/regions">Regiões</a>
+						<a class="collapse-item " href="https://salvador.colih.med.br/panel/congregations">Congregações</a>
+						<a class="collapse-item " href="https://salvador.colih.med.br/panel/privileges">Privilégios</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/fields">Áreas de atuação</a>
+						<a class="collapse-item " href="https://salvador.colih.med.br/panel/occupations">Profissões</a>
+										
+											<a class="collapse-item " href="https://salvador.colih.med.br/panel/roles">
+							Níveis de Acesso
+							<i class="fas fa fa-lock fa-sm fa-fw ml-1 text-gray-400"></i>
+						</a>
+					                                        
+											<div class="dropdown-divider"></div>
+						<a class="collapse-item " href="https://salvador.colih.med.br/panel/whatsapp">Whatsapp</a>
+						<a class="collapse-item "  href="https://salvador.colih.med.br/panel/settings">
+							Preferências <i class="fas fa-gear fa-sm fa-fw ml-1 text-gray-400"></i>
+						</a>
+                    				
+				</div>
+			</div>
+		</li>
+	
+
+        <li class="nav-item ">
+        <a class="nav-link" href="https://salvador.colih.med.br/panel/documents">
+            <i class="fas fa-fw fa-file-alt"></i>
+            <span>Documentos</span>
+        </a>
+    </li>
+        
+    <li class="nav-item">
+        <a class="nav-link" href="https://salvador.colih.med.br/panel/documents/doar">
+            <i class="fas fa-fw fa-dollar"></i>
+            <span>Doar</span>
+        </a>
+    </li>
+    
+
+			<hr class="sidebar-divider">
+
+		<div class="sidebar-heading">
+			Gerencial
+		</div>
+ 
+		<li class="nav-item">
+			<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collpseMetrics" aria-expanded="true" aria-controls="collpseMetrics">
+				<i class="fas fa-fw fa-chart-bar"></i>
+				<span>Relatórios</span>
+			</a>
+			<div id="collpseMetrics" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+				<div class="bg-white py-2 collapse-inner rounded">
+
+                    						<a class="collapse-item " href="https://salvador.colih.med.br/panel/profile/colih">
+							Estrutura da Colih 
+							<i class="fas fa-house-user fa-sm fa-fw ml-1 text-gray-400"></i>
+						</a>
+                    
+                    						<a class="collapse-item " href="https://salvador.colih.med.br/panel/profile/maps">
+							Mapa da Colih 
+							<i class="fas fa-map fa-sm fa-fw ml-1 text-gray-400"></i>
+						</a>
+                    											<a class="collapse-item " href="https://salvador.colih.med.br/panel/metrics/doctorsgraph">Médicos</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/visits/digest">Acompanhamento de Visitas</a>
+						<a class="collapse-item " href="https://salvador.colih.med.br/panel/metrics/visits">Visitas (antigo)</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/metrics/hlccases">Casos Colih</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/metrics/pvgcases">Casos GVP</a>
+
+									</div>
+			</div>
+		</li>
+	
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+</ul>
+
+		<div id="content-wrapper" class="d-flex flex-column">
+			<div id="content">
+				<style>
+#header-nav .nav-link {
+    cursor: pointer;
+}
+
+#header-nav .nav-link:hover {
+    opacity: 0.8;
+    transform: scale(1.2);
+    transition: all 0.2s ease-in-out;
+}
+</style>
+
+<nav class="navbar navbar-expand navbar-light bg-white topbar mb-3 static-top shadow">
+    <div class="container-fluid justify-content-between">
+        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+        </button>
+
+        <ul class="navbar-nav d-flex flex-row" id="header-nav">
+                        <li class="nav-item mx-1">
+                <i class="nav-link fas fa-fw fa-stethoscope text-primary colihlink" title="Médicos" data-url="https://salvador.colih.med.br/panel/doctors"></i>
+            </li>
+                                    <li class="nav-item mx-1">
+                <i class="nav-link fas fa-fw fa-user text-success colihlink" title="Membros" data-url="https://salvador.colih.med.br/panel/users"></i>
+            </li>
+                                    <li class="nav-item mx-1">
+                <i class="nav-link fas fa-fw fa-calendar text-secondary colihlink" title="Disponibilidade" data-url="https://salvador.colih.med.br/panel/users/disponibility"></i>
+            </li>
+                                    <li class="nav-item mx-1">
+                <i class="nav-link fas fa-fw fa-truck-medical text-danger colihlink" title="Casos Colih" data-url="https://salvador.colih.med.br/panel/triggers-colih"></i>
+            </li>
+                                    <li class="nav-item mx-1">
+                <i class="nav-link fas fa-fw fa-bed text-info colihlink" title="Casos GVP" data-url="https://salvador.colih.med.br/panel/triggers-gvp"></i>
+            </li>
+                    </ul>
+        <ul class="navbar-nav flex-row">
+            <li class="nav-item dropdown no-arrow mx-1">
+                <span class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-bell fa-fw" title="Notificações"></i>
+                                    </span>
+                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+                    <h6 class="dropdown-header">
+                        Notificações
+                    </h6>
+                     
+                    <div class="text-center text-red-500 m-3">Nenhuma nova notificação</div>
+                                    </div>
+            </li>
+
+
+            <li class="nav-item dropdown no-arrow">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="mr-2 d-md-none d-lg-inline text-gray-600 small" style="cursor: pointer;">
+						svc_colih
+					</span>
+                        	                <i class="fa fa-user-circle align-middle fa-lg" style="color:cornflowerblue" data-tooltip="tooltip" data-delay=300 title="svc_colih"></i>
+                                    </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                    <a class="dropdown-item" href="https://salvador.colih.med.br/panel/profile">
+                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+						Meus dados
+                    </a>
+
+                                        					                    <a class="dropdown-item" href="https://webmail.colih.med.br" target="_blank">
+                        <i class="fas fa-envelope fa-sm fa-fw mr-2 text-gray-400"></i>
+                        WebMail
+                    </a>
+                    
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Sair
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Deseja realmente sair?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">Clique no botão "Sair" abaixo se realmente deseja finalizar sua sessão.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                <a class="btn btn-primary" href="https://salvador.colih.med.br/session/logout">Sair</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="POST" action="https://salvador.colih.med.br/panel/users/cardgenerate" accept-charset="UTF-8" id="formCard" autocomplete="off"><input name="_token" type="hidden" value="ZcYjnYIw4v0hSrIweyAfprqjTxpqd1myCZA8k2vc">
+<input type="hidden" name="_method" value="POST">    <input type="hidden" name="iduser" value="207">
+</form>
+
+				<div class="px-3 pt-0 pb-0 container-fluid">
+					<div class="alert alert-danger alert-dismissable small" role="alert"
+			x-data="{ show: true }"
+			x-init="setTimeout(() => show = false, 15000)" 
+			x-show="show">
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+		<div class='row pb-0 mb-0'>
+			<span class="col-12 mt-1 mb-2">
+				<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+				<strong >ERROS NO PREENCHIMENTO</strong>
+			</span>
+			<ul class='col-12 mb-0 ml-4'>
+								<li>Região inválida</li>
+							</ul>
+		</div>
+	</div>
+
+<div class="row">
+
+	<div class="col-12 col-md-6  col-xl-4 mb-1 p-1">	
+	<div wire:snapshot="{&quot;data&quot;:{&quot;regions&quot;:[{&quot;2&quot;:&quot;Alagoinhas&quot;,&quot;3&quot;:&quot;Cama\u00e7ari&quot;,&quot;4&quot;:&quot;Dias D&#039;\u00e1vila&quot;,&quot;8&quot;:&quot;Grupo A&quot;,&quot;10&quot;:&quot;Grupo C&quot;,&quot;11&quot;:&quot;Grupo D&quot;,&quot;12&quot;:&quot;Grupo E&quot;,&quot;5&quot;:&quot;Itaparica&quot;,&quot;6&quot;:&quot;Mata de S\u00e2o Jo\u00e3o&quot;,&quot;7&quot;:&quot;Rec\u00f4ncavo&quot;,&quot;13&quot;:&quot;Santo Ant\u00f4nio de Jesus&quot;,&quot;1&quot;:&quot;Sem Grupo&quot;,&quot;14&quot;:&quot;Valen\u00e7a&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;region&quot;:[null,{&quot;class&quot;:&quot;region&quot;,&quot;key&quot;:1,&quot;s&quot;:&quot;mdl&quot;}],&quot;regionIdSelected&quot;:1,&quot;showModal&quot;:false,&quot;oncallsHLC&quot;:null,&quot;oncallsPVG&quot;:null,&quot;oncallsHLCgeneral&quot;:null,&quot;oncallsPVGgeneral&quot;:null,&quot;oncallsHLCText&quot;:&quot;N\u00e3o h\u00e1 programa\u00e7\u00e3o&quot;,&quot;oncallsPVGText&quot;:&quot;N\u00e3o h\u00e1 programa\u00e7\u00e3o&quot;,&quot;dateReference&quot;:[&quot;2026-06-24T00:00:00-03:00&quot;,{&quot;type&quot;:&quot;carbon&quot;,&quot;s&quot;:&quot;cbn&quot;}],&quot;rangePeriod&quot;:&quot;22\/06\/2026 a 28\/06\/2026&quot;,&quot;isMultipleRegions&quot;:true,&quot;isToday&quot;:true,&quot;phoneHLC&quot;:&quot;&quot;,&quot;phonePVG&quot;:&quot;&quot;},&quot;memo&quot;:{&quot;id&quot;:&quot;5K1FwD9XZCRkLQZyeykP&quot;,&quot;name&quot;:&quot;on-call-widget&quot;,&quot;path&quot;:&quot;panel\/dashboard&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:{&quot;region&quot;:[&quot;Regi\u00e3o inv\u00e1lida&quot;]},&quot;locale&quot;:&quot;pt_BR&quot;},&quot;checksum&quot;:&quot;b951816ce790c4c0ce362ef48ed7d7109c03669701825e6210fc0834d8eddc76&quot;}" wire:effects="[]" wire:id="5K1FwD9XZCRkLQZyeykP" class="card h-100 border-secondary border-bottom-secondary shadow-lg">
+    <img src="/img/bg-oncall-gvp-sm.jpg" title="Plantão" class="card-img-top crop-img">
+
+    <div class="card-body my-0 pb-1 pt-3 px-4">
+        
+        <div class=" text-info mb-1 border-bottom">
+            <span class="pt-1 font-weight-bold text-uppercase" wire:click="toggleModal" style="cursor: pointer" >
+                 Plantão
+                <!--[if BLOCK]><![endif]-->                    <span id='region_name'>Sem Grupo</span>
+                    <span  id="divRegion" >
+                        <i class="fa fa-refresh ml-3" data-placement="top" data-tooltip="tooltip" title="Mudar região"></i>
+                    </span>
+                <!--[if ENDBLOCK]><![endif]-->
+            </span>
+
+            <span class="float-right float-end">
+                <small><a href="https://salvador.colih.med.br/panel/oncall" data-placement="top" data-tooltip="tooltip" title="Ver todos os plantões">Ver mais...</a></small>
+            </span>
+        </div>
+
+        <div class="card-text">
+            <div class="row">
+                <!--[if BLOCK]><![endif]-->                    
+                    <div class="col-12 pt-3 mb-2">
+                        <div class="mb-1">Não há programação.</div>
+                    </div>
+                <!--[if ENDBLOCK]><![endif]-->
+                <div id="divNoProg" class="col-12 pt-3 mb-2" style="display: none;">
+                    <div class="mb-1">Não há programação.</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="card-footer">
+        <span id="currPeriodTxt" class="font-weight-bold small text-secondary">22/06/2026 a 28/06/2026</span>
+        <span class="float-right float-end">
+
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+
+            <button wire:click="changeDateReference('+')" id="btnNextPeriod" class="btn btn-danger btn-sm ml-1" type="button"
+                data-placement="top" data-tooltip="tooltip" title="Próximo plantão" data-delay=500>
+                <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </button>
+
+        </span>
+    </div>
+
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+
+    <div id="copyToClipboard1" class="d-none">Não há programação</div>
+    <div id="copyToClipboard2" class="d-none">Não há programação</div>
+
+    <script>
+        function copyToClipboard(element) {
+
+            var $temp = $("<textarea>");
+            var brRegex = /<br\s*[\/]?>/gi;
+            $("body").append($temp);
+            $temp.val($('#' + element).html().replace(brRegex, "\r\n")).select();
+            document.execCommand("copy");
+            $temp.remove();
+
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                confirmButton: "btn btn-primary mr-2",
+                cancelButton: "btn btn-secondary",
+                title: "h4 text-primary mb-2",
+                html: "h5 text-secondary"
+                },
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                html: 'As informações foram enviadas para a área de transferência.',
+                title: 'Dados copiados'
+            });
+        }   
+    </script>
+</div>
+</div>
+	<input id="routeOncallVisit" name="routeOncallVisit" type="hidden" value="https://salvador.colih.med.br/panel/visits/edit-visit/0">
+
+<div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1 p-1">
+    <div class="card border-secondary border-bottom-secondary shadow-lg h-100 py-2">
+        <div class="row py-0 pl-4 pr-2 " >
+            <div class="col mb-1 pl-2 mt-2">
+                <div class="font-weight-bold text-info text-uppercase mb-1">Minhas visitas
+                    <span class="h6 text-secondary ml-1 mb-1 pt-1"></span>
+                </div>
+            </div>
+            <div class="col-auto mr-3">
+                <a href="https://salvador.colih.med.br/panel/visits">
+                    <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                </a>
+            </div>
+        </div>
+
+        
+        <div class="card-body pl-1 py-0 pb-1 pr-2 ">
+
+			
+
+			
+			<div class="col-12 px-3 m-0 mt-2 mb-0 pb-0">
+				<table class="table table-sm" id="dataTable" width="100%" cellspacing="0">
+					<thead>
+						<tr>
+							<th class="text-right small text-info p-0 px-2 min-space">Mês</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								&ensp;1
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								&ensp;2
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								&ensp;3
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								&ensp;4
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								&ensp;5
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								&ensp;6
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								&ensp;7
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								&ensp;8
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								&ensp;9
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								10
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								11
+							</th>
+														<th class="text-center small text-info p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Mês">
+								12
+							</th>
+													</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="text-right small p-0 px-2 text-danger">Abertas</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Jan">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Fev">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Mar">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Abr">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Mai">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Jun">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Jul">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Ago">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Set">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Out">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Nov">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Marcadas para Dez">
+																	<span class="text-danger">
+										-
+									</span>
+									</a>
+							</td>
+													</tr>
+						<tr>
+							<td class="text-right small p-0 px-2 text-success">Fechadas</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Jan">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Fev">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Mar">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Abr">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Mai">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Jun">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Jul">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Ago">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Set">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Out">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Nov">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+														<td class="text-center small p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizada ou cancelada em Dez">
+																<span class="text-success">
+									-
+								</span>
+								</a>
+							</td>
+													</tr>
+					</tbody>
+				</table>
+			</div>
+		
+			
+			 
+				<div class="col-12 text-secondary mt-2 mb-4 ml-1 small">
+					Você não tem visitas designadas.
+				</div>
+			
+        </div>
+    </div>
+</div>
+	<div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1 p-1">
+	<div class="card border-secondary border-bottom-secondary shadow-lg h-100 py-2">
+		<div class="card-body row py-1 pl-4 pr-2" >
+				<div class="col-12 mb-2 pl-2">
+					<div class="font-weight-bold text-info text-uppercase mb-1">Colih BA Salvador
+					</div>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 px-2">
+											<a href="https://salvador.colih.med.br/panel/users?tipo=1&regions=All" class="card-link hover-effect">
+											
+					<div class="mb-0 mr-1 font-weight-bold text-dark">
+						<i class="fas fa-user-tie text-secondary pl-1 mr-1"></i>
+						&nbsp;&nbsp;92
+						<span class="small text-dark ml-1 mr-1">
+							Membros Colih
+						</span>
+					</div>
+					</a>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 px-2">
+											<a href="https://salvador.colih.med.br/panel/users?tipo=2&regions=All" class="card-link hover-effect">
+											
+					<div class="mb-0 mr-1 font-weight-bold text-dark">
+						<i class="fas fa-user-group text-secondary mr-1"></i>
+						&nbsp;&nbsp;59
+						<span class="small text-dark ml-1 mr-1">
+							Membros GVP
+						</span>
+					</div>
+					</a>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 px-2">
+											<a href="https://salvador.colih.med.br/panel/hospitals" class="card-link hover-effect">
+										<div class="mb-0 mr-1 font-weight-bold text-dark">
+						<i class="fas fa-hospital text-secondary mr-1"></i>
+						130
+						<span class="small text-dark ml-1 mr-1">
+							Instituições
+						</span>
+					</div>
+					</a>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 px-2">
+											<a href="https://salvador.colih.med.br/panel/easers" class="card-link hover-effect">
+										<div class="mb-0 mr-1 font-weight-bold text-dark">
+						<i class="fas fa-user-nurse text-secondary mr-1 pl-1"></i>
+						404
+						<span class="small text-dark ml-1 mr-1">
+							Facilitadores
+						</span>
+					</div>
+					</a>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 px-2">
+										<div class="mb-0 mr-1 font-weight-bold text-dark">
+						<i class="fa-solid fa-headset text-secondary pr-0 mr-1" aria-hidden="true"></i>
+						&nbsp;&nbsp;24
+						<span class="small text-dark ml-1 mr-1">
+							Assistentes
+						</span>
+					</div>
+					</a>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 px-2">
+											<a href="https://salvador.colih.med.br/panel/doctors" class="card-link hover-effect">
+											
+					<div class="mb-0 mr-1 font-weight-bold text-dark">
+						<i class="fas fa-stethoscope text-secondary pr-0 mr-1" ></i>
+						113
+						<span class="small text-dark ml-1 mr-1">
+							Médicos cooperadores
+						</span>
+					</div>
+					</a>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 px-2">
+											<a href="https://salvador.colih.med.br/panel/visits?status=1&members=0" class="card-link hover-effect">
+											
+					<div class="mb-0 mr-1 font-weight-bold text-dark">
+						<i class="fas fa-calendar text-secondary mr-1 pl-1"></i>
+						&nbsp;&nbsp;&nbsp;&nbsp;2
+						<span class="small text-dark ml-1 mr-1">
+							Visitas marcadas
+						</span>
+					</div>
+					</a>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 px-2">
+											<a href="https://salvador.colih.med.br/panel/triggers-colih?case_status=NC&iduser=0" class="card-link hover-effect">
+											
+						<div class="mb-0 mr-1 font-weight-bold text-dark">
+							<i class="fas fa-truck-medical text-secondary pr-1"></i>
+							165
+							<span class="small text-dark ml-1 mr-1">
+								Casos Colih abertos
+							</span>
+						</div>
+						</a>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 px-2">
+											<a href="https://salvador.colih.med.br/panel/triggers-gvp?status=NC&user=0" class="card-link hover-effect">
+											
+					<div class="mb-0 mr-1 font-weight-bold text-dark">
+						<i class="fas fa-bed text-secondary pr-1"></i>
+						&nbsp;&nbsp;&nbsp;&nbsp;6
+						<span class="small text-dark ml-1 mr-1">
+							Casos GVP abertos
+						</span>
+					</div>
+					</a>
+				</div>
+
+									<div class="w-100 mb-3"></div>
+					<div class="col-12 px-2">
+						<div class="mb-0 mr-1 font-weight-bold text-dark">
+							<a href="https://salvador.colih.med.br/panel/profile/colih" class="card-link" title="Estrutura">
+								<i class="fas fa-house-user text-primary mx-1"></i>
+								<span class="small text-primary mx-1">
+										Ver estrutura da Colih
+								</span>
+							</a>
+						</div>
+					</div>
+
+					<div class="col-12 px-2">
+						<div class="mb-0 mr-1 font-weight-bold text-dark">
+							<a href="https://salvador.colih.med.br/panel/profile/maps" class="card-link" title="Mapa">
+								<i class="fas fa-map text-primary mx-1"></i>
+								<span class="small text-primary mx-1">
+									Ver mapa da Colih
+								</span>
+							</a>
+						</div>
+					</div>
+						</div>
+	</div>
+</div>
+	
+</div>
+
+				</div>
+			</div>
+
+			<footer class="sticky-footer bg-white">
+    <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+            <a class="mr-5" href="#" id="click-support" data-user-id="207">
+                Precisa de ajuda? 
+            </a>
+            <span>&copy; BA Salvador 2026
+                - Laravel 10.49.0 - php 8.2.31 </span>
+            <br/>
+            <br/>
+        </div>
+    </div>
+</footer>
+		</div>
+	</div>
+
+	<a class="rounded scroll-to-top" href="#page-top">
+		<i class="fas fa-angle-up"></i>
+	</a>
+
+	        	<script type="text/javascript" src="/js/app.js"></script>
+                <script src="https://salvador.colih.med.br/vendor/sweetalert/sweetalert.all.js"></script> 
+
+                <script>
+                    Swal.mixin({
+                        timer: false
+                    });
+                </script>
+	<script type="text/javascript" src="/js/widget-visits.js"></script>
+<script type="text/javascript" src="/js/whatsapp.js"></script>
+	
+	<script src="/livewire/livewire.min.js?id=df3a17f2"   data-csrf="ZcYjnYIw4v0hSrIweyAfprqjTxpqd1myCZA8k2vc" data-update-uri="/livewire/update" data-navigate-once="true"></script>
+</body>
+
+</html>

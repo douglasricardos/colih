@@ -1,0 +1,49 @@
+name: Atualização Mensal do CNES e Doctoralia
+
+on:
+  schedule:
+    # Roda todo dia 15 de cada mês às 03:00 UTC (Meia-noite no Brasil)
+    - cron: '0 3 15 * *'
+  workflow_dispatch:
+    # Permite rodar manualmente clicando em um botão no GitHub
+
+jobs:
+  atualizar-dados:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+        
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Instalar Dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests unidecode playwright beautifulsoup4 uvicorn fastapi
+          
+      - name: Instalar Navegadores Headless (Playwright)
+        run: python -m playwright install chromium
+        
+      - name: 1. Baixar e Atualizar Base do CNES (Mensal)
+        run: |
+          # Este script atualizar_cache.py baixa o FTP do DATASUS e renova o json
+          python scripts/atualizar_cache.py
+          
+      - name: 2. Enriquecer Currículos Automáticos (Lattes e Doctoralia)
+        run: |
+          # Roda o nosso novo script Playwright para TODOS os médicos novos/pendentes
+          # O script foi desenhado para salvar o progresso a cada 5 médicos para não perder nada
+          python scripts/enriquecer_curriculos.py --todos
+          
+      - name: Commit e Push das Alterações de Cache
+        run: |
+          git config --global user.name "COLIH Bot Automação"
+          git config --global user.email "bot@colih.local"
+          git add backend/data/*.json
+          git commit -m "🤖 [Auto] Atualização Mensal: CNES e Doctoralia" || echo "Sem mudanças para commitar"
+          git push

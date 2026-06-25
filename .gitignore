@@ -1,0 +1,65 @@
+# =====================================================
+# COLIH Captação — .gitignore
+# =====================================================
+
+# ── Python ─────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Ambiente Virtual ────────────────────────────────
+backend/venv/
+venv/
+.venv/
+env/
+
+# ── Cache de Dados (gerados pelo script de sync) ────
+backend/data/medicos_cache.json
+backend/data/estab_cache.json
+backend/data/dicts/
+backend/cache/
+
+# ── Arquivos de Status (recriados a cada execução) ──
+# sync_status.json, pipeline.json e usuarios.json SÃO commitados
+# (contém dados operacionais importantes para o sistema funcionar)
+
+# ── Arquivos Temporários de Desenvolvimento ─────────
+*.tmp
+*.log
+*.bak
+
+# ── Arquivos Temporários do Projeto ─────────────────
+temp2.py
+temp_scraper.py
+test.py
+patch.js
+patch.py
+patch2.js
+patch3.py
+fix_html.py
+find_endpoints.js
+cnes.json
+
+# ── ZIPs de Dados CNES (pesados demais para o git) ──
+*.zip
+*.ZIP
+*.dbc
+*.dbf
+*.csv
+
+# ── IDE / Editor ─────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user
+.DS_Store
+Thumbs.db
+
+# ── Windows ───────────────────────────────────────────
+desktop.ini

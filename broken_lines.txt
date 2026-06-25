@@ -1,0 +1,2152 @@
+0: /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+1: COLIH Captação — app.js
+2: Lógica principal do frontend SPA
+3: â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+4: 
+5: const API = 'http://localhost:8000/api';
+6: 
+7: // Estado global
+8: const state = {
+9: usuarioAtivo: localStorage.getItem('colih_usuario') || '',
+10: pipelineData: [],
+11: pipelineFiltered: [],
+12: medicoSelecionado: null,
+13: editandoCns: null,
+14: especialidades: [],
+15: infoCache: null,
+16: };
+17: 
+18: /* ─── Utilitários ─────────────────────────────────────────────── */
+19: function debounce(fn, delay) {
+20: let t;
+21: return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+22: }
+23: 
+24: async function fetchAPI(path, opts = {}) {
+25: try {
+26: const res = await fetch(API + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+27: if (!res.ok) {
+28: const err = await res.json().catch(() => ({ detail: 'Erro na requisição' }));
+29: throw new Error(err.detail || `HTTP ${res.status}`);
+30: }
+31: return res.json();
+32: } catch (e) {
+33: if (e.message.includes('Failed to fetch')) {
+34: showToast('âŒ Backend offline. Verifique se o servidor estÃ¡ rodando.', 'error');
+35: }
+36: throw e;
+37: }
+38: }
+39: 
+40: function showToast(msg, tipo = 'success') {
+41: const t = document.getElementById('toast');
+42: t.textContent = msg;
+43: t.className = `toast show ${tipo}`;
+44: setTimeout(() => t.classList.remove('show'), 3500);
+45: }
+46: 
+47: function formatDate(iso) {
+48: if (!iso) return '—';
+49: const d = new Date(iso);
+50: return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+51: }
+52: 
+53: function statusLabel(status) {
+54: const m = {
+55: novo:       ['🔵', 'Novo'],
+56: em_contato: ['🟡', 'Em Contato'],
+57: aguardando: ['🟠', 'Aguardando'],
+58: reuniao:    ['🟣', 'Reunião Agendada'],
+59: cooperador: ['🟢', 'Cooperador ✅'],
+60: recusou:    ['🔴', 'Recusou'],
+61: };
+62: const [icon, label] = m[status] || ['⚪', status || 'N/A'];
+63: return `<span class="status-badge status-${status || 'na'}">${icon} ${label}</span>`;
+64: }
+65: 
+66: function tipoInteracaoLabel(tipo) {
+67: const m = { ligacao: 'ðŸ“ž LigaÃ§Ã£o', whatsapp: 'ðŸ’¬ WhatsApp', email: 'ðŸ“§ Email', visita: 'ðŸ¥ Visita', outro: 'ðŸ”¹ Outro' };
+68: return m[tipo] || tipo;
+69: }
+70: 
+71: function fonteChip(fonte) {
+72: if (!fonte) return '';
+73: const comp = fonte.competencia ? ` · Competência ${fonte.competencia.slice(0,4)}/${fonte.competencia.slice(4)}` : '';
+74: const data = fonte.data_atualizacao_fmt ? ` · Atualizado em ${fonte.data_atualizacao_fmt}` : '';
+75: return `Fonte: <strong>${fonte.nome || 'DATASUS/CNES'}</strong>${comp}${data}`;
+76: }
+77: 
+78: /* ─── Tabs ────────────────────────────────────────────────────── */
+79: function openTab(name, btn) {
+80: document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+81: document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+82: document.getElementById(`tab-${name}`).classList.add('active');
+83: btn.classList.add('active');
+84: if (name === 'pipeline') carregarPipeline();
+85: if (name === 'stats') carregarEstatisticas();
+86: if (name === 'medicos') buscarMedicos();
+87: if (name === 'regioes') carregarRegioes();
+88: }
+89: 
+90: function switchInnerTab(id, btn) {
+91: document.querySelectorAll('.inner-tab-panel').forEach(p => p.classList.remove('active'));
+92: document.querySelectorAll('.inner-tab').forEach(b => b.classList.remove('active'));
+93: document.getElementById(id).classList.add('active');
+94: btn.classList.add('active');
+95: }
+96: 
+97: /* ─── Modal ───────────────────────────────────────────────────── */
+98: function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+99: function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+100: 
+101: /* ─── Usuários ────────────────────────────────────────────────── */
+102: async function carregarUsuarios() {
+103: const data = await fetchAPI('/usuarios').catch(() => ({ usuarios: [] }));
+104: const usuarios = data.usuarios || [];
+105: const selects = ['usuario-select', 'pip-responsavel', 'edit-responsavel', 'pipe-resp-filter'];
+106: selects.forEach(id => {
+107: const el = document.getElementById(id);
+108: if (!el) return;
+109: const val = el.value;
+110: const isFilter = id === 'pipe-resp-filter' || id === 'usuario-select';
+111: el.innerHTML = isFilter
+112: ? `<option value="">${id === 'usuario-select' ? '👤 Selecionar usuário' : 'Todos os responsáveis'}</option>`
+113: : '<option value="">Selecionar responsável...</option>';
+114: usuarios.forEach(u => {
+115: const opt = document.createElement('option');
+116: opt.value = u.id;
+117: opt.textContent = u.nome;
+118: el.appendChild(opt);
+119: });
+120: el.value = val;
+121: });
+122: if (state.usuarioAtivo) {
+123: document.getElementById('usuario-select').value = state.usuarioAtivo;
+124: }
+125: }
+126: 
+127: function setUsuarioAtivo(val) {
+128: state.usuarioAtivo = val;
+129: localStorage.setItem('colih_usuario', val);
+130: }
+131: 
+132: /* ─── Info do Cache (Header) ─────────────────────────────────── */
+133: async function carregarInfo() {
+134: const info = await fetchAPI('/info').catch(() => null);
+135: if (!info) return;
+136: state.infoCache = info;
+137: 
+138: const fonte = info.fonte || {};
+139: const elFonte = document.getElementById('fonte-nome');
+140: if (elFonte) elFonte.textContent = fonte.nome || 'DATASUS/CNES';
+141: 
+142: document.getElementById('data-atualizacao').textContent = fonte.data_atualizacao_fmt || 'N/D';
+143: document.getElementById('competencia-valor').textContent = fonte.competencia
+144: ? `${fonte.competencia.slice(0,4)}/${fonte.competencia.slice(4)}`
+145: : 'N/D';
+146: document.getElementById('total-medicos').textContent = (info.totais?.medicos || 0).toLocaleString('pt-BR');
+147: 
+148: // Badge pipeline na aba
+149: document.getElementById('pipeline-count').textContent = info.pipeline?.total || 0;
+150: }
+151: 
+152: /* ─── Especialidades (select) ────────────────────────────────── */
+153: async function carregarEspecialidades() {
+154: const data = await fetchAPI('/especialidades').catch(() => ({ especialidades: [] }));
+155: state.especialidades = data.especialidades || [];
+156: const sel = document.getElementById('med-esp-select');
+157: state.especialidades.forEach(e => {
+158: const opt = document.createElement('option');
+159: opt.value = e.especialidade;
+160: opt.textContent = `${e.especialidade} (${e.total})`;
+161: sel.appendChild(opt);
+162: });
+163: }
+164: 
+165: /* ─── ABA HOSPITAIS ─────────────────────────────────────────── */
+166: window.updateFiltersUI = function() {
+167: // filter-complexidade is always visible, apoio só para hospitais
+168: const tipo = document.getElementById('filter-tipo').value;
+169: const apoioSelect = document.getElementById('filter-apoio');
+170: 
+171: if(tipo === '' || tipo.includes('HOSPITAL') || tipo.includes('PRONTO')) {
+172: apoioSelect.style.display = 'block';
+173: } else {
+174: apoioSelect.style.display = 'none';
+175: apoioSelect.value = '';
+176: }
+177: };
+178: 
+179: window.initDistritosFilter = async function() {
+180: const data = await fetchAPI('/hospitais/valores?field=distrito').catch(() => null);
+181: if(data && data.valores) {
+182: const select = document.getElementById('filter-distrito');
+183: data.valores.forEach(v => {
+184: const opt = document.createElement('option');
+185: opt.value = v;
+186: opt.textContent = v;
+187: select.appendChild(opt);
+188: });
+189: new TomSelect("#filter-distrito", {
+190: create: false,
+191: sortField: { field: "text", direction: "asc" },
+192: onChange: function() { buscarHospitais(); }
+193: });
+194: }
+195: };
+196: window.initDistritosFilter();
+197: 
+198: window._tmoCustomData = {};
+199: async function carregarTmoCustom() {
+200: window._tmoCustomData = await fetchAPI('/tmo').catch(() => ({}));
+201: }
+202: carregarTmoCustom();
+203: 
+204: // Lógica do Mapa
+205: let map = null;
+206: let markers = [];
+207: window.isMapVisible = false;
+208: window.hospDataCache = {};
+209: 
+210: window.toggleMap = function() {
+211: window.isMapVisible = !window.isMapVisible;
+212: const mapContainer = document.getElementById('map-container');
+213: const listContainer = document.getElementById('hosp-results');
+214: const btn = document.getElementById('btn-toggle-map');
+215: 
+216: if(window.isMapVisible) {
+217: mapContainer.style.display = 'block';
+218: listContainer.style.display = 'none';
+219: btn.innerHTML = '📋 Lista';
+220: if(!map) initMap();
+221: setTimeout(() => {
+222: map.invalidateSize();
+223: if(window.currentResults) updateMapMarkers(window.currentResults);
+224: }, 200);
+225: } else {
+226: mapContainer.style.display = 'none';
+227: listContainer.style.display = 'block';
+228: btn.innerHTML = 'ðŸŒ Mapa';
+229: }
+230: }
+231: 
+232: const DISTRICT_COLORS = {
+233: "barra/rio vermelho": "#ef4444", "boca do rio": "#f97316",
+234: "cabuíla/beiru": "#eab308", "cajazeiras": "#84cc16",
+235: "centro histórico": "#22c55e", "itapagipe": "#06b6d4",
+236: "itapuã": "#3b82f6", "liberdade": "#6366f1",
+237: "pau da lima": "#a855f7", "são caetano/valéria": "#d946ef",
+238: "subúrbio ferroviário": "#f43f5e", "brotas": "#0ea5e9"
+239: };
+240: 
+241: function initMap() {
+242: map = L.map('map-container').setView([-12.9714, -38.5014], 12);
+243: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+244: attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+245: }).addTo(map);
+246: 
+247: // Legenda baseada no DOM
+248: const legend = L.control({position: 'bottomright'});
+249: legend.onAdd = function (map) {
+250: const div = L.DomUtil.create('div', 'info legend');
+251: div.id = 'map-legend-container';
+252: div.style.backgroundColor = 'white';
+253: div.style.padding = '10px';
+254: div.style.borderRadius = '5px';
+255: div.style.boxShadow = '0 1px 5px rgba(0,0,0,0.4)';
+256: div.style.fontSize = '11px';
+257: div.style.lineHeight = '20px';
+258: div.style.color = '#333';
+259: div.style.maxHeight = '200px';
+260: div.style.overflowY = 'auto';
+261: div.innerHTML = 'Carregando...';
+262: return div;
+263: };
+264: legend.addTo(map);
+265: }
+266: 
+267: function updateMapMarkers(estabelecimentos) {
+268: if(!map) return;
+269: markers.forEach(m => map.removeLayer(m));
+270: markers = [];
+271: let bounds = [];
+272: const fallbackColors = ['#f43f5e', '#a855f7', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6'];
+273: const activeGroups = {};
+274: let colorIndex = 0;
+275: 
+276: estabelecimentos.forEach(h => {
+277: const id = h.cnes || h.id;
+278: window.hospDataCache[id] = h;
+279: if(h._lat && h._lng) {
+280: let color = "#6b7280";
+281: let groupName = "Outros / N/A";
+282: 
+283: if (h.municipio === 'Salvador') {
+284: const d = h._distrito ? h._distrito.toLowerCase().trim() : '';
+285: color = DISTRICT_COLORS[d] || "#6b7280";
+286: groupName = d ? 'Salvador - DS ' + d.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Salvador - DS N/A';
+287: } else {
+288: groupName = 'Município - ' + (h.municipio || 'N/A');
+289: if (!activeGroups[groupName]) {
+290: color = fallbackColors[colorIndex % fallbackColors.length];
+291: colorIndex++;
+292: } else {
+293: color = activeGroups[groupName].color;
+294: }
+295: }
+296: 
+297: if (!activeGroups[groupName]) {
+298: activeGroups[groupName] = { color: color, count: 0 };
+299: }
+300: activeGroups[groupName].count++;
+301: 
+302: const markerHtml = `<div style="background-color: ${color}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>`;
+303: const icon = L.divIcon({ html: markerHtml, className: '', iconSize: [14, 14], iconAnchor: [7, 7] });
+304: 
+305: const m = L.marker([h._lat, h._lng], {icon}).addTo(map);
+306: const labelDistritoOuMunicipio = h.municipio === 'Salvador' ? h._distrito : h.municipio;
+307: m.bindPopup(`<b>${h.nome}</b><br/><span style="font-size:11px;color:#666">${h.tipo || 'Instituição de Saúde'}</span><br/><span style="font-size:11px;color:${color};font-weight:bold">${labelDistritoOuMunicipio}</span><br/><br/><button onclick="window.abrirDetalheHospitalById('${id}')" style="background:var(--accent-purple);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:10px;">Ver Detalhes</button>`);
+308: 
+309: bounds.push([h._lat, h._lng]);
+310: markers.push(m);
+311: }
+312: });
+313: 
+314: // Update legend
+315: const legendDiv = document.getElementById('map-legend-container');
+316: if (legendDiv) {
+317: let labels = ['<strong style="display:block; margin-bottom:4px;">Legenda</strong>'];
+318: Object.keys(activeGroups).sort().forEach(group => {
+319: const data = activeGroups[group];
+320: labels.push(
+321: `<i style="background:${data.color}; width: 12px; height: 12px; display: inline-block; border-radius: 50%; margin-right: 5px; vertical-align:middle;"></i> <span style="vertical-align:middle; font-size:10px;">${group} (${data.count})</span>`
+322: );
+323: });
+324: legendDiv.innerHTML = labels.join('<br>');
+325: }
+326: 
+327: if(bounds.length > 0) map.fitBounds(bounds, {padding: [50, 50], maxZoom: 15});
+328: }
+329: 
+330: window.abrirDetalheHospitalById = function(id) {
+331: const h = window.hospDataCache[id];
+332: if(h) abrirDetalheHospital(h.cnes || h.id, h);
+333: };
+334: 
+335: function carregarConfiguracoes() {
+336: const salvos = localStorage.getItem('colih_equip_termos');
+337: if (salvos) {
+338: window.EQUIPAMENTOS_APOIO_TERMOS = JSON.parse(salvos);
+339: } else {
+340: window.EQUIPAMENTOS_APOIO_TERMOS = ["recuperador", "cell saver", "recuperação de sangue", "autotransfusão", "circulacao extracorporea", "aferese"];
+341: }
+342: 
+343: const ta = document.getElementById('config-equip-termos');
+344: if (ta) ta.value = window.EQUIPAMENTOS_APOIO_TERMOS.join(', ');
+345: }
+346: // Inicializações na carga
+347: carregarConfiguracoes();
+348: window.updateFiltersUI();
+349: 
+350: function salvarConfiguracoes() {
+351: const ta = document.getElementById('config-equip-termos');
+352: if (!ta) return;
+353: const termos = ta.value.split(',').map(s => s.trim().toLowerCase()).filter(s => s);
+354: window.EQUIPAMENTOS_APOIO_TERMOS = termos;
+355: localStorage.setItem('colih_equip_termos', JSON.stringify(termos));
+356: alert('Configurações salvas com sucesso!');
+357: if (document.getElementById('tab-hospitais').classList.contains('active')) {
+358: buscarHospitais();
+359: }
+360: }
+361: 
+362: async function carregarGeoConfig() {
+363: try {
+364: const cfg = await fetchAPI('/sync-config');
+365: const badge = document.getElementById('geo-config-badge');
+366: if (badge) badge.textContent = cfg.descricao || 'Bahia';
+367: const sel = document.getElementById('geo-uf-select');
+368: if (sel && cfg.uf) sel.value = cfg.uf;
+369: if (cfg.municipios_especificos && cfg.municipios_especificos.length > 0) {
+370: const radioC = document.querySelector('input[name="geo-modo"][value="cidades"]');
+371: if (radioC) { radioC.checked = true; toggleGeoModo(); }
+372: const inp = document.getElementById('geo-cidades-input');
+373: if (inp) inp.value = cfg.municipios_especificos.join(', ');
+374: }
+375: } catch(e) { console.warn('Erro ao carregar geo config:', e); }
+376: }
+377: 
+378: function toggleGeoModo() {
+379: const modo = document.querySelector('input[name="geo-modo"]:checked')?.value;
+380: const area = document.getElementById('geo-cidades-area');
+381: if (area) area.style.display = modo === 'cidades' ? 'block' : 'none';
+382: }
+383: 
+384: async function salvarGeoConfig() {
+385: const uf = document.getElementById('geo-uf-select')?.value || 'BA';
+386: const modo = document.querySelector('input[name="geo-modo"]:checked')?.value;
+387: let municipios = [];
+388: if (modo === 'cidades') {
+389: const inp = document.getElementById('geo-cidades-input')?.value || '';
+390: municipios = inp.split(',').map(s => s.trim()).filter(s => s && /^\d+$/.test(s));
+391: }
+392: try {
+393: await fetch(`${API}/sync-config`, {
+394: method: 'POST',
+395: headers: { 'Content-Type': 'application/json' },
+396: body: JSON.stringify({ uf, municipios_especificos: municipios })
+397: });
+398: const msg = document.getElementById('geo-save-msg');
+399: if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 5000); }
+400: carregarGeoConfig();
+401: } catch(e) { alert('Erro ao salvar: ' + e.message); }
+402: }
+403: 
+404: 
+405: 
+406: async function buscarHospitais() {
+407: const container = document.getElementById('hosp-results');
+408: const nome = document.getElementById('filter-nome').value.trim();
+409: const tipo = document.getElementById('filter-tipo').value;
+410: const distrito = document.getElementById('filter-distrito').value;
+411: 
+412: const complexidade = document.getElementById('filter-complexidade').value;
+413: const apoio = document.getElementById('filter-apoio').value;
+414: 
+415: const el = document.getElementById('hosp-results');
+416: el.innerHTML = '<div class="loading-state">ðŸ” Buscando...</div>';
+417: document.getElementById('hosp-detail').style.display = 'none';
+418: 
+419: let qs = `limit=100`;
+420: const tmo = document.getElementById('filter-tmo') ? document.getElementById('filter-tmo').value : '';
+421: const pbm = document.getElementById('filter-pbm') ? document.getElementById('filter-pbm').value : '';
+422: 
+423: if(nome) qs += `&nome=${encodeURIComponent(nome)}`;
+424: if(tipo) qs += `&tipo=${encodeURIComponent(tipo)}`;
+425: if(tmo) qs += `&tmo=${encodeURIComponent(tmo)}`;
+426: if(pbm) qs += `&pbm=${encodeURIComponent(pbm)}`;
+427: if(distrito) qs += `&distrito=${encodeURIComponent(distrito)}`;
+428: if(complexidade) qs += `&complexidade=${encodeURIComponent(complexidade)}`;
+429: if(apoio) {
+430: qs += `&apoio_colih=${encodeURIComponent(apoio)}`;
+431: qs += `&apoio_termos=${encodeURIComponent(window.EQUIPAMENTOS_APOIO_TERMOS.join(','))}`;
+432: }
+433: const data = await fetchAPI(`/hospitais?${qs}`).catch(() => null);
+434: if (!data) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">âš ï¸</div><p>Erro ao buscar. Verifique o servidor.</p></div>'; return; }
+435: 
+436: // Barra de fonte
+437: const fonteBar = document.getElementById('hosp-fonte-bar');
+438: fonteBar.style.display = 'flex';
+439: document.getElementById('hosp-fonte-text').innerHTML = fonteChip(data.fonte);
+440: 
+441: if (!data.estabelecimentos || !data.estabelecimentos.length) {
+442: el.innerHTML = '<div class="empty-state"><div class="empty-icon">ðŸ¥</div><p>Nenhuma instituiÃ§Ã£o de saÃºde encontrada.</p></div>';
+443: window.currentResults = [];
+444: if(window.isMapVisible) updateMapMarkers([]);
+445: return;
+446: }
+447: 
+448: window.currentResults = data.estabelecimentos;
+449: if(map || window.isMapVisible) updateMapMarkers(window.currentResults);
+450: 
+451: el.innerHTML = `
+452: <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">${data.total} estabelecimentos encontrados</p>
+453: <div class="hosps-grid">
+454: ${data.estabelecimentos.map(h => {
+455: // Popula o cache aqui também (não só no mapa)
+456: const id = h.cnes || h.id;
+457: window.hospDataCache[id] = h;
+458: const bairro = h.raw && h.raw.NO_BAIRRO ? h.raw.NO_BAIRRO : '';
+459: const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((h.endereco || '') + ' ' + (h.municipio || 'Salvador') + ' ' + bairro)}`;
+460: 
+461: let equipsHtml = '';
+462: let countApoio = 0;
+463: let hasCellSaver = false;
+464: if (h.equipamentos && h.equipamentos.length > 0) {
+465: const apoios = h.equipamentos.filter(eq => {
+466: const eqNome = eq.nome || eq.descricao || 'Equipamento';
+467: return window.EQUIPAMENTOS_APOIO_TERMOS.some(t => eqNome.toLowerCase().includes(t));
+468: });
+469: countApoio = apoios.length;
+470: if (countApoio > 0) hasCellSaver = true;
+471: 
+472: if (countApoio > 0) {
+473: const eqList = apoios.map(eq => {
+474: const eqNome = eq.nome || eq.descricao || 'Equipamento';
+475: return `<div style="font-size:11px; color:#ef4444; font-weight:bold; border-bottom:1px solid var(--border-color); padding:4px 0;">
+476: <span style="white-space:normal; line-height:1.4;" title="${eqNome}">🩸 ${eqNome}</span>
+477: </div>`;
+478: }).join('');
+479: equipsHtml = `<div style="margin-top:8px; max-height:120px; overflow-y:auto; padding-right:4px; background:rgba(0,0,0,0.02); border-radius:4px; padding:6px;">${eqList}</div>`;
+480: }
+481: }
+482: 
+483: let conveniosTags = '';
+484: if (h.convenios && h.convenios.length > 0) {
+485: const conveniosFiltrados = h.convenios.filter(c => !c.toUpperCase().includes('PLANO DE SAÚDE PÚBLICO') && !c.toUpperCase().includes('PLANO DE SAUDE PUBLICO'));
+486: conveniosTags = conveniosFiltrados.map(c => `<span style="background:var(--bg-body); border:1px solid var(--border-color); color:var(--text-primary); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,0.05);">${c}</span>`).join(' ');
+487: }
+488: 
+489: // Complexidade badge
+490: const complexColor = h._complexidade === 'Alta Complexidade' ? '#7c3aed'
+491: : h._complexidade === 'Média-Alta Complexidade' ? '#ef4444'
+492: : h._complexidade === 'Média Complexidade' ? '#3b82f6'
+493: : '#6b7280';
+494: 
+495: // Subcomplexidades: mostrar só o subtipo, sem repetir 'Alta Complexidade'
+496: const altaComplexTags = (h._altaComplexidade || []).map(cat => {
+497: // Remove prefixo 'Alta Complexidade' ou 'Habilitacao em ' para mostrar só o subtipo
+498: const label = cat.replace(/^Alta Complexidade\s*[–-]?\s*/i, '').replace(/^Habilitação em\s*/i, '').replace(/^Habilitacao em\s*/i, '').trim();
+499: return `<span style="background:rgba(124,58,237,0.1); border:1px solid rgba(124,58,237,0.4); color:#a78bfa; padding:2px 8px; border-radius:16px; font-size:10px; font-weight:700;">${label || cat}</span>`;
+500: }).join(' ');
+501: 
+502: return `
+503: <div class="hosp-card" style="display:flex; flex-direction:column; padding:16px; border:1px solid var(--border-color); border-left: 4px solid ${complexColor}; border-radius:8px; background:var(--bg-card); position:relative; cursor:pointer;" onclick="window.abrirDetalheHospitalById('${h.id || h.cnes}')">
+504: 
+505: <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+506: <h3 style="font-size:16px; font-weight:700; color:var(--text-primary); margin:0;">${h.nome || 'Sem nome'}</h3>
+507: </div>
+508: 
+509: <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">${h.tipo || 'ESTABELECIMENTO DE SAÚDE'}</div>
+510: 
+511: <div style="margin-bottom:8px;">
+512: ${h.municipio === 'Salvador'
+513: ? (h._distrito ? `<div style="font-weight:700; color:var(--accent-blue); margin-bottom:4px; font-size:12px;">ðŸ“ Distrito SanitÃ¡rio: ${h._distrito}</div>` : '')
+514: : `<div style="font-weight:700; color:var(--accent-purple); margin-bottom:4px; font-size:12px;">ðŸ“ MunicÃ­pio: ${h.municipio}</div>`
+515: }
+516: <a href="${mapsLink}" target="_blank" onclick="event.stopPropagation()" style="color:var(--text-secondary); text-decoration:none; display:flex; align-items:center; gap:4px; font-weight:500; font-size:12px;">ðŸ—ºï¸ ${h.endereco || ''}${bairro ? ' - ' + bairro : ''} â†—</a>
+517: </div>
+518: 
+519: <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; align-items:center;">
+520: <span style="background:${complexColor}; color:white; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700;">${h._complexidade || 'N/A'}</span>
+521: ${h._totalLeitos > 0 ? `<span style="background:var(--bg-body); border:1px solid var(--border-color); color:var(--text-secondary); padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700;">ðŸ›ï¸ ${h._totalLeitos} Leitos</span>` : ''}
+522: ${h._isPA ? '<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:4px; font-weight:700; font-size:11px;">🚑 Pronto Atendimento (PA)</span>' : ''}
+523: ${h._isSus ? '<span style="background:var(--accent-cyan); color:var(--bg-body); padding:4px 8px; border-radius:4px; font-weight:700; font-size:11px;">SUS</span>' : ''}
+524: ${(h.servicosEspecializados || []).concat(h.classificacoesServicos || []).some(s => typeof s === 'string' ? s.toUpperCase() === 'MEDULA OSSEA' : s.nome && s.nome.toUpperCase() === 'MEDULA OSSEA') ? '<span style="background:#ef4444; color:white; padding:4px 8px; border-radius:4px; font-weight:700; font-size:11px;">TMO</span>' : ''}
+525: ${h._pbm ? `<span style="background:#10b981; color:white; padding:4px 8px; border-radius:4px; font-weight:700; font-size:11px;">🩸 PBM</span>` : ''}
+526: </div>
+527: 
+528: ${altaComplexTags ? `<div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;">${altaComplexTags}</div>` : ''}
+529: 
+530: <div style="font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:6px;">Planos / Convênios Atendidos:</div>
+531: <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;">
+532: ${conveniosTags || '<span style="font-size:11px; color:var(--text-muted);">Não informados</span>'}
+533: </div>
+534: 
+535: <div style="margin-top:auto;">
+536: ${hasCellSaver ? `<div style="background:#fef2f2; border:1px solid #f87171; color:#b91c1c; padding:6px 8px; border-radius:4px; font-size:11px; font-weight:700; margin-bottom:8px; text-align:center;">âš ï¸ EQUIPAMENTOS DE APOIO Ã€ COLIH DISPONÃVEIS (${countApoio})</div>` : ''}
+537: ${equipsHtml}
+538: </div>
+539: 
+540: </div>
+541: `;
+542: }).join('')}
+543: </div>
+544: ${data.total > 100 ? `<div style="text-align:center; padding:16px; font-size:13px; color:var(--text-muted); border-top:1px solid var(--border-color); margin-top:16px; background:var(--bg-card); border-radius:8px;">
+545: Exibindo os primeiros <strong>${data.estabelecimentos.length}</strong> resultados de um total de <strong>${data.total}</strong>. Utilize os filtros para refinar a busca.
+546: </div>` : `<div style="text-align:center; padding:16px; font-size:13px; color:var(--text-muted); border-top:1px solid var(--border-color); margin-top:16px; background:var(--bg-card); border-radius:8px;">
+547: Exibindo <strong>${data.estabelecimentos.length}</strong> resultados.
+548: </div>`}
+549: `;
+550: }
+551: 
+552: async function abrirDetalheHospital(cnesId, hospData) {
+553: document.getElementById('hosp-results').innerHTML = '';
+554: document.getElementById('hosp-fonte-bar').style.display = 'none';
+555: const detail = document.getElementById('hosp-detail');
+556: detail.style.display = 'block';
+557: 
+558: document.getElementById('hosp-detail-title').innerHTML = `
+559: <h2 style="font-size:18px;font-weight:800;">${hospData.nome || cnesId}</h2>
+560: <p style="color:var(--text-secondary);font-size:13px;">CNES: ${cnesId} · ${hospData.municipio || 'Salvador'}</p>
+561: `;
+562: 
+563: const linkCnes = `https://cnes.datasus.gov.br/pages/estabelecimentos/ficha/index.jsp?coUnidade=${cnesId}`;
+564: window._currentHospLinkCnes = linkCnes;
+565: 
+566: let espsHtml = '';
+567: const especialidadesFiltradas = (hospData.especialidades || []).filter(e => e && !e.includes('CBO'));
+568: if (especialidadesFiltradas.length > 0) {
+569: espsHtml = especialidadesFiltradas.map(e => `<span class="status-badge" style="background:var(--accent-purple); color:white; font-size:12px; padding:6px 12px; border-radius:15px; font-weight:600; cursor:pointer;" onclick="filtrarMedicosPorEspecialidade('${e.replace(/'/g,"'").replace(/"/g,"&quot;")}')">${e}</span>`).join('');
+570: } else {
+571: espsHtml = '<p style="color:var(--text-muted); font-size:13px; width:100%;">Nenhuma especialidade mapeada para este hospital.</p>';
+572: }
+573: 
+574: const raw = hospData.raw || {};
+575: let dir = raw.NOME_DIRETOR_CLINICO || raw.NO_DIRETOR || raw.NOME_DIRETORCLN || hospData.responsavel || '—';
+576: if (dir !== '—' && /^[d.-]+$/.test(dir)) dir = '—';
+577: if (dir === '—' && raw.REG_DIRETORCLN) dir = `CRM: ${raw.REG_DIRETORCLN} (Nome não localizado)`;
+578: const mantenedora = raw.NO_RAZAO_SOCIAL ? `${raw.NO_RAZAO_SOCIAL} (CNPJ: ${raw.NU_CNPJ_MANTENEDORA || '—'})` : '—';
+579: const natJur = raw.DS_NATUREZA_JUR || raw.CO_NATUREZA_JUR || '—';
+580: 
+581: const logr = raw.NO_LOGRADOURO || hospData.endereco || '—';
+582: const num = raw.NU_ENDERECO || 'S/N';
+583: const compl = raw.NO_COMPLEMENTO ? ` - ${raw.NO_COMPLEMENTO}` : '';
+584: const bairro = raw.NO_BAIRRO || '';
+585: const cep = raw.CO_CEP ? ` - CEP: ${raw.CO_CEP}` : '';
+586: const enderecoCompleto = raw.NO_LOGRADOURO ? `${logr}, ${num}${compl} - ${bairro}${cep}` : logr;
+587: 
+588: const email = raw.NO_EMAIL || '—';
+589: const tel = raw.NU_TELEFONE || '—';
+590: const lat = raw.NU_LATITUDE;
+591: const lon = raw.NU_LONGITUDE;
+592: const latlon = (lat && lon) ? `<a href="https://maps.google.com/?q=${lat},${lon}" target="_blank" style="color:var(--accent-cyan); text-decoration:none;">${lat}, ${lon} ↗</a>` : 'Não informado';
+593: const dtAtualizacao = raw["TO_CHAR(DT_ATUALIZACAO,'DD/MM/YYYY')"] || '—';
+594: 
+595: 
+596: 
+597: document.getElementById('hosp-info-card').innerHTML = `
+598: <div class="info-grid">
+599: <div class="info-item"><label>Nome Completo</label><span>${hospData.nome || '—'}</span></div>
+600: <div class="info-item"><label>Código CNES</label><span><a href="${linkCnes}" target="_blank" style="color:var(--accent-cyan); text-decoration:none;">${cnesId} ↗</a></span></div>
+601: <div class="info-item"><label>Macrorregião</label><span>${hospData._macrorregiao || 'N/A'}</span></div>
+602: ${hospData.municipio === 'Salvador' ? `<div class="info-item"><label>Distrito Sanitário</label><span style="font-weight:bold;">${hospData._distrito || 'N/A'}</span></div>` : ''}
+603: <div class="info-item"><label>Atende SUS?</label><span style="font-weight:bold; color: ${hospData._isSus ? 'var(--accent-green)' : 'var(--text-secondary)'}">${hospData._isSus ? 'Sim' : 'Não / Particular'}</span></div>
+604: <div class="info-item"><label>Pronto Atend. / 24h?</label><span style="font-weight:bold; color: ${hospData._isPA ? 'var(--accent-purple)' : 'var(--text-secondary)'}">${hospData._isPA ? 'Sim' : 'Não'}</span></div>
+605: <div class="info-item"><label>Total de Leitos</label><span style="font-weight:bold;">${hospData._totalLeitos}</span></div>
+606: <div class="info-item"><label>Bairro</label><span style="color:var(--accent-cyan)">${bairro}</span></div>
+607: <div class="info-item"><label>Cidade</label><span>${hospData.municipio || '—'}</span></div>
+608: <div class="info-item"><label>Natureza Jurídica</label><span>${natJur}</span></div>
+609: <div class="info-item"><label>Responsável Técnico</label><span style="color:var(--accent-cyan)">${dir}</span></div>
+610: <div class="info-item"><label>Endereço Completo</label><span>${enderecoCompleto}</span></div>
+611: <div class="info-item"><label>Telefone</label><span>${tel}</span></div>
+612: <div class="info-item"><label>Mantenedora</label><span>${mantenedora}</span></div>
+613: <div class="info-item"><label>Última Atualização Nacional</label><span>${hospData._dtAtualizacaoNacional || 'N/A'}</span></div>
+614: <div class="info-item"><label>Última Atualização Regional</label><span>${hospData._dtAtualizacaoRegional || 'N/A'}</span></div>
+615: </div>
+616: ${(() => {
+617: if (window._tmoCustomData && window._tmoCustomData[cnesId]) {
+618: const linkInfo = window._tmoCustomData[cnesId];
+619: const hasDoctors = linkInfo.doctors && linkInfo.doctors.length > 0;
+620: return `
+621: <div style="margin-top: 16px; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 16px;">
+622: <div style="font-size: 14px; font-weight: bold; color: #ef4444; margin-bottom: 8px; text-align: center;">
+623: 🔥 Centro de Transplante de Medula Óssea
+624: </div>
+625: <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; text-align: center;">
+626: A relação de médicos TMO para este hospital é gerenciada customizadamente.
+627: </div>
+628: 
+629: ${hasDoctors ? `
+630: <div style="background: white; border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+631: <div style="font-size: 12px; font-weight: bold; color: var(--text-primary); margin-bottom: 8px;">Equipe Médica Conhecida (TMO):</div>
+632: <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+633: ${linkInfo.doctors.map(doc => `<li>${doc.name} ${doc.link ? `<a href="${doc.link}" target="_blank" style="color:var(--accent-cyan);text-decoration:none;">🔗 Perfil</a>` : ''}</li>`).join('')}
+634: </ul>
+635: </div>
+636: ` : `
+637: <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; text-align: center; font-style: italic;">
+638: * Nenhum médico cadastrado na equipe TMO ainda.
+639: </div>
+640: `}
+641: 
+642: <div style="text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center;">
+643: ${linkInfo.url ? `
+644: <a href="${linkInfo.url}" target="_blank" style="display: inline-block; background: #ef4444; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold; box-shadow: 0 2px 4px rgba(239,68,68,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+645: 🔗 ${linkInfo.label || 'Site do Hospital'}
+646: </a>` : ''}
+647: <button onclick="abrirModalAddMedicoTmo('${cnesId}')" style="display: inline-block; background: var(--bg-body); border: 1px dashed #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='white';" onmouseout="this.style.background='var(--bg-body)'; this.style.color='#ef4444';">
+648: ➕ Adicionar Médico/Link
+649: </button>
+650: </div>
+651: </div>
+652: `;
+653: } else {
+654: return `
+655: <div style="margin-top: 16px; text-align: center;">
+656: <button onclick="abrirModalAddMedicoTmo('${cnesId}')" style="display: inline-block; background: var(--bg-body); border: 1px dashed var(--text-muted); color: var(--text-secondary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: all 0.2s;" onmouseover="this.style.borderColor='#ef4444'; this.style.color='#ef4444';" onmouseout="this.style.borderColor='var(--text-muted)'; this.style.color='var(--text-secondary)';">
+657: ➕ Forçar como Centro de TMO
+658: </button>
+659: </div>`;
+660: }
+661: })()}
+662: 
+663: <div style="margin-top:15px; padding-top:12px; border-top:1px solid var(--border); font-size:11px; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
+664: <span><strong>Transparência de Dados:</strong> Todos os detalhes extraídos nativamente da tabela <code>tbEstabelecimento</code> via Extrato CSV DATASUS mensal.</span>
+665: <span>Última atualização no CNES: ${dtAtualizacao}</span>
+666: </div>
+667: `;
+668: 
+669: let offlineAdvanced = '';
+670: const advData = hospData;
+671: let cellSaverBadge = '';
+672: 
+673: if (advData.equipamentos && advData.equipamentos.length) {
+674: const isCellSaver = (n) => {
+675: const str = (n || '').toLowerCase();
+676: return window.EQUIPAMENTOS_APOIO_TERMOS.some(t => str.includes(t));
+677: };
+678: 
+679: const apoios = advData.equipamentos.filter(x => isCellSaver(x.nome || x.descricao));
+680: if (apoios.length > 0) {
+681: // Extrair nomes limpos e únicos para a legenda
+682: const nomesUnicos = [...new Set(apoios.map(x => x.nome || x.descricao))];
+683: const nomesStr = nomesUnicos.join(', ');
+684: cellSaverBadge = `<div style="background:#ef4444; color:#ffffff; padding:12px; border-radius:6px; font-size:13px; font-weight:bold; margin-bottom:15px; display:flex; align-items:center; gap:10px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);">
+685: <span style="font-size:18px;">🩸</span> <span>ALERTA COLIH: Este hospital possui equipamento(s) compatível(is) com a Recuperação Intraoperatória (${nomesStr})</span>
+686: </div>`;
+687: }
+688: 
+689: // Ordenar colocando apoios no topo
+690: advData.equipamentos.sort((a, b) => {
+691: const aAp = isCellSaver(a.nome || a.descricao);
+692: const bAp = isCellSaver(b.nome || b.descricao);
+693: if (aAp && !bAp) return -1;
+694: if (!aAp && bAp) return 1;
+695: return 0;
+696: });
+697: 
+698: advData.equipamentos.forEach(x => {
+699: if (isCellSaver(x.nome || x.descricao)) {
+700: x._highlight = true;
+701: }
+702: });
+703: }
+704: 
+705: document.getElementById('hosp-rec-card').innerHTML = cellSaverBadge;
+706: 
+707: // 1. Atendimento Prestado
+708: if (advData.atendimentoPrestado && advData.atendimentoPrestado.length) {
+709: offlineAdvanced += `
+710: <div style="background:var(--bg-card); padding:12px; border-radius:6px; border:1px solid var(--border-color); margin-bottom:10px;">
+711: <div style="font-size:13px; font-weight:600; color:var(--accent-purple); margin-bottom:8px;">Atendimento Prestado</div>
+712: <div style="display:flex; flex-wrap:wrap; gap:6px;">
+713: ${advData.atendimentoPrestado.map(x => typeof x === 'object' ? `<span class="status-badge" style="font-size:11px;">${x.tipo || x}</span>` : `<span class="status-badge" style="font-size:11px;">${x}</span>`).join('')}
+714: </div>
+715: </div>`;
+716: }
+717: 
+718: // 1.5 PBM (Gerenciamento do Uso de Sangue)
+719: offlineAdvanced += `
+720: <div style="background:var(--bg-card); padding:12px; border-radius:6px; border:1px solid var(--border-color); margin-bottom:10px;">
+721: <div style="font-size:13px; font-weight:600; color:#f97316; margin-bottom:8px;">🩸 Gerenciamento de Sangue do Paciente (PBM)</div>
+722: <div style="display:flex; gap:8px;">
+723: <button onclick="window.togglePBM('${cnesId}', ${hospData._pbm ? 'true' : 'false'})" style="background:${hospData._pbm ? '#10b981' : 'var(--bg-body)'}; color:${hospData._pbm ? 'white' : 'var(--text-primary)'}; border:1px solid ${hospData._pbm ? '#10b981' : 'var(--border-color)'}; padding:4px 8px; border-radius:4px; font-weight:600; font-size:11px; cursor:pointer;">
+724: ${hospData._pbm ? '✅ PBM Implantado (Clique para remover)' : 'Marcar como PBM Implantado'}
+725: </button>
+726: ${hospData._pbm_link ? `<a href="${hospData._pbm_link}" target="_blank" style="background:#065f46; color:white; padding:4px 8px; border-radius:4px; font-weight:600; font-size:11px; text-decoration:none; display:flex; align-items:center;">🔗 Ver Referência</a>` : ''}
+727: </div>
+728: </div>
+729: `;
+730: 
+731: 
+732: // 2. Servios Especializados  com Alta Complexidade destacada
+733: if (advData.servicosEspecializados && advData.servicosEspecializados.length) {
+734: // Termos de Alta Complexidade para destacar
+735: const TERMOS_ALTA = ['TRANSPLANTE','CARDIOVASCULAR','CARDIO','ONCOLOGIA','CANCER','QUIMIOTERAPIA','RADIOTERAPIA','NEUROLOGIA','NEUROCIRURGIA','ORTOPEDIA','TRAUMATOLOGIA','HEMOTERAPIA','HEMATOLOGIA','HEMODIALISE','DIALISE','NEONATOLOGIA','PERINATAL'];
+736: 
+737: let hasTransplante = false;
+738: const servicosComMarca = advData.servicosEspecializados.map(x => {
+739: const nome = typeof x === 'object' ? (x.tipo || String(x)) : String(x);
+740: if (nome.toUpperCase().includes('TRANSPLANTE')) hasTransplante = true;
+741: const isAlta = TERMOS_ALTA.some(t => nome.toUpperCase().includes(t));
+742: return { nome, isAlta };
+743: })
+744: .filter(s => !s.nome.toUpperCase().includes('TRANSPLANTE')) // Separar transplante da lista principal
+745: .sort((a,b) => b.isAlta - a.isAlta); // Alta complexidade primeiro
+746: 
+747: const altaCount = servicosComMarca.filter(s => s.isAlta).length + (hasTransplante ? 1 : 0);
+748: 
+749: let transplanteHtml = '';
+750: if (hasTransplante) {
+751: // Filtrar classificações vinculadas a transplante / doação / órgãos
+752: const tmoTerms = ['MEDULA', 'RIM', 'FIGADO', 'CORNEA', 'ESCLERA', 'RETIRADA', 'TRANSPLANT', 'ORGAO', 'TECIDO', 'DOACAO', 'CAPTACAO', 'CORACAO', 'PULMAO', 'PANCREAS', 'OSSEA'];
+753: const tiposTransplante = (advData.classificacoesServicos || []).map(x => typeof x === 'object' ? (x.nome || String(x)) : String(x))
+754: .filter(c => tmoTerms.some(t => c.toUpperCase().includes(t)));
+755: 
+756: transplanteHtml = `
+757: <div style="margin-bottom: 16px; background: rgba(239, 68, 68, 0.04); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 12px; border-left: 3px solid #ef4444;">
+758: <div style="font-size:12px; font-weight:800; color:#ef4444; margin-bottom: 8px; display:flex; align-items:center;">
+759: â¤ï¸ TRANSPLANTES
+760: </div>
+761: <div style="display:flex; flex-wrap:wrap; gap:6px;">
+762: ${tiposTransplante.length > 0 ? tiposTransplante.map(t => {
+763: const isMedula = t.toUpperCase().includes('MEDULA OSSEA');
+764: if (isMedula) {
+765: return `<span onclick="filtrarMedicosPorEspecialidade('${t}')" style="cursor:pointer; background:#ef4444; color:white; padding:4px 10px; border-radius:16px; font-size:11px; font-weight:800; box-shadow: 0 2px 4px rgba(239,68,68,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">🔥 ${t}</span>`;
+766: }
+767: return `<span onclick="filtrarMedicosPorEspecialidade('${t}')" style="cursor:pointer; background:var(--bg-body); border:1px solid rgba(239,68,68,0.4); color:#ef4444; padding:4px 10px; border-radius:16px; font-size:11px; font-weight:700; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">${t}</span>`;
+768: }).join('') : '<span style="color:var(--text-tertiary); font-size:11px; font-style:italic;">Tipos não especificados no CNES</span>'}
+769: </div>
+770: </div>
+771: `;
+772: }
+773: 
+774: offlineAdvanced += `
+775: <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border-color); border-left:4px solid #7c3aed; margin-bottom:10px;">
+776: <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+777: <div style="font-size:13px; font-weight:700; color:#7c3aed;">ðŸ… ServiÃ§os Especializados</div>
+778: ${altaCount > 0 ? `<span style="background:#7c3aed; color:white; padding:3px 10px; border-radius:16px; font-size:11px; font-weight:800;">${altaCount} de Alta Complexidade</span>` : ''}
+779: </div>
+780: ${transplanteHtml}
+781: <div style="display:flex; flex-wrap:wrap; gap:6px;">
+782: ${servicosComMarca.map(s => s.isAlta
+783: ? `<span style="background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.5); color:#7c3aed; padding:4px 10px; border-radius:16px; font-size:11px; font-weight:800;">â­ ${s.nome}</span>`
+784: : `<span style="background:var(--bg-body); border:1px solid var(--border-color); color:var(--text-secondary); padding:4px 10px; border-radius:16px; font-size:11px; font-weight:600;">${s.nome}</span>`
+785: ).join('')}
+786: </div>
+787: </div>`;
+788: }
+789: 
+790: // 3. Comissões e Comitês
+791: if (advData.comissoes && advData.comissoes.length) {
+792: offlineAdvanced += `
+793: <div style="background:var(--bg-card); padding:12px; border-radius:6px; border:1px solid var(--border-color); margin-bottom:10px;">
+794: <div style="font-size:13px; font-weight:600; color:var(--accent-purple); margin-bottom:8px;">Comissões e Comitês</div>
+795: <ul style="margin:0; padding-left:15px; font-size:12px; color:var(--text-secondary);">
+796: ${advData.comissoes.map(x => typeof x === 'object' ? `<li>${x.tipo || x}</li>` : `<li>${x}</li>`).join('')}
+797: </ul>
+798: </div>`;
+799: }
+800: 
+801: // 4. Leitos Hospitalares
+802: if (advData.leitos && advData.leitos.length) {
+803: offlineAdvanced += `
+804: <details style="background:var(--bg-card); padding:12px; border-radius:6px; border:1px solid var(--border-color); margin-bottom:10px; cursor:pointer;" open>
+805: <summary style="font-size:13px; font-weight:600; color:var(--accent-purple); outline:none; user-select:none;">Leitos Hospitalares <span style="font-size:11px; font-weight:normal; color:var(--text-muted); float:right; margin-top:2px;">(Expandir/Recolher)</span></summary>
+806: <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:12px; margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05);">
+807: ${advData.leitos.map(x => `<div><strong style="color:var(--text-secondary)">${x.nome}</strong>: ${x.quantidade}</div>`).join('')}
+808: </div>
+809: </details>`;
+810: }
+811: 
+812: // 5. Equipamentos
+813: if (advData.equipamentos && advData.equipamentos.length) {
+814: offlineAdvanced += `
+815: <details style="background:var(--bg-card); padding:12px; border-radius:6px; border:1px solid var(--border-color); margin-bottom:10px; cursor:pointer;" open>
+816: <summary style="font-size:13px; font-weight:600; color:var(--accent-purple); outline:none; user-select:none;">Equipamentos (${advData.equipamentos.length}) <span style="font-size:11px; font-weight:normal; color:var(--text-muted); float:right; margin-top:2px;">(Expandir/Recolher)</span></summary>
+817: <div style="display:grid; grid-template-columns: 1fr; gap:8px; font-size:12px; margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05);">
+818: ${advData.equipamentos.map(x => `
+819: <div style="${x._highlight ? 'color:#ef4444; font-weight:bold; background:rgba(239, 68, 68, 0.1); padding:8px; border-radius:4px;' : 'padding:6px 0; border-bottom:1px solid var(--border-color);'} display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+820: <span style="flex:1; min-width:200px;">${x._highlight ? 'ðŸ©¸ ' : 'âš™ï¸ '}${x.nome || x.descricao}</span>
+821: <span style="font-size:11px; color:var(--text-secondary); text-align:right;">(Existente: ${x.existente||x.quantidade||0} | Em Uso: ${x.em_uso||0} | Atende SUS: ${x.sus||'N/A'})</span>
+822: </div>
+823: `).join('')}
+824: </div>
+825: </details>`;
+826: }
+827: 
+828: document.getElementById('hosp-rec-card').innerHTML += offlineAdvanced;
+829: 
+830: document.getElementById('prof-table-wrap').innerHTML = '<div class="loading-state">Carregando médicos...</div>';
+831: const data = await fetchAPI(`/hospitais/${cnesId}`).catch(() => null);
+832: 
+833: if (!data) { document.getElementById('prof-table-wrap').innerHTML = '<div class="empty-state"><p>Erro ao carregar profissionais.</p></div>'; return; }
+834: 
+835: document.getElementById('prof-fonte-text').innerHTML = fonteChip(data.fonte);
+836: document.getElementById('prof-count').textContent = `${data.total_medicos} médicos`;
+837: 
+838: window._hospMedicos = data.medicos || [];
+839: renderizarProfissionais(window._hospMedicos);
+840: 
+841: if (window._hospMedicos.length > 0) {
+842: const contagem = {};
+843: window._hospMedicos.forEach(m => {
+844: let esps = [];
+845: if (m.especialidade_hlc9) {
+846: esps.push(m.especialidade_hlc9);
+847: } else if (m.especialidade) {
+848: esps = m.especialidade.split(' / ').map(e => e.trim());
+849: }
+850: esps.forEach(e => {
+851: if (e && !e.includes('CBO')) {
+852: contagem[e] = (contagem[e] || 0) + 1;
+853: }
+854: });
+855: });
+856: 
+857: let contagemHtml = '';
+858: const espsSorted = Object.keys(contagem).sort((a,b) => contagem[b] - contagem[a]);
+859: if (espsSorted.length > 0) {
+860: contagemHtml = espsSorted.map(e => `<span class="status-badge" style="background:var(--accent-purple); color:white; font-size:13px; padding:8px 14px; border-radius:8px; font-weight:600; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(0,0,0,0.05); cursor:pointer;" onclick="filtrarMedicosPorEspecialidade('${e.replace(/'/g,"'").replace(/"/g,"&quot;")}')">${e} <span style="background:rgba(255,255,255,0.25); padding:2px 6px; border-radius:12px; font-size:11px;">${contagem[e]}</span></span>`).join('');
+861: } else {
+862: contagemHtml = '<p style="color:var(--text-muted); font-size:13px; width:100%;">Nenhuma especialidade mapeada para este hospital.</p>';
+863: }
+864: document.getElementById('hosp-esps-card').innerHTML = contagemHtml;
+865: } else {
+866: document.getElementById('hosp-esps-card').innerHTML = espsHtml;
+867: }
+868: }
+869: 
+870: function fecharDetalheHospital() {
+871: document.getElementById('hosp-detail').style.display = 'none';
+872: document.getElementById('hosp-results').innerHTML = '';
+873: }
+874: 
+875: function filtrarProfissionais() {
+876: const q = document.getElementById('prof-filter-input').value.toLowerCase();
+877: const filtrados = q
+878: ? (window._hospMedicos || []).filter(m =>
+879: (m.especialidade || '').toLowerCase().includes(q) ||
+880: (m.nome || '').toLowerCase().includes(q) ||
+881: (m.especialidade_hlc9 || '').toLowerCase().includes(q))
+882: : (window._hospMedicos || []);
+883: document.getElementById('prof-count').textContent = `${filtrados.length} médicos`;
+884: renderizarProfissionais(filtrados);
+885: }
+886: 
+887: window.filtrarMedicosPorEspecialidade = function(esp) {
+888: let busca = esp.toUpperCase();
+889: const mapaTermos = {
+890: 'MEDULA': 'Oncolog', // Traduz para Oncologista (TMO)
+891: 'ONCOLOGIA': 'Oncolog',
+892: 'CORNEA': 'Oftalmolog',
+893: 'ESCLERA': 'Oftalmolog',
+894: 'RIM': 'Nefrolog',
+895: 'FIGADO': 'Gastro',
+896: 'CORACAO': 'Cardiolog',
+897: 'PULMAO': 'Pneumolog'
+898: };
+899: 
+900: for (const [key, value] of Object.entries(mapaTermos)) {
+901: if (busca.includes(key)) {
+902: busca = value;
+903: break;
+904: }
+905: }
+906: 
+907: document.getElementById('prof-filter-input').value = busca;
+908: filtrarProfissionais();
+909: 
+910: const btn = document.querySelector("button[onclick*='tab-hosp-prof']");
+911: if (btn) {
+912: switchTab('tab-hosp-prof', btn);
+913: }
+914: 
+915: document.getElementById('prof-filter-input').scrollIntoView({behavior: 'smooth', block: 'center'});
+916: };
+917: 
+918: function renderizarProfissionais(medicos) {
+919: if (!medicos.length) {
+920: document.getElementById('prof-table-wrap').innerHTML = '<div class="empty-state"><div class="empty-icon">ðŸ”</div><p>Nenhum mÃ©dico encontrado com esse filtro.</p></div>';
+921: return;
+922: }
+923: document.getElementById('prof-table-wrap').innerHTML = `
+924: <div class="table-wrap">
+925: <table>
+926: <thead><tr>
+927: <th>Nome</th>
+928: <th>CBO</th>
+929: <th>Especialidade</th>
+930: <th>CNS</th>
+931: <th>Pipeline</th>
+932: <th>Ações</th>
+933: </tr></thead>
+934: <tbody>
+935: ${medicos.map(m => {
+936: const hlc9 = m.especialidade_hlc9 ? `<br><span style="color:var(--accent-purple); font-size:11px; font-weight:600;">HLC-9: ${m.especialidade_hlc9}</span>` : '';
+937: return `
+938: <tr>
+939: <td style="font-weight:600">${m.nome || '—'}</td>
+940: <td class="td-muted" style="font-family:monospace; font-size:12px;">${m.cbo || '—'}</td>
+941: <td class="td-muted" style="line-height:1.4;">${m.especialidade || '—'}${hlc9}</td>
+942: <td class="td-muted" style="font-size:11px;">
+943: <a href="${window._currentHospLinkCnes}" target="_blank" style="color:var(--accent-cyan); text-decoration:none;" title="Ver hospital no CNES">${m.cns || '—'} 🔗</a>
+944: </td>
+945: <td>${m.no_pipeline ? statusLabel(m.status_pipeline) : '<span class="status-badge status-na">—</span>'}</td>
+946: <td class="td-actions">
+947: <button class="btn-secondary btn-sm" onclick="abrirDetalheMedicoFromHosp(${JSON.stringify(m).replace(/"/g,'&quot;')})">Ver Instituições de Saúde</button>
+948: ${m.no_pipeline
+949: ? `<button class="btn-secondary btn-sm" onclick="abrirModalEditar('${m.cns}')">Editar</button>`
+950: : `<button class="btn-primary btn-sm" onclick="abrirModalPipeline(${JSON.stringify(m).replace(/"/g,'&quot;')}, '')">+ Pipeline</button>`}
+951: </td>
+952: </tr>
+953: `;
+954: }).join('')}
+955: </tbody>
+956: </table>
+957: </div>
+958: `;
+959: }
+960: 
+961: /* ─── ABA MÉDICOS ────────────────────────────────────────────── */
+962: async function buscarMedicos() {
+963: const nome = document.getElementById('med-nome-input').value.trim();
+964: const esp = document.getElementById('med-esp-select').value;
+965: 
+966: const el = document.getElementById('med-results');
+967: el.innerHTML = '<div class="loading-state">ðŸ” Buscando...</div>';
+968: document.getElementById('med-detail').style.display = 'none';
+969: 
+970: const params = new URLSearchParams({ limit: 80 });
+971: if (nome) params.set('nome', nome);
+972: if (esp) params.set('especialidade', esp);
+973: 
+974: const data = await fetchAPI(`/medicos?${params}`).catch(() => null);
+975: if (!data) { el.innerHTML = '<div class="empty-state"><p>Erro ao buscar.</p></div>'; return; }
+976: 
+977: const fonteBar = document.getElementById('med-fonte-bar');
+978: fonteBar.style.display = 'flex';
+979: document.getElementById('med-fonte-text').innerHTML = fonteChip(data.fonte)
+980: + (data.fonte?.aviso ? ` <em style="color:var(--text-muted)"> · ${data.fonte.aviso}</em>` : '');
+981: 
+982: if (!data.medicos.length) {
+983: el.innerHTML = '<div class="empty-state"><div class="empty-icon">ðŸ‘¨â€âš•ï¸</div><p>Nenhum mÃ©dico encontrado.</p></div>';
+984: return;
+985: }
+986: 
+987: el.innerHTML = `
+988: <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">${data.total} médico(s) encontrado(s)</p>
+989: <div class="table-wrap">
+990: <table>
+991: <thead><tr>
+992: <th>Nome</th><th>Especialidade</th><th>Instituições</th><th>Pipeline</th><th>Ações</th>
+993: </tr></thead>
+994: <tbody>
+995: ${data.medicos.map(m => `
+996: <tr>
+997: <td style="font-weight:600">${m.nome || '—'}</td>
+998: <td class="td-muted">${m.especialidade || '—'}</td>
+999: <td class="td-muted">${(m.vinculos || []).filter(v => v.ativo).length} ativo(s) / ${(m.vinculos || []).length} total</td>
+1000: <td>${m.no_pipeline ? statusLabel(m.status_pipeline) : '<span class="status-badge status-na">—</span>'}</td>
+1001: <td class="td-actions">
+1002: <button class="btn-secondary btn-sm" onclick="abrirDetalheMedico('${m.cns}')">Ver Instituições de Saúde</button>
+1003: ${m.no_pipeline
+1004: ? `<button class="btn-primary btn-sm" onclick="abrirEditarMedico('${m.cns}')">Pipeline</button>`
+1005: : `<button class="btn-primary btn-sm" onclick="abrirModalPipeline('${m.cns}', '${(m.nome || '').replace(/'/g,"'").replace(/"/g,"&quot;")}')">Pipeline</button>`
+1006: }</td>
+1007: </tr>
+1008: `).join('')}
+1009: </tbody>
+1010: </table>
+1011: </div>
+1012: ${data.total > 80 ? `<div style="text-align:center; padding:16px; font-size:13px; color:var(--text-muted); border-top:1px solid var(--border-color); margin-top:16px; background:var(--bg-card); border-radius:8px;">
+1013: Exibindo os primeiros <strong>${data.medicos.length}</strong> resultados de um total de <strong>${data.total}</strong>. Utilize os filtros para refinar a busca.
+1014: </div>` : `<div style="text-align:center; padding:16px; font-size:13px; color:var(--text-muted); border-top:1px solid var(--border-color); margin-top:16px; background:var(--bg-card); border-radius:8px;">
+1015: Exibindo <strong>${data.medicos.length}</strong> resultados.
+1016: </div>`}
+1017: `;
+1018: }
+1019: 
+1020: async function abrirDetalheMedico(cns) {
+1021: document.getElementById('med-results').innerHTML = '';
+1022: document.getElementById('med-fonte-bar').style.display = 'none';
+1023: const detail = document.getElementById('med-detail');
+1024: detail.style.display = 'block';
+1025: 
+1026: document.getElementById('med-detail-title').innerHTML = '<div class="loading-state">Carregando dados do médico...</div>';
+1027: document.getElementById('med-cnes-card').innerHTML = '';
+1028: document.getElementById('med-cfm-card').innerHTML = '';
+1029: document.getElementById('med-curriculo-card').innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">🔄 Carregando currículo...</div>';
+1030: document.getElementById('vinculos-table-wrap').innerHTML = '';
+1031: document.getElementById('vinc-fonte-chip').innerHTML = '';
+1032: document.getElementById('captacao-actions-wrap').innerHTML = '';
+1033: 
+1034: const [m, curriculo] = await Promise.all([
+1035: fetchAPI(`/medicos/${cns}`).catch(() => null),
+1036: fetchAPI(`/medicos/${cns}/curriculo`).catch(() => null),
+1037: ]);
+1038: if (!m) return;
+1039: 
+1040: state.medicoSelecionado = m;
+1041: renderizarDetalheMedico(m);
+1042: renderCurriculoCard(m, curriculo);
+1043: }
+1044: 
+1045: function abrirDetalheMedicoFromHosp(m) {
+1046: openTab('medicos', document.getElementById('tab-btn-medicos'));
+1047: state.medicoSelecionado = m;
+1048: 
+1049: document.getElementById('med-results').innerHTML = '';
+1050: document.getElementById('med-fonte-bar').style.display = 'none';
+1051: const detail = document.getElementById('med-detail');
+1052: detail.style.display = 'block';
+1053: renderizarDetalheMedico(m);
+1054: // Carrega currículo em background
+1055: if (m.cns) {
+1056: document.getElementById('med-curriculo-card').innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">🔄 Carregando currículo...</div>';
+1057: fetchAPI(`/medicos/${m.cns}/curriculo`).then(c => renderCurriculoCard(m, c)).catch(() => renderCurriculoCard(m, null));
+1058: }
+1059: }
+1060: 
+1061: function fecharDetalheMedico() {
+1062: document.getElementById('med-detail').style.display = 'none';
+1063: document.getElementById('med-results').innerHTML = '';
+1064: state.medicoSelecionado = null;
+1065: }
+1066: 
+1067: function renderCurriculoCard(m, curriculo) {
+1068: const el = document.getElementById('med-curriculo-card');
+1069: if (!el) return;
+1070: 
+1071: const crm = m.crm || (curriculo?.crm_cnes) || '';
+1072: const crmTipo = m.crm_tipo || 'CRM';
+1073: const crmUf = m.crm_uf || (curriculo?.data?.crm_uf) || '';
+1074: const links = curriculo?.links || curriculo?.data?.links || {};
+1075: const doc = curriculo?.data?.doctoralia || {};
+1076: const lattes = curriculo?.data?.lattes || {};
+1077: const status = curriculo?.status || 'pendente';
+1078: 
+1079: // CRM badge
+1080: const crmBadge = crm
+1081: ? `<span style="background:var(--accent-cyan);color:var(--bg-body);padding:4px 12px;border-radius:6px;font-size:14px;font-weight:800;">${crmTipo} ${crm}</span>`
+1082: : `<span style="color:var(--text-muted);font-size:13px;font-style:italic;">Não encontrado no DATASUS — verifique no CFM</span>`;
+1083: 
+1084: // Doctoralia block
+1085: let docBlock = '';
+1086: if (doc.status === 'encontrado') {
+1087: const rating = doc.avaliacao ? `â­ ${doc.avaliacao} (${doc.total_avaliacoes || 0} avaliaÃ§Ãµes)` : '';
+1088: const esps = (doc.especialidades_doctoralia || []).join(', ') || '—';
+1089: const consultorios = (doc.consultorios || []).map(c =>
+1090: `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:2px;">ðŸ“ <strong>${c.nome || ''}</strong> â€” ${c.endereco || ''}, ${c.cidade || ''} ${c.telefone ? 'Â· ' + c.telefone : ''}</div>`
+1091: ).join('');
+1092: const convenios = (doc.convenios || []).filter(Boolean).slice(0, 6).join(', ');
+1093: const crmDoc = doc.crm_doctoralia ? `<div><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">CRM (Doctoralia)</label><div style="font-size:13px;font-weight:700;color:var(--accent-green);">${doc.crm_doctoralia}</div></div>` : '';
+1094: docBlock = `
+1095: <div style="border-top:1px solid var(--border-color);margin-top:16px;padding-top:16px;">
+1096: <div style="font-size:12px;font-weight:800;color:var(--accent-purple);text-transform:uppercase;margin-bottom:10px;">🩺 Doctoralia</div>
+1097: <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+1098: ${crmDoc}
+1099: ${doc.rqe ? `<div><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">RQE</label><div style="font-size:13px;font-weight:600;">${doc.rqe}</div></div>` : ''}
+1100: <div style="grid-column:1/-1;"><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">Especialidades</label><div style="font-size:13px;">${esps}</div></div>
+1101: ${rating ? `<div style="grid-column:1/-1;font-size:13px;color:var(--accent-yellow,#f59e0b);">${rating}</div>` : ''}
+1102: </div>
+1103: ${consultorios ? `<div style="margin-bottom:10px;"><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;display:block;margin-bottom:6px;">Consultórios</label>${consultorios}</div>` : ''}
+1104: ${convenios ? `<div><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;">Convênios</label><div style="font-size:12px;color:var(--text-secondary);">${convenios}</div></div>` : ''}
+1105: <a href="${doc.doctoralia_url || links.doctoralia || '#'}" target="_blank" style="display:inline-block;margin-top:12px;font-size:12px;color:var(--accent-cyan);text-decoration:none;font-weight:700;">Ver perfil completo na Doctoralia ↗</a>
+1106: </div>`;
+1107: }
+1108: 
+1109: // Lattes block
+1110: let lattesBlock = '';
+1111: if (lattes.status === 'encontrado') {
+1112: lattesBlock = `
+1113: <div style="border-top:1px solid var(--border-color);margin-top:16px;padding-top:16px;">
+1114: <div style="font-size:12px;font-weight:800;color:var(--accent-blue);text-transform:uppercase;margin-bottom:8px;">🎓 Plataforma Lattes (CNPq)</div>
+1115: <div style="font-size:13px;margin-bottom:6px;">👤 ${lattes.nome_lattes || m.nome}</div>
+1116: <a href="${lattes.lattes_url}" target="_blank" style="font-size:12px;color:var(--accent-cyan);text-decoration:none;font-weight:700;">Abrir Currículo Lattes ↗</a>
+1117: </div>`;
+1118: }
+1119: 
+1120: // Links de busca manual
+1121: const btnStyle = `style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none;border:1px solid var(--border-color);color:var(--text-primary);background:var(--bg-body);cursor:pointer;"`;
+1122: const linksHtml = `
+1123: <div style="border-top:1px solid var(--border-color);margin-top:16px;padding-top:16px;">
+1124: <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:10px;">🔗 VERIFICAR MANUALMENTE</div>
+1125: <div style="display:flex;flex-wrap:wrap;gap:6px;">
+1126: ${links.cfm ? `<a href="${links.cfm}" target="_blank" ${btnStyle}>ðŸ›ï¸ CFM Portal</a>` : ''}
+1127: ${links.cfm_crm ? `<a href="${links.cfm_crm}" target="_blank" ${btnStyle}>🔢 CFM por CRM</a>` : ''}
+1128: ${links.doctoralia ? `<a href="${links.doctoralia}" target="_blank" ${btnStyle}>🩺 Doctoralia</a>` : ''}
+1129: ${links.escavador ? `<a href="${links.escavador}" target="_blank" ${btnStyle}>ðŸ” Escavador</a>` : ''}
+1130: ${links.lattes ? `<a href="${links.lattes}" target="_blank" ${btnStyle}>🎓 Lattes</a>` : ''}
+1131: ${links.google_medico ? `<a href="${links.google_medico}" target="_blank" ${btnStyle}>ðŸŒ Google</a>` : ''}
+1132: </div>
+1133: ${status === 'pendente' ? `
+1134: <button onclick="enriquecerMedico('${m.cns}')" style="margin-top:12px;padding:6px 14px;background:var(--accent-purple);color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;" id="btn-enriquecer-${m.cns}">
+1135: ⚡ Buscar dados automaticamente (Doctoralia + Lattes)
+1136: </button>` : `
+1137: <button onclick="enriquecerMedico('${m.cns}')" style="margin-top:12px;padding:6px 14px;background:rgba(255,255,255,0.1);color:var(--text-secondary);border:1px dashed var(--border-color);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;" id="btn-enriquecer-${m.cns}">
+1138: 🔄 Tentar buscar dados novamente
+1139: </button>`}
+1140: </div>`;
+1141: 
+1142: el.innerHTML = `
+1143: <h3 style="margin:0 0 16px 0;font-size:16px;font-weight:800;color:var(--text-primary);border-bottom:1px dashed var(--border-color);padding-bottom:12px;">
+1144: 📚 Currículo & Registro
+1145: </h3>
+1146: <div>
+1147: <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:8px;">Registro Profissional (DATASUS)</label>
+1148: ${crmBadge}
+1149: </div>
+1150: ${docBlock}
+1151: ${lattesBlock}
+1152: ${linksHtml}
+1153: `;
+1154: }
+1155: 
+1156: window.enriquecerMedico = async function(cns) {
+1157: const btn = document.getElementById(`btn-enriquecer-${cns}`);
+1158: if (btn) { btn.disabled = true; btn.textContent = 'â³ Buscando...'; }
+1159: try {
+1160: await fetch(`${API}/medicos/${cns}/enriquecer`, { method: 'POST' });
+1161: if (btn) btn.textContent = '✅ Iniciado! Aguarde ~30s e recarregue.';
+1162: // Recarrega o card após 35 segundos
+1163: setTimeout(() => abrirDetalheMedico(cns), 35000);
+1164: } catch(e) {
+1165: if (btn) { btn.disabled = false; btn.textContent = '⚡ Tentar novamente'; }
+1166: }
+1167: };
+1168: 
+1169: function renderizarDetalheMedico(m) {
+1170: const fonte = m.fonte || {};
+1171: const vinculos = m.vinculos || [];
+1172: const noP = m.pipeline;
+1173: 
+1174: let isTmoDoctor = false;
+1175: if (window._tmoCustomData) {
+1176: for (const [cnesId, info] of Object.entries(window._tmoCustomData)) {
+1177: if (info.doctors && info.doctors.some(d => d.cnes_name === m.nome || d.name === m.nome)) {
+1178: isTmoDoctor = true;
+1179: break;
+1180: }
+1181: }
+1182: }
+1183: 
+1184: // Título
+1185: document.getElementById('med-detail-title').innerHTML = `
+1186: <h2 style="font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px;">
+1187: ${m.nome || '—'}
+1188: ${isTmoDoctor ? '<span style="background:#ef4444;color:white;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;text-transform:uppercase;box-shadow:0 2px 4px rgba(239,68,68,0.3);">🔥 Equipe de TMO</span>' : ''}
+1189: </h2>
+1190: <p style="color:var(--text-secondary);font-size:13px;">${m.especialidade || '—'} · CNS: ${m.cns || '—'}</p>
+1191: `;
+1192: 
+1193: // Card CNES
+1194: document.getElementById('med-cnes-card').innerHTML = `
+1195: <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:800; color:var(--text-primary); border-bottom:1px dashed var(--border-color); padding-bottom:12px; display:flex; align-items:center; gap:8px;">
+1196: ðŸ›ï¸ Dados CNES
+1197: </h3>
+1198: <div class="info-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+1199: <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Nome</label><span style="font-size:14px; font-weight:600;">${m.nome || '—'}</span></div>
+1200: <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Especialidade</label><span style="font-size:14px; font-weight:600;">${m.especialidade || '—'}</span></div>
+1201: <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CBO</label><span style="font-size:14px; font-weight:600;">${m.cbo || '—'}</span></div>
+1202: <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CRM</label><span style="font-size:14px; font-weight:600; color:var(--accent-purple);">${m.crm ? `${m.crm} ${m.crm_uf || 'BA'}` : (doc && doc.crm_doctoralia ? doc.crm_doctoralia : '—')}</span></div>
+1203: <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CNS</label><span style="font-size:14px; font-weight:600;">${m.cns || '—'}</span></div>
+1204: <div class="info-item" style="display:flex; flex-direction:column; grid-column: 1 / -1;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Instituições Ativas</label><span style="font-size:14px; font-weight:600; color:var(--accent-cyan);">${vinculos.filter(v=>v.ativo).length} estabelecimentos</span></div>
+1205: </div>
+1206: <div style="margin-top:auto; padding-top:16px; border-top:1px solid var(--border-color); font-size:11px; color:var(--text-muted); line-height:1.6;">
+1207: <div style="display:flex; justify-content:space-between;">
+1208: <span><strong>Fonte:</strong> ${fonte.nome || 'DATASUS/CNES'} · Competência: ${fonte.competencia ? `${fonte.competencia.slice(0,4)}/${fonte.competencia.slice(4)}` : '—'}</span>
+1209: <span><strong>Atualizado:</strong> ${fonte.data_atualizacao_fmt || '—'}</span>
+1210: </div>
+1211: </div>
+1212: `;
+1213: 
+1214: // Card CFM
+1215: const crm = noP?.crm;
+1216: document.getElementById('med-cfm-card').innerHTML = `
+1217: <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:800; color:var(--text-primary); border-bottom:1px dashed var(--border-color); padding-bottom:12px; display:flex; align-items:center; gap:8px;">
+1218: 🔑 Dados CFM
+1219: </h3>
+1220: ${crm ? `
+1221: <div class="info-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+1222: <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CRM</label><span style="font-size:16px; font-weight:800; color:#fff; background:var(--accent-cyan); padding:4px 10px; border-radius:6px; display:inline-block; width:fit-content;">${crm}</span></div>
+1223: <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Situação</label><span style="font-size:14px; font-weight:600; color:${noP?.crm_situacao === 'Regular' ? '#10b981' : '#ef4444'};">${noP?.crm_situacao || '—'}</span></div>
+1224: </div>
+1225: <p style="font-size:11px; color:var(--text-muted); margin-top:24px; padding:12px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid rgba(255,255,255,0.05);"><i class="fas fa-info-circle"></i> CRM inserido manualmente via Portal CFM e salvo no pipeline.</p>
+1226: ` : `
+1227: <div style="text-align:center; padding:32px 20px; color:var(--text-muted); background:var(--bg-body); border-radius:12px; border:1px dashed var(--border-color);">
+1228: <div style="font-size:32px; margin-bottom:12px; opacity:0.5;">ðŸ”</div>
+1229: <p style="font-size:13px; font-weight:500; line-height:1.5;">O CRM deste médico não está disponível na base CNES.</p>
+1230: <p style="font-size:12px; margin-top:12px;">Consulte no <a href="https://portal.cfm.org.br/busca-medicos/?nome=${encodeURIComponent(m.nome||'')}" target="_blank" style="color:var(--accent-cyan); font-weight:700; text-decoration:none; padding:4px 8px; background:rgba(0,255,136,0.1); border-radius:4px;">Portal CFM</a> e registre no pipeline.</p>
+1231: </div>
+1232: <div style="font-size:10px; color:var(--text-muted); margin-top:16px; text-align:center; opacity:0.6;">Fonte de consulta: portal.cfm.org.br</div>
+1233: `}
+1234: `;
+1235: 
+1236: // Vínculos
+1237: document.getElementById('vinc-fonte-chip').innerHTML = fonteChip(fonte);
+1238: document.getElementById('vinculos-table-wrap').innerHTML = vinculos.length ? `
+1239: <div class="table-wrap">
+1240: <table>
+1241: <thead><tr><th>Estabelecimento</th><th>Município</th><th>Tipo</th><th>Status</th></tr></thead>
+1242: <tbody>
+1243: ${vinculos.map(v => `
+1244: <tr>
+1245: <td style="font-weight:600">${v.estabelecimento || '—'}</td>
+1246: <td class="td-muted">${v.municipio || '—'}</td>
+1247: <td class="td-muted">${v.tipo_unidade || '—'}</td>
+1248: <td><span class="ativo-badge ${v.ativo ? 'ativo' : 'inativo'}">${v.ativo ? 'â— Ativo' : 'â—‹ Inativo'}</span></td>
+1249: </tr>
+1250: `).join('')}
+1251: </tbody>
+1252: </table>
+1253: </div>
+1254: ` : '<div class="empty-state"><p>Nenhum vínculo encontrado.</p></div>';
+1255: 
+1256: // Ações de captação
+1257: const wrap = document.getElementById('captacao-actions-wrap');
+1258: if (noP) {
+1259: wrap.innerHTML = `
+1260: <span class="action-label">✅ Já está no pipeline</span>
+1261: ${statusLabel(noP.status)}
+1262: <button class="btn-secondary" onclick="abrirModalEditar('${m.cns}')">âœï¸ Gerenciar</button>
+1263: `;
+1264: } else {
+1265: wrap.innerHTML = `
+1266: <span class="action-label">💡 Adicione este médico ao pipeline para iniciar a captação</span>
+1267: <button class="btn-primary" onclick="abrirModalPipeline(${JSON.stringify(m).replace(/"/g,'&quot;')}, '${(vinculos[0]?.estabelecimento||'').replace(/'/g,"'")}')">
+1268: ➕ Adicionar ao Pipeline
+1269: </button>
+1270: `;
+1271: }
+1272: }
+1273: 
+1274: /* ─── WhatsApp ─────────────────────────────────────────────── */
+1275: function abrirWhatsApp() {
+1276: const contato = document.getElementById('edit-contato').value.trim();
+1277: const nome = document.getElementById('med-edit-header')?.textContent?.trim() || 'Dr(a).';
+1278: if (!contato) { showToast('âš ï¸ Informe o telefone primeiro', 'error'); return; }
+1279: const tel = contato.replace(/D/g, '');
+1280: const msg = encodeURIComponent(
+1281: `Olá, Dr(a). ${nome}! Sou membro da COLIH Salvador (Corpo Humanitário de Socorro Voluntário). ` +
+1282: `Gostaria de apresentar nossa missão e verificar a possibilidade de colaboração voluntária. ` +
+1283: `Podemos conversar sobre isso? Muito obrigado!`
+1284: );
+1285: const num = tel.startsWith('55') ? tel : `55${tel}`;
+1286: window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
+1287: }
+1288: 
+1289: /* ─── Modal Pipeline (adicionar) ─────────────────────────────── */
+1290: function abrirModalPipeline(medico, hospitalPrincipal) {
+1291: document.getElementById('pip-nome').value = medico.nome || '';
+1292: document.getElementById('pip-especialidade').value = medico.especialidade || medico.cbo || '';
+1293: document.getElementById('pip-hospital').value = hospitalPrincipal || medico.vinculos?.[0]?.estabelecimento || '';
+1294: document.getElementById('pip-cns').value = medico.cns || '';
+1295: document.getElementById('pip-cnes').value = medico.vinculos?.[0]?.cnes || medico.cnes_principal || '';
+1296: document.getElementById('pip-contato').value = '';
+1297: document.getElementById('pip-notas').value = '';
+1298: document.getElementById('pip-responsavel').value = state.usuarioAtivo || '';
+1299: abrirModal('modal-pipeline');
+1300: }
+1301: 
+1302: async function confirmarPipeline() {
+1303: const cns = document.getElementById('pip-cns').value;
+1304: const body = {
+1305: cns,
+1306: nome: document.getElementById('pip-nome').value,
+1307: especialidade: document.getElementById('pip-especialidade').value,
+1308: vinculo_principal: document.getElementById('pip-hospital').value,
+1309: cnes_principal: document.getElementById('pip-cnes').value,
+1310: responsavel: document.getElementById('pip-responsavel').value,
+1311: contato: document.getElementById('pip-contato').value,
+1312: notas: document.getElementById('pip-notas').value,
+1313: };
+1314: 
+1315: await fetchAPI('/pipeline', { method: 'POST', body: JSON.stringify(body) });
+1316: showToast(`✅ ${body.nome} adicionado ao pipeline!`);
+1317: fecharModal('modal-pipeline');
+1318: await carregarInfo();
+1319: if (state.medicoSelecionado?.cns === cns) abrirDetalheMedico(cns);
+1320: }
+1321: 
+1322: /* ─── Modal Editar Pipeline ──────────────────────────────────── */
+1323: async function abrirModalEditar(cns) {
+1324: state.editandoCns = cns;
+1325: const pipeline = await fetchAPI('/pipeline').catch(() => ({ pipeline: [] }));
+1326: const entrada = pipeline.pipeline.find(p => p.cns === cns);
+1327: if (!entrada) { showToast('Médico não encontrado no pipeline', 'error'); return; }
+1328: 
+1329: // Header
+1330: document.getElementById('edit-med-header').innerHTML = `
+1331: <div>
+1332: <div style="font-size:15px;font-weight:700;">${entrada.nome}</div>
+1333: <div style="font-size:12px;color:var(--text-muted)">${entrada.especialidade || '—'} · CNS ${cns}</div>
+1334: </div>
+1335: <div style="margin-left:auto">${statusLabel(entrada.status)}</div>
+1336: `;
+1337: 
+1338: // Preencher campos
+1339: document.getElementById('edit-cns').value = cns;
+1340: document.getElementById('edit-status').value = entrada.status || 'novo';
+1341: document.getElementById('edit-contato').value = entrada.contato || '';
+1342: document.getElementById('edit-notas').value = entrada.notas || '';
+1343: document.getElementById('edit-crm').value = entrada.crm || '';
+1344: document.getElementById('edit-crm-situacao').value = entrada.crm_situacao || '';
+1345: document.getElementById('edit-responsavel').value = entrada.responsavel || '';
+1346: 
+1347: // Link CFM
+1348: document.getElementById('cfm-search-link').href =
+1349: `https://portal.cfm.org.br/busca-medicos/?nome=${encodeURIComponent(entrada.nome || '')}`;
+1350: 
+1351: // Interações
+1352: renderizarInteracoes(entrada.interacoes || []);
+1353: 
+1354: // Resetar inner tabs
+1355: switchInnerTab('tab-status', document.querySelector('.inner-tab'));
+1356: abrirModal('modal-editar');
+1357: }
+1358: 
+1359: function renderizarInteracoes(interacoes) {
+1360: const el = document.getElementById('interacoes-lista');
+1361: if (!interacoes.length) {
+1362: el.innerHTML = '<div class="empty-state" style="padding:16px"><p style="font-size:12px">Nenhuma interação registrada ainda.</p></div>';
+1363: return;
+1364: }
+1365: el.innerHTML = [...interacoes].reverse().map(i => `
+1366: <div class="interacao-item">
+1367: <div class="interacao-header">
+1368: <span class="interacao-tipo">${tipoInteracaoLabel(i.tipo)}</span>
+1369: ${i.responsavel ? `<span style="font-size:11px;color:var(--text-muted)">por ${i.responsavel}</span>` : ''}
+1370: <span class="interacao-data">${i.data_fmt || formatDate(i.data)}</span>
+1371: </div>
+1372: <div class="interacao-desc">${i.descricao}</div>
+1373: ${i.resultado ? `<div class="interacao-resultado">→ ${i.resultado}</div>` : ''}
+1374: </div>
+1375: `).join('');
+1376: }
+1377: 
+1378: async function salvarInteracao() {
+1379: const cns = document.getElementById('edit-cns').value;
+1380: const body = {
+1381: tipo: document.getElementById('int-tipo').value,
+1382: descricao: document.getElementById('int-descricao').value.trim(),
+1383: resultado: document.getElementById('int-resultado').value.trim(),
+1384: responsavel: state.usuarioAtivo,
+1385: };
+1386: if (!body.descricao) { showToast('Descreva a interação', 'error'); return; }
+1387: 
+1388: await fetchAPI(`/pipeline/${cns}/interacao`, { method: 'POST', body: JSON.stringify(body) });
+1389: showToast('✅ Interação registrada!');
+1390: document.getElementById('int-descricao').value = '';
+1391: document.getElementById('int-resultado').value = '';
+1392: 
+1393: // Recarregar interações
+1394: const pipeline = await fetchAPI('/pipeline').catch(() => ({ pipeline: [] }));
+1395: const entrada = pipeline.pipeline.find(p => p.cns === cns);
+1396: renderizarInteracoes(entrada?.interacoes || []);
+1397: }
+1398: 
+1399: async function salvarEdicaoPipeline() {
+1400: const cns = document.getElementById('edit-cns').value;
+1401: const body = {
+1402: status: document.getElementById('edit-status').value,
+1403: contato: document.getElementById('edit-contato').value,
+1404: notas: document.getElementById('edit-notas').value,
+1405: crm: document.getElementById('edit-crm').value,
+1406: crm_situacao: document.getElementById('edit-crm-situacao').value,
+1407: responsavel: document.getElementById('edit-responsavel').value,
+1408: };
+1409: await fetchAPI(`/pipeline/${cns}`, { method: 'PUT', body: JSON.stringify(body) });
+1410: showToast('✅ Pipeline atualizado!');
+1411: fecharModal('modal-editar');
+1412: carregarPipeline();
+1413: await carregarInfo();
+1414: }
+1415: 
+1416: async function removerDoPipeline() {
+1417: const cns = document.getElementById('edit-cns').value;
+1418: if (!confirm('Remover este médico do pipeline?')) return;
+1419: await fetchAPI(`/pipeline/${cns}`, { method: 'DELETE' });
+1420: showToast('ðŸ—‘ï¸ Removido do pipeline');
+1421: fecharModal('modal-editar');
+1422: carregarPipeline();
+1423: await carregarInfo();
+1424: }
+1425: 
+1426: /* ─── ABA PIPELINE ───────────────────────────────────────────── */
+1427: async function carregarPipeline() {
+1428: const status = document.getElementById('pipe-status-filter').value;
+1429: const resp = document.getElementById('pipe-resp-filter').value;
+1430: 
+1431: const params = new URLSearchParams();
+1432: if (status) params.set('status', status);
+1433: if (resp) params.set('responsavel', resp);
+1434: 
+1435: const data = await fetchAPI(`/pipeline?${params}`).catch(() => ({ pipeline: [], fonte: {} }));
+1436: state.pipelineData = data.pipeline || [];
+1437: state.pipelineFiltered = [...state.pipelineData];
+1438: 
+1439: // Barra de fonte
+1440: const fonteBar = document.getElementById('pipe-fonte-bar');
+1441: fonteBar.style.display = 'flex';
+1442: document.getElementById('pipe-fonte-text').innerHTML = fonteChip(data.fonte)
+1443: + ' · <em style="color:var(--text-muted)">Pipeline salvo localmente no servidor</em>';
+1444: 
+1445: // Summary cards
+1446: const counts = {};
+1447: const statusOrdem = ['novo', 'em_contato', 'aguardando', 'reuniao', 'cooperador', 'recusou'];
+1448: state.pipelineData.forEach(p => { counts[p.status] = (counts[p.status] || 0) + 1; });
+1449: 
+1450: const statusNames = { novo:'Novos', em_contato:'Em Contato', aguardando:'Aguardando', reuniao:'Reunião', cooperador:'Cooperadores', recusou:'Recusaram' };
+1451: const statusColors = { novo:'#3b82f6', em_contato:'#eab308', aguardando:'#f97316', reuniao:'#a855f7', cooperador:'#22c55e', recusou:'#ef4444' };
+1452: 
+1453: document.getElementById('status-summary').innerHTML = statusOrdem.map(s => `
+1454: <div class="summary-card" onclick="filtrarPorStatus('${s}')">
+1455: <div class="summary-num" style="color:${statusColors[s]}">${counts[s] || 0}</div>
+1456: <div class="summary-label">${statusNames[s]}</div>
+1457: </div>
+1458: `).join('');
+1459: 
+1460: document.getElementById('pipeline-count').textContent = state.pipelineData.length;
+1461: renderizarPipeline(state.pipelineFiltered);
+1462: }
+1463: 
+1464: function filtrarPipelineLocal() {
+1465: const q = document.getElementById('pipe-search').value.toLowerCase();
+1466: state.pipelineFiltered = q
+1467: ? state.pipelineData.filter(p => p.nome?.toLowerCase().includes(q) || p.especialidade?.toLowerCase().includes(q))
+1468: : [...state.pipelineData];
+1469: renderizarPipeline(state.pipelineFiltered);
+1470: }
+1471: 
+1472: /* ─── REGIÕES SUS ──────────────────────────────────── */
+1473: async function carregarRegioes() {
+1474: const container = document.getElementById('regioes-container');
+1475: if (container.innerHTML.trim() !== '') return; // Já carregou
+1476: 
+1477: document.getElementById('regioes-loading').style.display = 'block';
+1478: 
+1479: try {
+1480: const response = await fetchAPI('/regioes');
+1481: document.getElementById('regioes-loading').style.display = 'none';
+1482: 
+1483: // Agrupar por macrorregião
+1484: const macros = {};
+1485: response.regioes.forEach(regiao => {
+1486: const macro = regiao.macrorregiao.toUpperCase();
+1487: if (!macros[macro]) macros[macro] = [];
+1488: macros[macro].push(regiao);
+1489: });
+1490: 
+1491: let html = '';
+1492: 
+1493: for (const [macro, regioes] of Object.entries(macros)) {
+1494: html += `
+1495: <div style="grid-column: 1 / -1; margin-top: 32px; padding-bottom: 12px; border-bottom: 2px solid var(--accent-cyan);">
+1496: <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;">
+1497: <i class="fas fa-map"></i> MACRORREGIÃO: ${macro}
+1498: </h2>
+1499: </div>
+1500: `;
+1501: 
+1502: regioes.forEach(regiao => {
+1503: const bairrosHtml = regiao.bairros.map(b => `<div class="bairro-tag">${b}</div>`).join('');
+1504: html += `
+1505: <div class="info-card region-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+1506: <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px dashed var(--border-color); padding-bottom:16px; margin-bottom:16px;">
+1507: <div>
+1508: <h2 style="margin:0 0 4px 0; font-size:18px; font-weight:800; color:var(--text-primary); display:flex; align-items:center; gap:6px;">
+1509: ðŸ“ DS: ${regiao.distrito_sanitario}
+1510: </h2>
+1511: </div>
+1512: <div style="background:var(--bg-body); border:1px solid var(--border-color); padding:4px 10px; border-radius:8px; font-size:11px; font-weight:800; color:var(--text-secondary);">
+1513: ${regiao.bairros.length} BAIRROS
+1514: </div>
+1515: </div>
+1516: <div style="flex-grow:1;">
+1517: <p style="font-size:13px; color:var(--text-secondary); margin:0; font-weight:600;">Bairros Abrangidos:</p>
+1518: <div class="bairros-grid" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
+1519: ${bairrosHtml}
+1520: </div>
+1521: </div>
+1522: </div>
+1523: `;
+1524: });
+1525: }
+1526: 
+1527: // Adicionar estilos inline que estavam na antiga pagina
+1528: if (!document.getElementById('regiao-style')) {
+1529: const style = document.createElement('style');
+1530: style.id = 'regiao-style';
+1531: style.textContent = `
+1532: .bairro-tag { background:var(--bg-body); border:1px solid var(--border-color); padding:6px 12px; border-radius:16px; font-size:12px; font-weight:700; color:var(--text-secondary); transition:all 0.2s; }
+1533: .bairro-tag:hover { background:var(--accent-cyan); color:#fff; border-color:var(--accent-cyan); }
+1534: .region-card { transition: transform 0.3s ease, border-color 0.3s ease; border: 1px solid var(--border-color); }
+1535: .region-card:hover { transform: translateY(-3px); border-color: var(--accent-cyan); }
+1536: `;
+1537: document.head.appendChild(style);
+1538: 
+1539: container.style.display = 'grid';
+1540: container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(350px, 1fr))';
+1541: container.style.gap = '24px';
+1542: }
+1543: 
+1544: container.innerHTML = html;
+1545: } catch (error) {
+1546: document.getElementById('regioes-loading').innerHTML = '<span style="color:var(--status-falha);">Erro ao carregar dados.</span>';
+1547: console.error(error);
+1548: }
+1549: }
+1550: 
+1551: // Init inicial — carrega status da sincronização imediatamente
+1552: fetchSyncStatus();
+1553: 
+1554: function filtrarPorStatus(s) {
+1555: document.getElementById('pipe-status-filter').value = s;
+1556: carregarPipeline();
+1557: }
+1558: 
+1559: function renderizarPipeline(lista) {
+1560: const el = document.getElementById('pipeline-table-wrap');
+1561: if (!lista.length) {
+1562: el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>Nenhum médico no pipeline.</p></div>';
+1563: return;
+1564: }
+1565: 
+1566: el.innerHTML = `
+1567: <div class="table-wrap">
+1568: <table>
+1569: <thead><tr>
+1570: <th>Nome</th>
+1571: <th>Especialidade</th>
+1572: <th>Hospital</th>
+1573: <th>Status</th>
+1574: <th>Responsável</th>
+1575: <th>Contato</th>
+1576: <th>Últ. Contato</th>
+1577: <th>Interações</th>
+1578: <th>Ações</th>
+1579: </tr></thead>
+1580: <tbody>
+1581: ${lista.map(p => `
+1582: <tr>
+1583: <td style="font-weight:600">${p.nome || '—'}</td>
+1584: <td class="td-muted">${p.especialidade || '—'}</td>
+1585: <td class="td-muted" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+1586: title="${p.vinculo_principal||''}">${p.vinculo_principal || '—'}</td>
+1587: <td>${statusLabel(p.status)}</td>
+1588: <td class="td-muted">${p.responsavel || '—'}</td>
+1589: <td>
+1590: ${p.contato
+1591: ? `<div style="display:flex;gap:6px;align-items:center;">
+1592: <span style="font-size:12px">${p.contato}</span>
+1593: <button class="btn-whatsapp" style="padding:4px 8px;font-size:11px"
+1594: onclick="abrirWhatsAppDireto('${p.contato}','${(p.nome||'').replace(/'/g,"'")}')">
+1595: 💬
+1596: </button>
+1597: </div>`
+1598: : '<span class="td-muted">—</span>'}
+1599: </td>
+1600: <td class="td-muted" style="font-size:11px">${p.data_ultimo_contato ? formatDate(p.data_ultimo_contato) : '—'}</td>
+1601: <td style="text-align:center">${(p.interacoes||[]).length}</td>
+1602: <td class="td-actions">
+1603: <button class="btn-secondary btn-sm" onclick="abrirModalEditar('${p.cns}')">âœï¸ Gerenciar</button>
+1604: </td>
+1605: </tr>
+1606: `).join('')}
+1607: </tbody>
+1608: </table>
+1609: </div>
+1610: `;
+1611: }
+1612: 
+1613: function abrirWhatsAppDireto(contato, nome) {
+1614: const tel = contato.replace(/D/g, '');
+1615: const msg = encodeURIComponent(
+1616: `Olá, Dr(a). ${nome}! Sou membro da COLIH Salvador. Gostaria de conversar sobre uma possibilidade de colaboração voluntária. Podemos falar?`
+1617: );
+1618: const num = tel.startsWith('55') ? tel : `55${tel}`;
+1619: window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
+1620: }
+1621: 
+1622: /* ─── Exportar CSV ───────────────────────────────────────────── */
+1623: function exportarCSV() {
+1624: const data = state.pipelineFiltered;
+1625: if (!data.length) { showToast('Pipeline vazio', 'error'); return; }
+1626: 
+1627: const headers = ['Nome','Especialidade','Hospital','Status','Responsável','Contato','CRM','Notas','Últ. Contato','Data Adição'];
+1628: const rows = data.map(p => [
+1629: p.nome || '',
+1630: p.especialidade || '',
+1631: p.vinculo_principal || '',
+1632: p.status || '',
+1633: p.responsavel || '',
+1634: p.contato || '',
+1635: p.crm || '',
+1636: (p.notas || '').replace(/n/g, ' '),
+1637: p.data_ultimo_contato ? formatDate(p.data_ultimo_contato) : '',
+1638: p.data_adicao ? formatDate(p.data_adicao) : '',
+1639: ]);
+1640: 
+1641: const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('n');
+1642: const blob = new Blob(['uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+1643: const url = URL.createObjectURL(blob);
+1644: const a = document.createElement('a'); a.href = url;
+1645: a.download = `colih_pipeline_${new Date().toISOString().slice(0,10)}.csv`;
+1646: a.click(); URL.revokeObjectURL(url);
+1647: showToast('â¬‡ï¸ CSV exportado!');
+1648: }
+1649: 
+1650: /* â”€â”€â”€ ABA ESTATÃSTICAS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+1651: async function carregarEstatisticas() {
+1652: const el = document.getElementById('stats-content');
+1653: el.innerHTML = '<div class="loading-state">Carregando estatísticas...</div>';
+1654: 
+1655: const data = await fetchAPI('/stats').catch(() => null);
+1656: if (!data) { el.innerHTML = '<div class="empty-state"><p>Erro ao carregar.</p></div>'; return; }
+1657: 
+1658: const fonteBar = document.getElementById('stats-fonte-bar');
+1659: fonteBar.style.display = 'flex';
+1660: document.getElementById('stats-fonte-text').innerHTML = fonteChip(data.fonte);
+1661: 
+1662: const p = data.pipeline || {};
+1663: const status = p.por_status || {};
+1664: const totalP = p.total || 0;
+1665: const cooperadores = status.cooperador || 0;
+1666: 
+1667: el.innerHTML = `
+1668: <!-- KPIs -->
+1669: <div class="stat-card">
+1670: <h3>Pipeline Total</h3>
+1671: <div class="stat-number">${totalP}</div>
+1672: <div class="stat-sub">médicos em acompanhamento</div>
+1673: </div>
+1674: <div class="stat-card">
+1675: <h3>Cooperadores Confirmados</h3>
+1676: <div class="stat-number" style="background:linear-gradient(135deg,#22c55e,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${cooperadores}</div>
+1677: <div class="stat-sub">parcerias confirmadas</div>
+1678: </div>
+1679: <div class="stat-card">
+1680: <h3>Taxa de Conversão</h3>
+1681: <div class="stat-number" style="background:linear-gradient(135deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${p.taxa_conversao || 0}%</div>
+1682: <div class="stat-sub">do pipeline → cooperador</div>
+1683: </div>
+1684: <div class="stat-card">
+1685: <h3>Base CNES Total</h3>
+1686: <div class="stat-number">${(data.cache?.total_medicos || 0).toLocaleString('pt-BR')}</div>
+1687: <div class="stat-sub">médicos em ${(data.cache?.municipios || []).join(', ')}</div>
+1688: </div>
+1689: 
+1690: <!-- Por Status -->
+1691: <div class="stat-card">
+1692: <h3>Pipeline por Status</h3>
+1693: <ul class="stat-list">
+1694: ${[
+1695: ['novo','🔵 Novos'],
+1696: ['em_contato','🟡 Em Contato'],
+1697: ['aguardando','🟠 Aguardando'],
+1698: ['reuniao','🟣 Reunião'],
+1699: ['cooperador','🟢 Cooperador'],
+1700: ['recusou','🔴 Recusou'],
+1701: ].map(([k,l]) => `<li><span>${l}</span><span class="stat-count">${status[k]||0}</span></li>`).join('')}
+1702: </ul>
+1703: </div>
+1704: 
+1705: <!-- Especialidades dos cooperadores -->
+1706: <div class="stat-card">
+1707: <h3>Cooperadores por Especialidade</h3>
+1708: ${Object.keys(data.cooperadores_por_especialidade || {}).length
+1709: ? `<ul class="stat-list">
+1710: ${Object.entries(data.cooperadores_por_especialidade).map(([e,c]) =>
+1711: `<li><span>${e}</span><span class="stat-count">${c}</span></li>`).join('')}
+1712: </ul>`
+1713: : '<p style="color:var(--text-muted);font-size:12px">Nenhum cooperador ainda.</p>'}
+1714: </div>
+1715: 
+1716: <!-- Por Responsável -->
+1717: <div class="stat-card">
+1718: <h3>Por Responsável COLIH</h3>
+1719: <ul class="stat-list">
+1720: ${Object.entries(data.por_responsavel || {}).map(([r,c]) =>
+1721: `<li><span>${r || 'Sem responsável'}</span><span class="stat-count">${c}</span></li>`).join('')
+1722: || '<li style="color:var(--text-muted);font-size:12px">Sem dados ainda.</li>'}
+1723: </ul>
+1724: </div>
+1725: 
+1726: <!-- Fonte dos dados -->
+1727: <div class="stat-card" style="grid-column:1/-1">
+1728: <h3>📡 Fontes dos Dados</h3>
+1729: <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px;">
+1730: <div>
+1731: <div style="font-size:12px;font-weight:600;color:var(--accent-cyan);margin-bottom:8px;">ðŸ›ï¸ CNES/DATASUS</div>
+1732: <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
+1733: <div><strong>URL:</strong> <a href="https://cnes.datasus.gov.br" target="_blank" style="color:var(--accent-cyan)">cnes.datasus.gov.br</a></div>
+1734: <div><strong>Método:</strong> FTP anônimo (pysus)</div>
+1735: <div><strong>Competência:</strong> ${data.fonte?.competencia ? `${data.fonte.competencia.slice(0,4)}/${data.fonte.competencia.slice(4)}` : '—'}</div>
+1736: <div><strong>Atualizado em:</strong> ${data.fonte?.data_atualizacao_fmt || '—'}</div>
+1737: <div><strong>Atualização:</strong> Mensal (execute atualizar_cache.py)</div>
+1738: </div>
+1739: </div>
+1740: <div>
+1741: <div style="font-size:12px;font-weight:600;color:var(--accent-purple);margin-bottom:8px;">🔑 CFM</div>
+1742: <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
+1743: <div><strong>URL:</strong> <a href="https://portal.cfm.org.br/busca-medicos/" target="_blank" style="color:var(--accent-cyan)">portal.cfm.org.br</a></div>
+1744: <div><strong>Método:</strong> Consulta manual (inserção no pipeline)</div>
+1745: <div><strong>Dados:</strong> CRM, situação da inscrição, especialidade</div>
+1746: <div><strong>Nota:</strong> Dados de CRM não disponíveis no CNES</div>
+1747: </div>
+1748: </div>
+1749: </div>
+1750: </div>
+1751: `;
+1752: }
+1753: 
+1754: /* ─── Init ──────────────────────────────────────────────────── */
+1755: async function init() {
+1756: await carregarInfo();
+1757: await carregarUsuarios();
+1758: await carregarEspecialidades();
+1759: }
+1760: 
+1761: document.addEventListener('DOMContentLoaded', init);
+1762: 
+1763: // ==========================================
+1764: // STATUS DO SERVIDOR E SINCRONIZAÇÃO
+1765: // ==========================================
+1766: 
+1767: async function fetchSyncStatus() {
+1768: try {
+1769: const res = await fetch(`${API}/status`);
+1770: if (!res.ok) throw new Error("Erro ao buscar status");
+1771: 
+1772: const status = await res.json();
+1773: const dot = document.getElementById("syncStatusDot");
+1774: const details = document.getElementById("syncStatusDetails");
+1775: const text = document.getElementById("syncStatusText");
+1776: 
+1777: let headerColor = "#aaa";
+1778: let headerText = "Lendo base do MS...";
+1779: 
+1780: if (status.status_geral === "verificando") {
+1781: headerColor = "#ffaa00"; // Laranja
+1782: headerText = "Lendo base do MS...";
+1783: 
+1784: let etaStr = "";
+1785: if (status.eta) {
+1786: etaStr = " (ETA: " + status.eta + ")";
+1787: }
+1788: 
+1789: if (status.progresso !== undefined && status.progresso !== null) {
+1790: headerText += ` (${status.progresso}%)`;
+1791: text.innerHTML = `Sincronizando: <span style="color:#ffaa00; font-weight:bold;">${status.progresso}%</span> <span style="color:#aaa; font-size:12px;">${etaStr}</span>`;
+1792: } else {
+1793: text.innerText = "Lendo base do MS...";
+1794: }
+1795: } else if (status.status_geral === "sucesso") {
+1796: headerColor = "#00ff88"; // Verde
+1797: headerText = `Base Atualizada (${status.data_fmt})`;
+1798: text.innerText = `Atualizado`;
+1799: } else {
+1800: headerColor = "#ff3366"; // Vermelho
+1801: headerText = "Falha Total na Sincronização";
+1802: text.innerText = "Erro de Sync";
+1803: }
+1804: 
+1805: dot.style.background = headerColor;
+1806: dot.style.boxShadow = `0 0 8px ${headerColor}`;
+1807: 
+1808: let html = `
+1809: <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+1810: <strong>Última Tentativa:</strong> ${status.data_fmt || 'Nunca'}<br>
+1811: <strong>Competência (Governo):</strong> ${status.competencia || 'Desconhecida'}
+1812: ${status.url_fonte ? `<br><strong>Fonte:</strong> <a href="${status.url_fonte}" target="_blank" style="color: #4da6ff; text-decoration: none; word-break: break-all;">${status.url_fonte}</a>` : ''}
+1813: </div>`;
+1814: 
+1815: if (status.status_geral === "verificando" && status.progresso !== undefined && status.progresso !== null) {
+1816: let modalEta = "";
+1817: if (status.eta) {
+1818: modalEta = `<span style="margin-left:10px; font-size:12px; color:#aaa;">(Restam: ${status.eta})</span>`;
+1819: }
+1820: html += `
+1821: <div style="margin-bottom: 15px; padding: 15px; background: rgba(255,170,0,0.05); border-radius: 8px; border: 1px solid rgba(255,170,0,0.2);">
+1822: <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+1823: <strong style="color: #ccc; font-size: 0.95rem;"><i class="fas fa-database"></i> Lendo base do MS...</strong>
+1824: <strong style="color: #ffaa00; font-size: 1rem;">${status.progresso}%${modalEta}</strong>
+1825: </div>
+1826: <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);">
+1827: <div style="width: ${status.progresso}%; height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); transition: width 0.3s ease; border-radius: 5px;"></div>
+1828: </div>
+1829: <div style="margin-top: 12px; font-family: monospace; font-size: 0.85rem; color: #aaa; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; white-space: pre-wrap; word-break: break-all;">${status.detalhes || "Conectando aos servidores..."}</div>
+1830: </div>`;
+1831: }
+1832: 
+1833: html += `
+1834: <strong>Status dos Servidores do Governo:</strong>
+1835: <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+1836: `;
+1837: 
+1838: if (status.planos && status.planos.length > 0) {
+1839: status.planos.forEach(p => {
+1840: let icon = '<i class="fas fa-clock" style="color:#666"></i>';
+1841: let pColor = "#aaa";
+1842: let erroHtml = '';
+1843: 
+1844: if (p.status === "processando") {
+1845: icon = '<i class="fas fa-circle-notch fa-spin" style="color:#ffaa00"></i>';
+1846: pColor = "#ffaa00";
+1847: } else if (p.status === "sucesso") {
+1848: icon = '<i class="fas fa-check-circle" style="color:#00ff88"></i>';
+1849: pColor = "#00ff88";
+1850: } else if (p.status === "falha") {
+1851: icon = '<i class="fas fa-times-circle" style="color:#ff3366"></i>';
+1852: pColor = "#ff3366";
+1853: if (p.erro) erroHtml = `<div style="font-size: 0.8rem; color: #ff3366; margin-left: 24px; margin-top: 2px;">${p.erro}</div>`;
+1854: }
+1855: 
+1856: html += `
+1857: <div style="background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 6px; border-left: 3px solid ${pColor};">
+1858: <div style="display: flex; align-items: center; gap: 10px;">
+1859: ${icon} <strong style="color: ${pColor}">${p.nome}</strong>
+1860: </div>
+1861: ${erroHtml}
+1862: </div>
+1863: `;
+1864: });
+1865: }
+1866: 
+1867: html += `</div>`;
+1868: 
+1869: if (status.status_geral === "falha_total" && status.erro_geral) {
+1870: html += `
+1871: <div style="margin-top: 15px; padding: 10px; background: rgba(255,51,102,0.1); border: 1px solid rgba(255,51,102,0.3); border-radius: 6px; color: #ff3366;">
+1872: <strong><i class="fas fa-exclamation-triangle"></i> Falha Geral:</strong> ${status.erro_geral}
+1873: </div>
+1874: `;
+1875: }
+1876: 
+1877: if (status.proxima_tentativa) {
+1878: html += `
+1879: <div style="margin-top: 15px; font-size: 0.9rem; color: #aaa; text-align: center;">
+1880: <i class="fas fa-history"></i> Próxima tentativa automática: <strong>${status.proxima_tentativa}</strong>
+1881: </div>
+1882: `;
+1883: }
+1884: 
+1885: details.innerHTML = html;
+1886: return status;
+1887: 
+1888: } catch (e) {
+1889: console.error("Erro status:", e);
+1890: document.getElementById("syncStatusText").innerText = "Status Indisponível";
+1891: return null;
+1892: }
+1893: }
+1894: 
+1895: let syncPollInterval = null;
+1896: 
+1897: async function forceSyncUpdate() {
+1898: const btn = document.getElementById("btnForceSync");
+1899: btn.disabled = true;
+1900: btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
+1901: 
+1902: try {
+1903: const res = await fetch(`${API}/sync`, { method: 'POST' });
+1904: if (res.ok) {
+1905: showToast("Sincronização iniciada. Acompanhe o progresso em tempo real.", "success");
+1906: 
+1907: btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processando...';
+1908: if (syncPollInterval) clearInterval(syncPollInterval);
+1909: 
+1910: syncPollInterval = setInterval(async () => {
+1911: const status = await fetchSyncStatus();
+1912: if (status && status.status_geral !== "verificando") {
+1913: clearInterval(syncPollInterval);
+1914: syncPollInterval = setInterval(fetchSyncStatus, 60000);
+1915: btn.disabled = false;
+1916: btn.innerHTML = '<i class="fas fa-sync-alt"></i> Forçar Atualização';
+1917: 
+1918: // Se deu sucesso, fecha o popup automaticamente e recarrega os dados
+1919: if (status.status_geral === "sucesso") {
+1920: setTimeout(() => {
+1921: document.getElementById('syncStatusModal').style.display = 'none';
+1922: carregarInfo();
+1923: buscarHospitais(); // Auto-carrega hospitais
+1924: buscarMedicos(); // Auto-carrega medicos
+1925: }, 1500);
+1926: }
+1927: }
+1928: }, 1500);
+1929: 
+1930: } else {
+1931: throw new Error();
+1932: }
+1933: } catch (e) {
+1934: showToast("Erro ao iniciar sincronização", "error");
+1935: btn.disabled = false;
+1936: btn.innerHTML = '<i class="fas fa-sync-alt"></i> Forçar Atualização';
+1937: }
+1938: }
+1939: 
+1940: async function importarZipLocal() {
+1941: const caminho = document.getElementById('importZipPath').value.trim();
+1942: if (!caminho) {
+1943: showToast('Cole o caminho do arquivo ZIP primeiro!', 'error');
+1944: return;
+1945: }
+1946: try {
+1947: const res = await fetch(`${API}/sync/importar-zip`, {
+1948: method: 'POST',
+1949: headers: { 'Content-Type': 'application/json' },
+1950: body: JSON.stringify({ caminho })
+1951: });
+1952: const data = await res.json();
+1953: if (data.ok === false) { showToast(`Erro: ${data.erro}`, 'error'); return; }
+1954: showToast('Processando o ZIP — acompanhe o status!', 'success');
+1955: document.getElementById('importZipPanel').style.display = 'none';
+1956: if (syncPollInterval) clearInterval(syncPollInterval);
+1957: syncPollInterval = setInterval(async () => {
+1958: const status = await fetchSyncStatus();
+1959: if (status && status.status_geral !== 'verificando') {
+1960: clearInterval(syncPollInterval);
+1961: syncPollInterval = setInterval(fetchSyncStatus, 60000);
+1962: if (status.status_geral === 'sucesso') {
+1963: setTimeout(() => {
+1964: document.getElementById('syncStatusModal').style.display = 'none';
+1965: carregarInfo(); buscarHospitais(); buscarMedicos();
+1966: }, 1500);
+1967: }
+1968: }
+1969: }, 2000);
+1970: } catch (e) { showToast('Erro ao conectar com o servidor', 'error'); }
+1971: }
+1972: 
+1973: 
+1974: document.addEventListener("DOMContentLoaded", () => {
+1975: carregarUsuarios();
+1976: carregarInfo();
+1977: carregarEspecialidades();
+1978: carregarMapeamento();
+1979: carregarGeoConfig();
+1980: fetchSyncStatus();
+1981: syncPollInterval = setInterval(fetchSyncStatus, 60000);
+1982: 
+1983: // Auto buscar listas
+1984: setTimeout(() => {
+1985: buscarHospitais();
+1986: buscarMedicos();
+1987: }, 500);
+1988: });
+1989: 
+1990: window.switchTab = function(tabId, btn) {
+1991: // Remove active from all buttons and tabs inside the modal
+1992: const modal = btn.closest('.detail-body');
+1993: if (!modal) return;
+1994: modal.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+1995: modal.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+1996: 
+1997: // Add active to selected
+1998: btn.classList.add('active');
+1999: const targetTab = document.getElementById(tabId);
+2000: if (targetTab) targetTab.classList.add('active');
+2001: };
+2002: 
+2003: async function carregarMapeamento() {
+2004: const container = document.getElementById('mapeamento-lista');
+2005: if (!container) return;
+2006: 
+2007: try {
+2008: const data = await fetchAPI('/mapeamento');
+2009: if (!data || Object.keys(data).length === 0) {
+2010: container.innerHTML = '<div style="grid-column: span 2; text-align:center; color:var(--text-muted)">Nenhum mapeamento encontrado.</div>';
+2011: return;
+2012: }
+2013: 
+2014: // Sort keys alphabetically
+2015: const keys = Object.keys(data).sort();
+2016: 
+2017: let html = '';
+2018: for (const k of keys) {
+2019: html += `
+2020: <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+2021: <span style="font-weight:600; font-size:13px; color:var(--text-primary)">${k}</span>
+2022: <span style="color:var(--text-muted); font-size:12px;">âž¡ï¸</span>
+2023: <span style="background:var(--accent-purple); color:white; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold;">${data[k]}</span>
+2024: </div>
+2025: `;
+2026: }
+2027: container.innerHTML = html;
+2028: } catch (e) {
+2029: container.innerHTML = '<div style="grid-column: span 2; text-align:center; color:var(--text-danger)">Erro ao carregar dicionário.</div>';
+2030: }
+2031: }
+2032: 
+2033: function filtrarMedicosPorEspecialidade(especialidade) {
+2034: if (!window._hospMedicos) return;
+2035: const btn = document.querySelector(`button[onclick="switchTab('tab-hosp-prof', this)"]`);
+2036: if (btn) openTab('hosp-prof', btn);
+2037: const inputFiltro = document.getElementById('hosp-prof-filter');
+2038: if (inputFiltro) {
+2039: inputFiltro.value = especialidade;
+2040: const event = new Event('input');
+2041: inputFiltro.dispatchEvent(event);
+2042: }
+2043: }
+2044: 
+2045: window.togglePBM = async function(cnesId, currentStatus) {
+2046: const newStatus = !currentStatus;
+2047: let link = "";
+2048: if (newStatus) {
+2049: link = prompt("Insira a URL da notícia ou site oficial que comprova a implantação do PBM (opcional):", "");
+2050: if (link === null) return; // User cancelled
+2051: }
+2052: try {
+2053: const res = await fetch(`/api/hospitais/${cnesId}/pbm`, {
+2054: method: 'POST',
+2055: headers: {'Content-Type': 'application/json'},
+2056: body: JSON.stringify({pbm: newStatus, link: link || ""})
+2057: });
+2058: if(res.ok) {
+2059: alert(newStatus ? 'PBM marcado como Implantado!' : 'PBM desmarcado.');
+2060: buscarHospitais();
+2061: }
+2062: } catch(e) {
+2063: console.error(e);
+2064: alert('Erro ao atualizar PBM.');
+2065: }
+2066: };
+2067: 
+2068: 
+2069: window.abrirModalAddMedicoTmo = function(cnesId) {
+2070: if (!window._hospMedicos || window._hospMedicos.length === 0) {
+2071: alert('Carregue a aba de médicos primeiro para ter as opções disponíveis.');
+2072: return;
+2073: }
+2074: 
+2075: let modal = document.getElementById('modal-tmo-add');
+2076: if (!modal) {
+2077: modal = document.createElement('div');
+2078: modal.id = 'modal-tmo-add';
+2079: modal.className = 'modal';
+2080: modal.innerHTML = `
+2081: <div class="modal-content" style="max-width: 400px; padding: 20px;">
+2082: <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+2083: <h3 style="margin:0; font-size:16px; color:#ef4444;">Adicionar Equipe TMO</h3>
+2084: <span style="cursor:pointer; font-size:20px; color:#aaa;" onclick="document.getElementById('modal-tmo-add').classList.remove('open')">&times;</span>
+2085: </div>
+2086: <p style="font-size:12px; color:var(--text-secondary); margin-bottom:15px;">Selecione um médico que possui vínculo na base CNES para este hospital e insira opcionalmente o link do perfil dele.</p>
+2087: 
+2088: <label style="font-size:12px; font-weight:bold; margin-bottom:4px; display:block;">Médico (Base CNES):</label>
+2089: <select id="tmo-add-medico-select" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:4px; margin-bottom:12px; font-size:12px; background:var(--bg-body); color:var(--text-primary);"></select>
+2090: 
+2091: <label style="font-size:12px; font-weight:bold; margin-bottom:4px; display:block;">Link do Perfil (Site Oficial / Escavador):</label>
+2092: <input type="text" id="tmo-add-link" placeholder="https://..." style="width:100%; padding:8px; border:1px solid var(--border); border-radius:4px; margin-bottom:16px; font-size:12px; background:var(--bg-body); color:var(--text-primary);">
+2093: 
+2094: <button id="btn-save-tmo" style="width:100%; padding:10px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px;">💾 Salvar na Equipe TMO</button>
+2095: </div>
+2096: `;
+2097: document.body.appendChild(modal);
+2098: }
+2099: 
+2100: const sel = document.getElementById('tmo-add-medico-select');
+2101: sel.innerHTML = '<option value="">-- Selecione o Médico --</option>';
+2102: 
+2103: const sortedMedicos = [...window._hospMedicos].sort((a,b) => a.nome.localeCompare(b.nome));
+2104: sortedMedicos.forEach(m => {
+2105: const opt = document.createElement('option');
+2106: opt.value = m.nome;
+2107: opt.textContent = m.nome;
+2108: sel.appendChild(opt);
+2109: });
+2110: 
+2111: document.getElementById('tmo-add-link').value = '';
+2112: 
+2113: document.getElementById('btn-save-tmo').onclick = async function() {
+2114: const docName = sel.value;
+2115: const link = document.getElementById('tmo-add-link').value;
+2116: 
+2117: if (!docName) {
+2118: alert('Por favor, selecione um médico.');
+2119: return;
+2120: }
+2121: 
+2122: this.disabled = true;
+2123: this.textContent = 'Salvando...';
+2124: 
+2125: try {
+2126: const res = await fetch('/api/tmo/' + cnesId + '/medico', {
+2127: method: 'POST',
+2128: headers: {'Content-Type': 'application/json'},
+2129: body: JSON.stringify({name: docName, link: link})
+2130: });
+2131: if (res.ok) {
+2132: await carregarTmoCustom();
+2133: alert('Médico adicionado à equipe TMO com sucesso!');
+2134: document.getElementById('modal-tmo-add').classList.remove('open');
+2135: if (document.getElementById('tab-hosp-info').classList.contains('active')) {
+2136: fecharModal('modal-hospital');
+2137: }
+2138: } else {
+2139: throw new Error('Erro no backend');
+2140: }
+2141: } catch (e) {
+2142: console.error(e);
+2143: alert('Erro ao salvar.');
+2144: } finally {
+2145: this.disabled = false;
+2146: this.textContent = '💾 Salvar na Equipe TMO';
+2147: }
+2148: };
+2149: 
+2150: modal.classList.add('open');
+2151: };

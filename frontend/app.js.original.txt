@@ -1,0 +1,208 @@
+Created At: 2026-06-19T22:14:45Z
+Completed At: 2026-06-19T22:14:45Z
+File Path: `file:///C:/Users/e333638/Desktop/Projetos%20AntiGravity/COLIH_Captacao/broken_lines.txt`
+Total Lines: 2153
+Total Bytes: 116364
+Showing lines 1 to 200
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: 0: /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+2: 1: COLIH Captação — app.js
+3: 2: Lógica principal do frontend SPA
+4: 3: â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+5: 4: 
+6: 5: const API = 'http://localhost:8000/api';
+7: 6: 
+8: 7: // Estado global
+9: 8: const state = {
+10: 9: usuarioAtivo: localStorage.getItem('colih_usuario') || '',
+11: 10: pipelineData: [],
+12: 11: pipelineFiltered: [],
+13: 12: medicoSelecionado: null,
+14: 13: editandoCns: null,
+15: 14: especialidades: [],
+16: 15: infoCache: null,
+17: 16: };
+18: 17: 
+19: 18: /* ─── Utilitários ─────────────────────────────────────────────── */
+20: 19: function debounce(fn, delay) {
+21: 20: let t;
+22: 21: return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+23: 22: }
+24: 23: 
+25: 24: async function fetchAPI(path, opts = {}) {
+26: 25: try {
+27: 26: const res = await fetch(API + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+28: 27: if (!res.ok) {
+29: 28: const err = await res.json().catch(() => ({ detail: 'Erro na requisição' }));
+30: 29: throw new Error(err.detail || `HTTP ${res.status}`);
+31: 30: }
+32: 31: return res.json();
+33: 32: } catch (e) {
+34: 33: if (e.message.includes('Failed to fetch')) {
+35: 34: showToast('âŒ Backend offline. Verifique se o servidor estÃ¡ rodando.', 'error');
+36: 35: }
+37: 36: throw e;
+38: 37: }
+39: 38: }
+40: 39: 
+41: 40: function showToast(msg, tipo = 'success') {
+42: 41: const t = document.getElementById('toast');
+43: 42: t.textContent = msg;
+44: 43: t.className = `toast show ${tipo}`;
+45: 44: setTimeout(() => t.classList.remove('show'), 3500);
+46: 45: }
+47: 46: 
+48: 47: function formatDate(iso) {
+49: 48: if (!iso) return '—';
+50: 49: const d = new Date(iso);
+51: 50: return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+52: 51: }
+53: 52: 
+54: 53: function statusLabel(status) {
+55: 54: const m = {
+56: 55: novo:       ['🔵', 'Novo'],
+57: 56: em_contato: ['🟡', 'Em Contato'],
+58: 57: aguardando: ['🟠', 'Aguardando'],
+59: 58: reuniao:    ['🟣', 'Reunião Agendada'],
+60: 59: cooperador: ['🟢', 'Cooperador ✅'],
+61: 60: recusou:    ['🔴', 'Recusou'],
+62: 61: };
+63: 62: const [icon, label] = m[status] || ['⚪', status || 'N/A'];
+64: 63: return `<span class="status-badge status-${status || 'na'}">${icon} ${label}</span>`;
+65: 64: }
+66: 65: 
+67: 66: function tipoInteracaoLabel(tipo) {
+68: 67: const m = { ligacao: 'ðŸ“ž LigaÃ§Ã£o', whatsapp: 'ðŸ’¬ WhatsApp', email: 'ðŸ“§ Email', visita: 'ðŸ¥ Visita', outro: 'ðŸ”¹ Outro' };
+69: 68: return m[tipo] || tipo;
+70: 69: }
+71: 70: 
+72: 71: function fonteChip(fonte) {
+73: 72: if (!fonte) return '';
+74: 73: const comp = fonte.competencia ? ` · Competência ${fonte.competencia.slice(0,4)}/${fonte.competencia.slice(4)}` : '';
+75: 74: const data = fonte.data_atualizacao_fmt ? ` · Atualizado em ${fonte.data_atualizacao_fmt}` : '';
+76: 75: return `Fonte: <strong>${fonte.nome || 'DATASUS/CNES'}</strong>${comp}${data}`;
+77: 76: }
+78: 77: 
+79: 78: /* ─── Tabs ────────────────────────────────────────────────────── */
+80: 79: function openTab(name, btn) {
+81: 80: document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+82: 81: document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+83: 82: document.getElementById(`tab-${name}`).classList.add('active');
+84: 83: btn.classList.add('active');
+85: 84: if (name === 'pipeline') carregarPipeline();
+86: 85: if (name === 'stats') carregarEstatisticas();
+87: 86: if (name === 'medicos') buscarMedicos();
+88: 87: if (name === 'regioes') carregarRegioes();
+89: 88: }
+90: 89: 
+91: 90: function switchInnerTab(id, btn) {
+92: 91: document.querySelectorAll('.inner-tab-panel').forEach(p => p.classList.remove('active'));
+93: 92: document.querySelectorAll('.inner-tab').forEach(b => b.classList.remove('active'));
+94: 93: document.getElementById(id).classList.add('active');
+95: 94: btn.classList.add('active');
+96: 95: }
+97: 96: 
+98: 97: /* ─── Modal ───────────────────────────────────────────────────── */
+99: 98: function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+100: 99: function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+101: 100: 
+102: 101: /* ─── Usuários ────────────────────────────────────────────────── */
+103: 102: async function carregarUsuarios() {
+104: 103: const data = await fetchAPI('/usuarios').catch(() => ({ usuarios: [] }));
+105: 104: const usuarios = data.usuarios || [];
+106: 105: const selects = ['usuario-select', 'pip-responsavel', 'edit-responsavel', 'pipe-resp-filter'];
+107: 106: selects.forEach(id => {
+108: 107: const el = document.getElementById(id);
+109: 108: if (!el) return;
+110: 109: const val = el.value;
+111: 110: const isFilter = id === 'pipe-resp-filter' || id === 'usuario-select';
+112: 111: el.innerHTML = isFilter
+113: 112: ? `<option value="">${id === 'usuario-select' ? '👤 Selecionar usuário' : 'Todos os responsáveis'}</option>`
+114: 113: : '<option value="">Selecionar responsável...</option>';
+115: 114: usuarios.forEach(u => {
+116: 115: const opt = document.createElement('option');
+117: 116: opt.value = u.id;
+118: 117: opt.textContent = u.nome;
+119: 118: el.appendChild(opt);
+120: 119: });
+121: 120: el.value = val;
+122: 121: });
+123: 122: if (state.usuarioAtivo) {
+124: 123: document.getElementById('usuario-select').value = state.usuarioAtivo;
+125: 124: }
+126: 125: }
+127: 126: 
+128: 127: function setUsuarioAtivo(val) {
+129: 128: state.usuarioAtivo = val;
+130: 129: localStorage.setItem('colih_usuario', val);
+131: 130: }
+132: 131: 
+133: 132: /* ─── Info do Cache (Header) ─────────────────────────────────── */
+134: 133: async function carregarInfo() {
+135: 134: const info = await fetchAPI('/info').catch(() => null);
+136: 135: if (!info) return;
+137: 136: state.infoCache = info;
+138: 137: 
+139: 138: const fonte = info.fonte || {};
+140: 139: const elFonte = document.getElementById('fonte-nome');
+141: 140: if (elFonte) elFonte.textContent = fonte.nome || 'DATASUS/CNES';
+142: 141: 
+143: 142: document.getElementById('data-atualizacao').textContent = fonte.data_atualizacao_fmt || 'N/D';
+144: 143: document.getElementById('competencia-valor').textContent = fonte.competencia
+145: 144: ? `${fonte.competencia.slice(0,4)}/${fonte.competencia.slice(4)}`
+146: 145: : 'N/D';
+147: 146: document.getElementById('total-medicos').textContent = (info.totais?.medicos || 0).toLocaleString('pt-BR');
+148: 147: 
+149: 148: // Badge pipeline na aba
+150: 149: document.getElementById('pipeline-count').textContent = info.pipeline?.total || 0;
+151: 150: }
+152: 151: 
+153: 152: /* ─── Especialidades (select) ────────────────────────────────── */
+154: 153: async function carregarEspecialidades() {
+155: 154: const data = await fetchAPI('/especialidades').catch(() => ({ especialidades: [] }));
+156: 155: state.especialidades = data.especialidades || [];
+157: 156: const sel = document.getElementById('med-esp-select');
+158: 157: state.especialidades.forEach(e => {
+159: 158: const opt = document.createElement('option');
+160: 159: opt.value = e.especialidade;
+161: 160: opt.textContent = `${e.especialidade} (${e.total})`;
+162: 161: sel.appendChild(opt);
+163: 162: });
+164: 163: }
+165: 164: 
+166: 165: /* ─── ABA HOSPITAIS ─────────────────────────────────────────── */
+167: 166: window.updateFiltersUI = function() {
+168: 167: // filter-complexidade is always visible, apoio só para hospitais
+169: 168: const tipo = document.getElementById('filter-tipo').value;
+170: 169: const apoioSelect = document.getElementById('filter-apoio');
+171: 170: 
+172: 171: if(tipo === '' || tipo.includes('HOSPITAL') || tipo.includes('PRONTO')) {
+173: 172: apoioSelect.style.display = 'block';
+174: 173: } else {
+175: 174: apoioSelect.style.display = 'none';
+176: 175: apoioSelect.value = '';
+177: 176: }
+178: 177: };
+179: 178: 
+180: 179: window.initDistritosFilter = async function() {
+181: 180: const data = await fetchAPI('/hospitais/valores?field=distrito').catch(() => null);
+182: 181: if(data && data.valores) {
+183: 182: const select = document.getElementById('filter-distrito');
+184: 183: data.valores.forEach(v => {
+185: 184: const opt = document.createElement('option');
+186: 185: opt.value = v;
+187: 186: opt.textContent = v;
+188: 187: select.appendChild(opt);
+189: 188: });
+190: 189: new TomSelect("#filter-distrito", {
+191: 190: create: false,
+192: 191: sortField: { field: "text", direction: "asc" },
+193: 192: onChange: function() { buscarHospitais(); }
+194: 193: });
+195: 194: }
+196: 195: };
+197: 196: window.initDistritosFilter();
+198: 197: 
+199: 198: window._tmoCustomData = {};
+200: 199: async function carregarTmoCustom() {
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
