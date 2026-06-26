@@ -1119,6 +1119,8 @@ window.abrirMedicoDoHospital = function(cns) {
 async function abrirDetalheMedico(cns) {
   document.getElementById('med-results').innerHTML = '';
   document.getElementById('med-fonte-bar').style.display = 'none';
+  const searchBars = document.querySelectorAll('#tab-medicos .search-bar');
+  searchBars.forEach(bar => bar.style.display = 'none');
   const detail = document.getElementById('med-detail');
   detail.style.display = 'block';
 
@@ -1163,6 +1165,8 @@ function abrirDetalheMedicoFromHosp(m) {
 
 function fecharDetalheMedico() {
   document.getElementById('med-detail').style.display = 'none';
+  const searchBars = document.querySelectorAll('#tab-medicos .search-bar');
+  searchBars.forEach(bar => bar.style.display = 'flex');
   document.getElementById('med-results').innerHTML = '';
   state.medicoSelecionado = null;
 }
