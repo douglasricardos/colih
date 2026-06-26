@@ -1084,9 +1084,11 @@ async function buscarMedicos() {
               <td>${m.no_pipeline ? statusLabel(m.status_pipeline) : '<span class="status-badge status-na">—</span>'}</td>
               <td class="td-actions">
                 <button class="btn-secondary btn-sm" onclick="abrirDetalheMedico('${m.cns}')">Mais Informações</button>
-                  ${m.no_pipeline 
-                    ? `<span class="badge" style="background:var(--bg-success); color:#fff; font-size:11px; padding:4px 8px; border-radius:4px;"><i data-lucide="check-circle" style="width:12px; height:12px; display:inline-block; vertical-align:text-bottom;"></i> No Pipeline</span>`
-                    : `<button class="btn-primary btn-sm" onclick=\'abrirModalPipeline(${JSON.stringify(m).replace(/"/g,"&quot;").replace(/\'/g,"&apos;")}, "${m.vinculos && m.vinculos[0] ? m.vinculos[0].estabelecimento : ""}")\'>Pipeline</button>`
+                  ${m.colih 
+                    ? `<span class="badge" style="background:#10b981; color:#fff; font-size:11px; padding:4px 8px; border-radius:4px; font-weight: 600;">🤝 Cooperador</span>`
+                    : m.no_pipeline 
+                      ? `<span class="badge" style="background:var(--bg-success); color:#fff; font-size:11px; padding:4px 8px; border-radius:4px;"><i data-lucide="check-circle" style="width:12px; height:12px; display:inline-block; vertical-align:text-bottom;"></i> No Pipeline</span>`
+                      : `<button class="btn-primary btn-sm" onclick=\'abrirModalPipeline(${JSON.stringify(m).replace(/"/g,"&quot;").replace(/\'/g,"&apos;")}, "${m.vinculos && m.vinculos[0] ? m.vinculos[0].estabelecimento : ""}")\'>Pipeline</button>`
                   }</td>
             </tr>
           `).join('')}
