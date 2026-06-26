@@ -1561,10 +1561,12 @@ async function removerDoPipeline() {
 async function carregarPipeline() {
   const status = document.getElementById('pipe-status-filter').value;
   const resp = document.getElementById('pipe-resp-filter').value;
+  const sus = document.getElementById('pipe-sus-filter') ? document.getElementById('pipe-sus-filter').value : '';
 
   const params = new URLSearchParams();
   if (status) params.set('status', status);
   if (resp) params.set('responsavel', resp);
+  if (sus) params.set('atende_sus', sus);
 
   const data = await fetchAPI(`/pipeline?${params}`).catch(() => ({ pipeline: [], fonte: {} }));
   state.pipelineData = data.pipeline || [];
@@ -1716,9 +1718,10 @@ function renderizarPipeline(lista) {
             <tr>
               <td style="font-weight:600">${p.nome || '—'}</td>
               <td class="td-muted">${p.especialidade || '—'}</td>
-              <td class="td-muted" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-                title="${p.vinculo_principal||''}">${p.vinculo_principal || '—'}</td>
-              <td>${statusLabel(p.status)}</td>
+<td class="td-muted" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                <div title="${p.vinculo_principal||''}">${p.vinculo_principal || '—'}</div>
+                ${p.atende_sus === 'Sim' ? `<span title="Hospitais SUS:\n${(p.hospitais_sus||[]).join('\n')}" style="display:inline-block; margin-top:4px; font-size:10px; background:rgba(34, 197, 94, 0.1); color:#22c55e; padding:2px 6px; border-radius:4px; cursor:help; border:1px solid rgba(34, 197, 94, 0.2); font-weight:600;">SUS: Sim</span>` : ''}
+              </td>\n              <td>${statusLabel(p.status)}</td>
               <td class="td-muted">${p.responsavel || '—'}</td>
               <td>
                 ${p.contato

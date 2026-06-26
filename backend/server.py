@@ -431,7 +431,7 @@ def info():
     cache = get_medicos_cache()
     meta = cache.get("meta", {})
     pipeline = get_pipeline()
-    usuarios = get_usuarios()
+    usuarios = listar_usuarios()
 
     return {
         "status": "ok" if meta else "sem_cache",
@@ -1188,13 +1188,29 @@ def listar_pipeline(
     responsavel: Optional[str] = Query(None, description="Filtrar por responsável"),
     status: Optional[str] = Query(None, description="Filtrar por status"),
     especialidade: Optional[str] = Query(None),
+    atende_sus: Optional[str] = Query(None, description="Filtrar por Atende SUS (sim/nao)"),
 ):
     """Lista médicos no pipeline. Suporta filtro por usuário responsável."""
     pipeline = get_pipeline()
     cache = get_medicos_cache()
     meta = cache.get("meta", {})
+    medicos_sus = cache.get("medicos", [])
+    
+    sus_dict = {}
+    for ms in medicos_sus:
+        if ms.get("cns"):
+            sus_dict[ms["cns"]] = ms.get("vinculos", [])
 
     resultado = list(pipeline.values())
+
+    for p in resultado:
+        cns = p.get("cns")
+        if cns and cns in sus_dict:
+            p["atende_sus"] = "Sim"
+            p["hospitais_sus"] = list(set([v.get("estabelecimento") for v in sus_dict[cns] if v.get("estabelecimento")]))
+        else:
+            p["atende_sus"] = "Não"
+            p["hospitais_sus"] = []
 
     if responsavel:
         resultado = [p for p in resultado if p.get("responsavel", "").lower() == responsavel.lower()]
@@ -1203,7 +1219,9 @@ def listar_pipeline(
     if especialidade:
         esp_lower = especialidade.lower()
         resultado = [p for p in resultado if esp_lower in p.get("especialidade", "").lower()]
-
+    if atende_sus:
+        val = "Sim" if atende_sus.lower() == "sim" else "Não"
+        resultado = [p for p in resultado if p.get("atende_sus") == val]
     return {
         "total": len(resultado),
         "fonte": {

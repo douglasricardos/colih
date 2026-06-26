@@ -373,6 +373,11 @@
     <!-- Filtros e ações -->
     <div class="pipeline-toolbar">
       <div class="toolbar-filters">
+        <select id="pipe-sus-filter" class="filter-select" onchange="carregarPipeline()">
+          <option value="">Atende SUS (Ambos)</option>
+          <option value="sim">Sim, Atende SUS</option>
+          <option value="nao">Apenas Privado</option>
+        </select>
         <select id="pipe-status-filter" class="filter-select" onchange="carregarPipeline()">
           <option value="">Todos os status</option>
           <option value="novo">🔵 Novo</option>
