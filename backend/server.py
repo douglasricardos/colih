@@ -54,10 +54,26 @@ ESTAB_CACHE_PATH = DATA_DIR / "estab_cache.json"
 PIPELINE_FILE = DATA_DIR / "pipeline.json"
 USUARIOS_FILE = DATA_DIR / "usuarios.json"
 
+from contextlib import asynccontextmanager
+import threading as _threading
+
+@asynccontextmanager
+async def lifespan(app):
+    # Dispara verificação de sync trimestral em background (5s após subir)
+    def _check_sync():
+        import time; time.sleep(5)
+        try:
+            _auto_trigger_trimestral()
+        except Exception as e:
+            print(f"[AUTO-SYNC] Erro no auto-trigger: {e}")
+    _threading.Thread(target=_check_sync, daemon=True).start()
+    yield
+
 app = FastAPI(
     title="COLIH Captação API",
     description="Sistema de Captação de Médicos Cooperadores — COLIH Salvador",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -1193,6 +1209,7 @@ def enriquecer_medico_bg(cns: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/api/enriquecer-todos")
 def enriquecer_todos_bg(limite: int = 100):
     """Dispara enriquecimento em background para todos os médicos sem currículo."""
@@ -1204,6 +1221,92 @@ def enriquecer_todos_bg(limite: int = 100):
         subprocess.run([py, str(script), "--todos", "--limite", str(limite)])
     threading.Thread(target=run, daemon=True).start()
     return {"ok": True, "message": f"Enriquecimento em lote iniciado (até {limite} médicos)"}
+
+# ─────────────────────────────────────────────────────────────
+# Endpoints de Controle do Sync de Currículos
+# ─────────────────────────────────────────────────────────────
+def _get_sync_status_data():
+    """Lê o arquivo de status do sync de currículos."""
+    status_file = DATA_DIR / "sync_curriculos_status.json"
+    cache_file  = DATA_DIR / "curriculos_cache.json"
+    total_medicos = 0
+    try:
+        with open(DATA_DIR / "medicos_cache.json", "r", encoding="utf-8") as f:
+            total_medicos = len(json.load(f).get("medicos", []))
+    except Exception:
+        pass
+    total_cache = 0
+    try:
+        with open(cache_file, "r", encoding="utf-8") as f:
+            total_cache = len(json.load(f))
+    except Exception:
+        pass
+    if status_file.exists():
+        try:
+            with open(status_file, "r", encoding="utf-8") as f:
+                s = json.load(f)
+            s["total_base"] = total_medicos
+            s["total_enriquecidos"] = total_cache
+            s["percentual"] = round(total_cache / total_medicos * 100, 1) if total_medicos else 0
+            return s
+        except Exception:
+            pass
+    return {
+        "rodando": False, "total": 0, "processados": 0,
+        "encontrados_lattes": 0, "erros": 0,
+        "ultima_rodada": None, "proxima_rodada": None, "medico_atual": None,
+        "total_base": total_medicos, "total_enriquecidos": total_cache,
+        "percentual": round(total_cache / total_medicos * 100, 1) if total_medicos else 0,
+    }
+
+@app.get("/api/admin/sync-curriculos/status")
+def sync_curriculos_status():
+    """Retorna o status atual do sync de currículos."""
+    return _get_sync_status_data()
+
+@app.post("/api/admin/sync-curriculos/start")
+def sync_curriculos_start(colih_only: bool = False, forcar: bool = False, limite: int = 200):
+    """Inicia uma rodada de enriquecimento de currículos em background."""
+    import subprocess, threading
+    status = _get_sync_status_data()
+    if status.get("rodando"):
+        return {"ok": False, "message": "Sync já está rodando."}
+    def run():
+        script = Path(__file__).parent.parent / "scripts" / "enriquecer_curriculos.py"
+        venv_py = Path(__file__).parent.parent / "backend" / "venv" / "Scripts" / "python.exe"
+        py = str(venv_py) if venv_py.exists() else "python"
+        args = [py, str(script), "--limite", str(limite)]
+        if colih_only:
+            args.append("--colih-only")
+        else:
+            args.append("--todos")
+        if forcar:
+            args.append("--forcar")
+        subprocess.run(args)
+    threading.Thread(target=run, daemon=True).start()
+    return {"ok": True, "message": f"Sync iniciado ({'COLIH only' if colih_only else 'todos'}, limite={limite})"}
+
+def _auto_trigger_trimestral():
+    """Verifica se o sync trimestral precisa rodar e dispara se necessário."""
+    import subprocess
+    status = _get_sync_status_data()
+    ultima = status.get("ultima_rodada")
+    if ultima:
+        try:
+            dias = (datetime.now() - datetime.fromisoformat(ultima)).days
+            if dias < 85:  # ainda dentro dos 90 dias
+                return
+        except Exception:
+            pass
+    # Verifica se há médicos sem enriquecimento
+    if status.get("total_enriquecidos", 0) >= status.get("total_base", 1):
+        return
+    script = Path(__file__).parent.parent / "scripts" / "enriquecer_curriculos.py"
+    venv_py = Path(__file__).parent.parent / "backend" / "venv" / "Scripts" / "python.exe"
+    py = str(venv_py) if venv_py.exists() else "python"
+    print("[AUTO-SYNC] Disparando sync trimestral de currículos...")
+    subprocess.Popen([py, str(script), "--todos", "--limite", "300"])
+
 
 @app.get("/api/pipeline")
 def listar_pipeline(

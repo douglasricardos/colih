@@ -2,18 +2,17 @@
   "898004854656486": {
     "cns": "898004854656486",
     "nome": "Franklin Baxter Downs Morgan",
-    "especialidade": "Médico neurocirurgião / Médico neurologista",
+    "especialidade": "Médico neurologista / Médico neurocirurgião",
     "crm_cnes": "",
     "crm_uf": "",
-    "enriquecido_em": "2026-06-18T21:34:17.269173",
+    "enriquecido_em": "2026-06-26T09:57:09.512861",
     "links": {
       "cfm": "https://portal.cfm.org.br/busca-medicos/?busca=Franklin%20Baxter%20Downs%20Morgan&uf=",
       "cfm_crm": "",
       "doctoralia": "https://www.doctoralia.com.br/busca?q=Franklin%20Baxter%20Downs%20Morgan",
-      "medicosbrasil": "https://www.medicosbrasil.com/busca?q=Franklin%20Baxter%20Downs%20Morgan",
-      "instagram": "https://www.instagram.com/explore/search/keyword/?q=Franklin%20Baxter%20Downs%20Morgan",
+      "escavador": "https://www.escavador.com/sobre/franklin-baxter-downs-morgan",
       "lattes": "https://buscatextual.cnpq.br/buscatextual/busca.do?metodo=apresentar&nome=Franklin%20Baxter%20Downs%20Morgan&tipoRecurso=1",
-      "google_medico": "https://www.google.com/search?q=Franklin%20Baxter%20Downs%20Morgan+médico+CRM+"
+      "google_medico": "https://www.google.com/search?q=Franklin%20Baxter%20Downs%20Morgan+medico+CRM+"
     },
     "doctoralia": {
       "fonte": "doctoralia",
@@ -21,27 +20,9 @@
       "doctoralia_url": "https://www.doctoralia.com.br/franklin-baxter-downs-morgan/neurologista-neurocirurgiao/salvador",
       "crm_doctoralia": "2921/BA",
       "rqe": "336",
-      "foto_url": "",
       "especialidades_doctoralia": [],
-      "consultorios": [
-        {
-          "nome": "Proneuro Assistencia Neurologica",
-          "endereco": "Rua Humberto de Campos, 144 / Cm da Graca1003,, Barra,, Salvador",
-          "telefone": ""
-        },
-        {
-          "nome": "Hospital Geral Ernesto Simões Filho",
-          "endereco": "Praça Conselheiro João Alfredo, S/N,, Caixa D'agua,, Salvador",
-          "telefone": ""
-        },
-        {
-          "nome": "Proneuro Assistencia Neurologica Ltda",
-          "endereco": "Rua Professor Antônio Augusto Machado, quadra 12- lote 05., Praias do Flamengo,, P. Flamengo,, Salvador",
-          "telefone": ""
-        }
-      ],
-      "convenios": [],
-      "formacao_doctoralia": []
+      "consultorios": [],
+      "convenios": []
     },
     "lattes": {
       "fonte": "lattes",

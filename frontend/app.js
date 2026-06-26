@@ -16,6 +16,131 @@ const state = {
   infoCache: null,
 };
 
+/* ─── Widget de Sync de Currículos ────────────────────────────── */
+let _curriculoSyncInterval = null;
+
+async function atualizarWidgetCurriculos() {
+  try {
+    const s = await fetch(API + '/admin/sync-curriculos/status').then(r => r.json());
+    const label = document.getElementById('curriculo-sync-label');
+    const dot   = document.getElementById('curriculo-sync-dot');
+    if (!label || !dot) return;
+
+    const enc = s.total_enriquecidos || 0;
+    const total = s.total_base || 0;
+    const pct = s.percentual || 0;
+
+    if (s.rodando) {
+      label.textContent = `${s.processados}/${s.total} rodando...`;
+      label.style.color = '#f59e0b';
+      dot.style.background = '#f59e0b';
+      dot.style.boxShadow = '0 0 5px #f59e0b';
+    } else if (enc === 0) {
+      label.textContent = 'Sem dados';
+      label.style.color = '#94a3b8';
+      dot.style.background = '#94a3b8';
+      dot.style.boxShadow = 'none';
+    } else {
+      label.textContent = `${pct}% (${enc.toLocaleString('pt-BR')})`;
+      label.style.color = pct >= 80 ? '#22c55e' : pct >= 30 ? '#f59e0b' : '#94a3b8';
+      dot.style.background = pct >= 80 ? '#22c55e' : pct >= 30 ? '#f59e0b' : '#94a3b8';
+      dot.style.boxShadow = pct >= 80 ? '0 0 5px #22c55e' : 'none';
+    }
+  } catch(e) { /* backend offline */ }
+}
+
+window.abrirModalSyncCurriculos = async function() {
+  let s = {};
+  try { s = await fetch(API + '/admin/sync-curriculos/status').then(r => r.json()); } catch(e) {}
+
+  const enc   = s.total_enriquecidos || 0;
+  const total = s.total_base || 0;
+  const pct   = s.percentual || 0;
+  const pw    = s.playwright_ativo ? '✅ Ativo (Doctoralia + Lattes)' : '⚠️ Inativo (só Lattes)';
+  const barW  = Math.min(pct, 100);
+
+  const html = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
+        📚 Enriquecimento de Currículos
+      </h2>
+      <button onclick="this.closest('.modal-overlay').style.display='none'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:20px;">✕</button>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+        <span style="color:var(--text-secondary);">Progresso geral</span>
+        <strong>${enc.toLocaleString('pt-BR')} / ${total.toLocaleString('pt-BR')} (${pct}%)</strong>
+      </div>
+      <div style="background:rgba(255,255,255,0.05); border-radius:6px; height:10px; overflow:hidden;">
+        <div style="width:${barW}%; height:100%; background:${pct>=80?'#22c55e':pct>=30?'#f59e0b':'#94a3b8'}; border-radius:6px; transition:width 0.5s;"></div>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px; margin-bottom:20px;">
+      <div style="padding:10px; background:var(--bg-surface); border-radius:8px;">
+        <div style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">ESTADO</div>
+        <strong style="color:${s.rodando?'#f59e0b':'#22c55e'}">${s.rodando ? '🔄 Rodando...' : '✅ Aguardando'}</strong>
+      </div>
+      <div style="padding:10px; background:var(--bg-surface); border-radius:8px;">
+        <div style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">PLAYWRIGHT</div>
+        <strong style="font-size:11px;">${pw}</strong>
+      </div>
+      <div style="padding:10px; background:var(--bg-surface); border-radius:8px;">
+        <div style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">ÚLTIMA RODADA</div>
+        <strong>${s.ultima_rodada ? s.ultima_rodada.slice(0,10) : '—'}</strong>
+      </div>
+      <div style="padding:10px; background:var(--bg-surface); border-radius:8px;">
+        <div style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">PRÓXIMA RODADA</div>
+        <strong>${s.proxima_rodada || 'Auto (trimestral)'}</strong>
+      </div>
+      ${s.rodando ? `<div style="grid-column:1/-1; padding:10px; background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.2); border-radius:8px; font-size:12px;">
+        <strong>Processando:</strong> ${s.medico_atual || '—'}<br>
+        <span style="color:var(--text-muted);">${s.processados || 0} feitos | ${s.encontrados_lattes||0} Lattes | ${s.erros||0} erros</span>
+      </div>` : ''}
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      ${!s.rodando ? `
+        <button onclick="iniciarSyncCurriculos(false)" style="flex:1; padding:10px; background:var(--accent-blue); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">
+          ▶ Iniciar Sync Completo
+        </button>
+        <button onclick="iniciarSyncCurriculos(true)" style="flex:1; padding:10px; background:rgba(16,185,129,0.2); color:#10b981; border:1px solid rgba(16,185,129,0.3); border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">
+          🤝 Só Cooperadores COLIH
+        </button>
+      ` : `<div style="color:var(--text-muted); font-size:13px; text-align:center; width:100%;">Sync em andamento... Esta janela pode ser fechada.</div>`}
+    </div>`;
+
+  let modal = document.getElementById('curriculo-sync-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'curriculo-sync-modal';
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'z-index:9999; display:flex;';
+    modal.innerHTML = `<div class="modal-content" style="max-width:480px; background:var(--bg-card); color:var(--text-primary); border-radius:12px; padding:24px;">${html}</div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if(e.target === modal) modal.style.display='none'; });
+  } else {
+    modal.querySelector('.modal-content').innerHTML = html;
+    modal.style.display = 'flex';
+  }
+};
+
+window.iniciarSyncCurriculos = async function(colihOnly = false) {
+  try {
+    const url = API + '/admin/sync-curriculos/start?colih_only=' + colihOnly + '&limite=500';
+    const r = await fetch(url, { method: 'POST' }).then(r => r.json());
+    showToast(r.message || 'Sync iniciado!', 'success');
+    document.getElementById('curriculo-sync-modal').style.display = 'none';
+    atualizarWidgetCurriculos();
+  } catch(e) {
+    showToast('Erro ao iniciar sync', 'error');
+  }
+};
+
+// Polling: atualiza o widget a cada 30s
+atualizarWidgetCurriculos();
+setInterval(atualizarWidgetCurriculos, 30000);
+
+
+
 /* ─── Utilitários ─────────────────────────────────────────────── */
 function debounce(fn, delay) {
   let t;
