@@ -1178,31 +1178,23 @@ function renderCurriculoCard(m, curriculo) {
   const el = document.getElementById('med-curriculo-card');
   if (!el) return;
 
-  const crm = m.crm || (curriculo?.crm_cnes) || '';
-  const crmTipo = m.crm_tipo || 'CRM';
-  const crmUf = m.crm_uf || (curriculo?.data?.crm_uf) || '';
   const links = curriculo?.links || curriculo?.data?.links || {};
   const doc = curriculo?.data?.doctoralia || {};
   const lattes = curriculo?.data?.lattes || {};
   const status = curriculo?.status || 'pendente';
 
-  // CRM badge
-  const crmBadge = crm
-    ? `<span style="background:var(--accent-cyan);color:var(--bg-body);padding:4px 12px;border-radius:6px;font-size:14px;font-weight:800;">${crmTipo} ${crm}</span>`
-    : `<span style="color:var(--text-muted);font-size:13px;font-style:italic;">Não encontrado no DATASUS — verifique no CFM</span>`;
-
   // Doctoralia block
   let docBlock = '';
   if (doc.status === 'encontrado') {
-    const rating = doc.avaliacao ? `â˜… ${doc.avaliacao} (${doc.total_avaliacoes || 0} avaliações)` : '';
+    const rating = doc.avaliacao ? `★ ${doc.avaliacao} (${doc.total_avaliacoes || 0} avaliações)` : '';
     const esps = (doc.especialidades_doctoralia || []).join(', ') || '—';
     const consultorios = (doc.consultorios || []).map(c =>
-      `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:2px;"> <strong>${c.nome || ''}</strong> â€¢ ${c.endereco || ''}, ${c.cidade || ''} ${c.telefone ? 'Â· ' + c.telefone : ''}</div>`
+      `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:2px;"> <strong>${c.nome || ''}</strong> • ${c.endereco || ''}, ${c.cidade || ''} ${c.telefone ? '· ' + c.telefone : ''}</div>`
     ).join('');
     const convenios = (doc.convenios || []).filter(Boolean).slice(0, 6).join(', ');
     const crmDoc = doc.crm_doctoralia ? `<div><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">CRM (Doctoralia)</label><div style="font-size:13px;font-weight:700;color:var(--accent-green);">${doc.crm_doctoralia}</div></div>` : '';
     docBlock = `
-      <div style="border-top:1px solid var(--border-color);margin-top:16px;padding-top:16px;">
+      <div style="margin-top:0px;">
         <div style="font-size:12px;font-weight:800;color:var(--accent-purple);text-transform:uppercase;margin-bottom:10px;">🩺 Doctoralia</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
           ${crmDoc}
@@ -1236,7 +1228,7 @@ function renderCurriculoCard(m, curriculo) {
         ${links.cfm ? `<a href="${links.cfm}" target="_blank" ${btnStyle}> CFM Portal</a>` : ''}
         ${links.cfm_crm ? `<a href="${links.cfm_crm}" target="_blank" ${btnStyle}>🔢 CFM por CRM</a>` : ''}
         ${links.doctoralia ? `<a href="${links.doctoralia}" target="_blank" ${btnStyle}>🩺 Doctoralia</a>` : ''}
-        ${links.escavador ? `<a href="${links.escavador}" target="_blank" ${btnStyle}>â–¡ Escavador</a>` : ''}
+        ${links.escavador ? `<a href="${links.escavador}" target="_blank" ${btnStyle}>📄 Escavador</a>` : ''}
         ${links.lattes ? `<a href="${links.lattes}" target="_blank" ${btnStyle}>🎓 Lattes</a>` : ''}
         ${links.google_medico ? `<a href="${links.google_medico}" target="_blank" ${btnStyle}>🔍 Google</a>` : ''}
       </div>
@@ -1250,13 +1242,10 @@ function renderCurriculoCard(m, curriculo) {
     </div>`;
 
   el.innerHTML = `
-    <h3 style="margin:0 0 16px 0;font-size:16px;font-weight:800;color:var(--text-primary);border-bottom:1px dashed var(--border-color);padding-bottom:12px;">
-      📚 Currículo & Registro
+    <h3 style="margin:0 0 16px 0;font-size:18px;font-weight:800;color:var(--text-primary);border-bottom:1px dashed var(--border-color);padding-bottom:12px;">
+      📚 Pesquisa Curricular
     </h3>
-    <div>
-      <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:8px;">Registro Profissional (DATASUS)</label>
-      ${crmBadge}
-    </div>
+    ${!docBlock && !lattesBlock ? `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px; font-style:italic;">Nenhum currículo carregado automaticamente ainda.</div>` : ''}
     ${docBlock}
     ${lattesBlock}
     ${linksHtml}
@@ -1294,26 +1283,22 @@ function renderizarDetalheMedico(m, curriculo = null) {
   // Tratamento dos vínculos e hospitais da COLIH
   let hospitaisColih = [];
   if (m.colih && m.colih.hospitais) {
-      // Divide por vírgula ou E e limpa
       hospitaisColih = m.colih.hospitais.replace(/ e /gi, ',').split(',').map(s => s.trim()).filter(Boolean);
   }
   
   let vinculosProcessados = vinculos.map(v => {
       let isColih = false;
       let estNome = (v.estabelecimento || '').toLowerCase();
-      // Checa se algum hospital colih bate com este estabelecimento
       if (estNome) {
           const match = hospitaisColih.find(hc => estNome.includes(hc.toLowerCase()) || hc.toLowerCase().includes(estNome));
           if (match) {
               isColih = true;
-              // Remove da lista para não duplicar
               hospitaisColih = hospitaisColih.filter(h => h !== match);
           }
       }
       return { ...v, isColih };
   });
 
-  // Adiciona os que sobraram da COLIH que não estavam no CNES
   hospitaisColih.forEach(hc => {
       vinculosProcessados.push({
           estabelecimento: hc,
@@ -1325,7 +1310,6 @@ function renderizarDetalheMedico(m, curriculo = null) {
       });
   });
 
-  // Título
   document.getElementById('med-detail-title').innerHTML = `
     <h2 style="font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px;">
         ${m.nome || '—'}
@@ -1335,54 +1319,48 @@ function renderizarDetalheMedico(m, curriculo = null) {
     <p style="color:var(--text-secondary);font-size:13px;">${m.especialidade || '—'} · CNS: ${m.cns || '—'}</p>
   `;
 
-  // Telefones COLIH
   let telHtml = '';
   if (m.colih && (m.colih.telefone || m.colih.celular)) {
-      telHtml = `<div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Telefones (COLIH)</label><span style="font-size:14px; font-weight:600; color:var(--accent-purple);">${m.colih.telefone || ''} ${m.colih.celular || ''}</span></div>`;
+      telHtml = `<div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Telefones (COLIH)</label><span style="font-size:14px; font-weight:600; color:var(--text-primary);">${m.colih.telefone || ''} ${m.colih.celular || ''}</span></div>`;
+  }
+
+  const crm = m.crm || curriculo?.crm_cnes || curriculo?.data?.crm_uf || noP?.crm;
+  let crmHtml = '';
+  if (crm) {
+      crmHtml = `<div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CRM</label><span style="font-size:16px; font-weight:800; color:#fff; background:var(--accent-cyan); padding:4px 10px; border-radius:6px; display:inline-block; width:fit-content;">CRM ${crm} ${m.crm_uf || 'BA'}</span></div>`;
+  } else {
+      crmHtml = `<div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CRM</label><span style="font-size:14px; font-weight:600; color:var(--text-muted);">Não identificado</span></div>`;
   }
 
   // Card CNES
-  document.getElementById('med-cnes-card').innerHTML = `
-    <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:800; color:var(--text-primary); border-bottom:1px dashed var(--border-color); padding-bottom:12px; display:flex; align-items:center; gap:8px;">
-       Dados CNES
-    </h3>
-    <div class="info-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-      <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Nome</label><span style="font-size:14px; font-weight:600;">${m.nome || '—'}</span></div>
-      <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Especialidade</label><span style="font-size:14px; font-weight:600;">${m.especialidade || '—'}</span></div>
-      <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CBO</label><span style="font-size:14px; font-weight:600;">${m.cbo || '—'}</span></div>
-      <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CNS</label><span style="font-size:14px; font-weight:600;">${m.cns || '—'}</span></div>
-      ${telHtml}
-      <div class="info-item" style="display:flex; flex-direction:column; grid-column: 1 / -1;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Instituições Ativas</label><span style="font-size:14px; font-weight:600; color:var(--accent-cyan);">${vinculos.filter(v=>v.ativo).length} estabelecimentos no CNES</span></div>
-    </div>
-    <div style="margin-top:auto; padding-top:16px; border-top:1px solid var(--border-color); font-size:11px; color:var(--text-muted); line-height:1.6;">
-      <div style="display:flex; justify-content:space-between;">
-        <span><strong>Fonte:</strong> ${fonte.nome || 'DATASUS/CNES'} · Competência: ${fonte.competencia ? `${fonte.competencia.slice(0,4)}/${fonte.competencia.slice(4)}` : '—'}</span>
-        <span><strong>Atualizado:</strong> ${fonte.data_atualizacao_fmt || '—'}</span>
+  const cardCnes = document.getElementById('med-cnes-card');
+  if (cardCnes) {
+    cardCnes.innerHTML = `
+      <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:800; color:var(--text-primary); border-bottom:1px dashed var(--border-color); padding-bottom:12px; display:flex; align-items:center; gap:8px;">
+        Dados CNES & Contato
+      </h3>
+      <div class="info-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+        ${crmHtml}
+        ${telHtml}
+        <div class="info-item" style="display:flex; flex-direction:column; grid-column: 1 / -1; margin-top: 8px;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Nome</label><span style="font-size:14px; font-weight:600;">${m.nome || '—'}</span></div>
+        <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Especialidade</label><span style="font-size:14px; font-weight:600;">${m.especialidade || '—'}</span></div>
+        <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CBO</label><span style="font-size:14px; font-weight:600;">${m.cbo || '—'}</span></div>
+        <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CNS</label><span style="font-size:14px; font-weight:600;">${m.cns || '—'}</span></div>
+        
+        <div class="info-item" style="display:flex; flex-direction:column; grid-column: 1 / -1;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Instituições Ativas</label><span style="font-size:14px; font-weight:600; color:var(--accent-cyan);">${vinculos.filter(v=>v.ativo).length} estabelecimentos no CNES</span></div>
       </div>
-    </div>
-  `;
-
-  // Card CFM
-  const crm = m.crm || curriculo?.crm_cnes || curriculo?.data?.crm_uf || noP?.crm;
-  document.getElementById('med-cfm-card').innerHTML = `
-    <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:800; color:var(--text-primary); border-bottom:1px dashed var(--border-color); padding-bottom:12px; display:flex; align-items:center; gap:8px;">
-      🔑 Dados CFM
-    </h3>
-    ${crm ? `
-      <div class="info-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CRM</label><span style="font-size:16px; font-weight:800; color:#fff; background:var(--accent-cyan); padding:4px 10px; border-radius:6px; display:inline-block; width:fit-content;">${crm} ${m.crm_uf || 'BA'}</span></div>
-        <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Situação</label><span style="font-size:14px; font-weight:600; color:${noP?.crm_situacao === 'Regular' ? '#10b981' : (noP?.crm_situacao ? '#ef4444' : 'var(--text-muted)')};">${noP?.crm_situacao || 'Não informada'}</span></div>
+      <div style="margin-top:auto; padding-top:16px; border-top:1px solid var(--border-color); font-size:11px; color:var(--text-muted); line-height:1.6;">
+        <div style="display:flex; justify-content:space-between;">
+          <span><strong>Fonte:</strong> ${fonte.nome || 'DATASUS/CNES'} · Competência: ${fonte.competencia ? `${fonte.competencia.slice(0,4)}/${fonte.competencia.slice(4)}` : '—'}</span>
+          <span><strong>Atualizado:</strong> ${fonte.data_atualizacao_fmt || '—'}</span>
+        </div>
       </div>
-      <p style="font-size:11px; color:var(--text-muted); margin-top:24px; padding:12px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid rgba(255,255,255,0.05);"><i class="fas fa-info-circle"></i> O CRM pode estar vindo do CNES, Currículo Lattes ou Doctoralia.</p>
-    ` : `
-      <div style="text-align:center; padding:32px 20px; color:var(--text-muted); background:var(--bg-body); border-radius:12px; border:1px dashed var(--border-color);">
-        <div style="font-size:32px; margin-bottom:12px; opacity:0.5;">🔍</div>
-        <p style="font-size:13px; font-weight:500; line-height:1.5;">O CRM deste médico não está disponível na base CNES.</p>
-        <p style="font-size:12px; margin-top:12px;">Consulte no <a href="https://portal.cfm.org.br/busca-medicos/?nome=${encodeURIComponent(m.nome||'')}" target="_blank" style="color:var(--accent-cyan); font-weight:700; text-decoration:none; padding:4px 8px; background:rgba(0,255,136,0.1); border-radius:4px;">Portal CFM</a> e registre no pipeline.</p>
-      </div>
-      <div style="font-size:10px; color:var(--text-muted); margin-top:16px; text-align:center; opacity:0.6;">Fonte de consulta: portal.cfm.org.br</div>
-    `}
-  `;
+    `;
+  }
+  
+  // Limpa o card CFM se ainda existir
+  const cardCfm = document.getElementById('med-cfm-card');
+  if (cardCfm) { cardCfm.style.display = 'none'; cardCfm.innerHTML = ''; }
 
   // Vínculos
   document.getElementById('vinc-fonte-chip').innerHTML = fonteChip(fonte);
