@@ -1320,8 +1320,12 @@ function renderizarDetalheMedico(m, curriculo = null) {
   `;
 
   let telHtml = '';
-  if (m.colih && (m.colih.telefone || m.colih.celular)) {
-      telHtml = `<div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Telefones (COLIH)</label><span style="font-size:14px; font-weight:600; color:var(--text-primary);">${m.colih.telefone || ''} ${m.colih.celular || ''}</span></div>`;
+  if (m.colih && (m.colih.telefone || m.colih.celular || m.colih.email)) {
+      telHtml = `<div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Contatos (COLIH)</label>
+      <span style="font-size:14px; font-weight:600; color:var(--text-primary);">
+        ${[m.colih.telefone, m.colih.celular].filter(Boolean).join(' / ') || '—'}
+        <br/><span style="color:var(--accent-cyan); font-size: 13px;">${m.colih.email || ''}</span>
+      </span></div>`;
   }
 
   const crm = m.crm || curriculo?.crm_cnes || curriculo?.data?.crm_uf || noP?.crm;
@@ -1388,13 +1392,26 @@ function renderizarDetalheMedico(m, curriculo = null) {
 
   // Ações de captação
   const wrap = document.getElementById('captacao-actions-wrap');
-  if (m.colih && m.colih.observacoes) {
+  if (m.colih) {
+    let colab = m.colih.colaboracao ? `<span style="background:var(--accent-blue);color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700;">Cooperação: ${m.colih.colaboracao}</span>` : '';
+    let tags = [];
+    if (m.colih.atende_menores === 'Sim') tags.push('✅ Menores');
+    if (m.colih.atende_bebes === 'Sim') tags.push('✅ Bebês');
+    if (m.colih.e_tj === 'Sim') tags.push('📖 Testemunha de Jeová');
+    if (m.colih.e_consultor === 'Sim') tags.push('🎓 Consultor');
+    
+    let tagsHtml = tags.length > 0 ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;">${tags.map(t=>`<span style="background:rgba(255,255,255,0.1);border:1px solid var(--border-color);padding:2px 8px;border-radius:4px;font-size:11px;">${t}</span>`).join('')}</div>` : '';
+
     wrap.innerHTML = `
-      <div style="width:100%; text-align:left; font-size:13px; line-height:1.5; padding: 12px; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.2);">
-        <div style="font-weight:600; color:#10b981; font-size:14px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-          🤝 Observações Extras (COLIH)
+      <div style="width:100%; text-align:left; font-size:13px; line-height:1.5; padding: 16px; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.2);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+           <div style="font-weight:800; color:#10b981; font-size:15px; display:flex; align-items:center; gap:6px;">
+             🤝 Perfil de Cooperador COLIH
+           </div>
+           ${colab}
         </div>
-        <div style="color:var(--text-muted);">${m.colih.observacoes}</div>
+        ${tagsHtml}
+        ${m.colih.observacoes ? `<div style="margin-top:12px; padding:12px; background:rgba(0,0,0,0.1); border-radius:6px; border-left:3px solid #10b981;"><strong style="display:block;margin-bottom:4px;color:var(--text-secondary);">📝 Observações:</strong><span style="color:var(--text-muted);">${m.colih.observacoes}</span></div>` : ''}
       </div>
     `;
   } else if (noP) {
@@ -1403,15 +1420,13 @@ function renderizarDetalheMedico(m, curriculo = null) {
       ${statusLabel(noP.status)}
       <button class="btn-secondary" onclick="abrirModalEditar('${m.cns}')">⚙️ Gerenciar</button>
     `;
-  } else if (!m.colih) {
+  } else {
     wrap.innerHTML = `
       <span class="action-label">💡 Adicione este médico ao pipeline para iniciar a captação</span>
       <button class="btn-primary" onclick="abrirModalPipeline(${JSON.stringify(m).replace(/"/g,'&quot;')}, '${(vinculos[0]?.estabelecimento||'').replace(/'/g,"\'")}')">
         ➕ Adicionar ao Pipeline
       </button>
     `;
-  } else {
-      wrap.innerHTML = ''; // Cooperador sem observações não precisa de nada embaixo.
   }
 }
 
