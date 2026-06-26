@@ -812,6 +812,16 @@ def listar_especialidades():
     }
 
 
+
+_sus_hospitais_set = None
+
+def get_sus_hospitais_set():
+    global _sus_hospitais_set
+    if _sus_hospitais_set is None:
+        hospitais = get_hospitais_cache().get("estabelecimentos", [])
+        _sus_hospitais_set = {h.get("cnes") for h in hospitais if h.get("convenios") and "SUS" in h.get("convenios")}
+    return _sus_hospitais_set
+
 @app.get("/api/medicos")
 def buscar_medicos(
     nome: str = Query("", description="Busca por nome do médico"),
@@ -883,9 +893,12 @@ def buscar_medicos(
     total = len(resultado)
     pagina = resultado[offset : offset + limit]
 
-    # Enriquecer com dados do pipeline
+    # Enriquecer com dados do pipeline e SUS
     pipeline = get_pipeline()
     for m in pagina:
+        m["atende_sus"] = "Sim" if any(v.get("cnes") in sus_cnes_set for v in m.get("vinculos", [])) else "Não"
+        m["hospitais_sus"] = list(set([v.get("estabelecimento") for v in m.get("vinculos", []) if v.get("cnes") in sus_cnes_set and v.get("estabelecimento")]))
+        
         m["no_pipeline"] = m.get("cns") in pipeline
         if m["no_pipeline"]:
             p = pipeline[m["cns"]]

@@ -310,7 +310,12 @@
     <div class="search-bar">
       <div class="search-field-wrap">
         <span class="search-icon">🔍</span>
-        <input type="text" id="med-nome-input" placeholder="Nome do médico..."
+        <select id="med-sus-select" class="search-input" onchange="buscarMedicos()" style="max-width: 160px; border-right: 1px solid var(--border-color); border-radius: 6px 0 0 6px; flex-shrink: 0;">
+          <option value="">SUS (Ambos)</option>
+          <option value="sim">Sim, Atende SUS</option>
+          <option value="nao">Apenas Privado</option>
+        </select>
+        <input type="text" id="med-nome-input" placeholder="Nome do médico..." style="border-radius: 0 6px 6px 0;"
           class="search-input" oninput="debounce(buscarMedicos, 350)()" />
         <div style="position:relative; width:220px; flex-shrink:0;" class="custom-dropdown-container" id="dropdown-med-hosp">
             <input type="text" id="med-hosp-input" placeholder="Hospital / Estabelecimento..." autocomplete="off" oninput="filtrarDropdownMedHosp()" onfocus="abrirDropdownMedHosp()" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;">

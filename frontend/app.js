@@ -1037,6 +1037,7 @@ async function buscarMedicos() {
   const nome = document.getElementById('med-nome-input').value.trim();
   const esp = document.getElementById('med-esp-select').value;
   const hosp = document.getElementById('med-hosp-input')?.value.trim();
+  const sus = document.getElementById('med-sus-select')?.value;
 
   const el = document.getElementById('med-results');
   el.innerHTML = '<div class="loading-state">Buscando...</div>';
@@ -1046,6 +1047,7 @@ async function buscarMedicos() {
   if (nome) params.set('nome', nome);
   if (esp) params.set('especialidade', esp);
   if (hosp) params.set('hospital', hosp);
+  if (sus) params.set('atende_sus', sus);
 
   const data = await fetchAPI(`/medicos?${params}`).catch(() => null);
   if (!data) { el.innerHTML = '<div class="empty-state"><p>Erro ao buscar.</p></div>'; return; }
@@ -1075,7 +1077,10 @@ async function buscarMedicos() {
                 ${m.colih && m.colih.membro_resp ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Resp: ${m.colih.membro_resp}</div>` : ''}
               </td>
               <td class="td-muted">${m.especialidade || '—'}</td>
-              <td class="td-muted">${(m.vinculos || []).filter(v => v.ativo).length} ativo(s) / ${(m.vinculos || []).length} total</td>
+              <td class="td-muted">
+                <div style="margin-bottom:4px;">${(m.vinculos || []).filter(v => v.ativo).length} ativo(s) / ${(m.vinculos || []).length} total</div>
+                ${m.atende_sus === 'Sim' ? `<span title="Hospitais SUS:\n${(m.hospitais_sus||[]).join('\n')}" style="display:inline-block; font-size:10px; background:rgba(34, 197, 94, 0.1); color:#22c55e; padding:2px 6px; border-radius:4px; cursor:help; border:1px solid rgba(34, 197, 94, 0.2); font-weight:600;">SUS: Sim</span>` : ''}
+              </td>
               <td>${m.no_pipeline ? statusLabel(m.status_pipeline) : '<span class="status-badge status-na">—</span>'}</td>
               <td class="td-actions">
                 <button class="btn-secondary btn-sm" onclick="abrirDetalheMedico('${m.cns}')">Mais Informações</button>
