@@ -3686,8 +3686,8 @@ function initTomSelectHospital() {
     if(pipHospitalTomSelect) return;
     pipHospitalTomSelect = new TomSelect("#pip-hospital-busca-ts", {
         valueField: 'cnes',
-        labelField: 'nomeFantasia',
-        searchField: ['nomeFantasia', 'razaoSocial', 'cnes'],
+        labelField: 'nome',
+        searchField: ['nome', 'cnes'],
         load: function(query, callback) {
             if(!query.length) return callback();
             fetch(`${API}/hospitais?nome=${encodeURIComponent(query)}&limit=10`)
@@ -3699,31 +3699,16 @@ function initTomSelectHospital() {
         render: {
             option: function(item, escape) {
                 return `<div>
-                    <span style="font-weight:bold;">${escape(item.nomeFantasia || item.razaoSocial)}</span><br>
-                    <span style="font-size:11px; color:#aaa;">CNES: ${escape(item.cnes)}</span>
+                    <span style="font-weight:bold;">${escape(item.nome || 'Sem Nome')}</span><br>
+                    <span style="font-size:11px;color:#666;">CNES: ${escape(item.cnes)} | ${escape(item.municipio || '—')}</span>
                 </div>`;
             },
             item: function(item, escape) {
-                return `<div>${escape(item.nomeFantasia || item.razaoSocial)}</div>`;
+                return `<div>${escape(item.nome || item.cnes)}</div>`;
             }
         },
         onChange: function(value) {
-            if(!value) return;
-            const item = pipHospitalTomSelect.options[value];
-            if(item) {
-                const selectHosp = document.getElementById('pip-hospital');
-                const opt = document.createElement('option');
-                const nomeHosp = item.nomeFantasia || item.razaoSocial;
-                opt.value = nomeHosp;
-                opt.textContent = nomeHosp;
-                
-                selectHosp.insertBefore(opt, selectHosp.lastElementChild);
-                selectHosp.value = nomeHosp;
-                document.getElementById('pip-cnes').value = item.cnes;
-                
-                document.getElementById('pip-hospital-outro-container').style.display = 'none';
-                pipHospitalTomSelect.clear(true);
-            }
+            document.getElementById('pip-cnes').value = value || '';
         }
     });
 }
