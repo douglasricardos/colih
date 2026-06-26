@@ -380,7 +380,7 @@ def get_pipeline():
     if supabase:
         try:
             res = supabase.table("pipeline").select("*").execute()
-            return {row["cns"]: row["data"] for row in res.data}
+            return {str(row["cns"]): row["data"] for row in res.data}
         except:
             pass
     return load_json(PIPELINE_FILE, {})
@@ -818,7 +818,7 @@ _sus_hospitais_set = None
 def get_sus_hospitais_set():
     global _sus_hospitais_set
     if _sus_hospitais_set is None:
-        hospitais = get_hospitais_cache().get("estabelecimentos", [])
+        hospitais = get_estab_cache().get("estabelecimentos", [])
         _sus_hospitais_set = {h.get("cnes") for h in hospitais if h.get("convenios") and "SUS" in h.get("convenios")}
     return _sus_hospitais_set
 
@@ -829,6 +829,7 @@ def buscar_medicos(
     hospital: str = Query("", description="Filtra por nome do estabelecimento"),
     municipio: Optional[str] = Query(None),
     apenas_ativos: bool = Query(True),
+    atende_sus: Optional[str] = Query(None, description="Filtra por Atende SUS (sim/nao)"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ):
@@ -837,7 +838,15 @@ def buscar_medicos(
     meta = cache.get("meta", {})
     medicos = cache.get("medicos", [])
 
+    sus_cnes_set = get_sus_hospitais_set()
     resultado = medicos
+    
+    if atende_sus:
+        want_sus = (atende_sus.lower() == "sim")
+        resultado = [
+            m for m in resultado
+            if any(v.get("cnes") in sus_cnes_set for v in m.get("vinculos", [])) == want_sus
+        ]
 
     if nome:
         nome_lower = nome.lower()

@@ -1362,7 +1362,21 @@ function renderizarDetalheMedico(m) {
 
   // Ações de captação
   const wrap = document.getElementById('captacao-actions-wrap');
-  if (noP) {
+  if (m.colih) {
+    let extra = '';
+    if (m.colih.observacoes) extra += `<div style="margin-bottom:8px;"><strong>Observações COLIH:</strong> <span style="color:var(--text-muted);">${m.colih.observacoes}</span></div>`;
+    if (m.colih.hospitais) extra += `<div style="margin-bottom:8px;"><strong>Hospitais (COLIH):</strong> <span style="color:var(--text-muted);">${m.colih.hospitais}</span></div>`;
+    if (m.colih.telefone || m.colih.celular) extra += `<div style="margin-bottom:8px;"><strong>Telefones:</strong> <span style="color:var(--text-muted);">${m.colih.telefone || ''} ${m.colih.celular || ''}</span></div>`;
+    
+    wrap.innerHTML = `
+      <div style="width:100%; text-align:left; font-size:13px; line-height:1.5; padding: 12px; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.2);">
+        <div style="font-weight:600; color:#10b981; font-size:14px; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+          🤝 Profissional Cooperador da COLIH
+        </div>
+        ${extra}
+      </div>
+    `;
+  } else if (noP) {
     wrap.innerHTML = `
       <span class="action-label">✅ Já está no pipeline</span>
       ${statusLabel(noP.status)}
