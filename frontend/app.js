@@ -1126,7 +1126,6 @@ async function abrirDetalheMedico(cns) {
 
   document.getElementById('med-detail-title').innerHTML = '<div class="loading-state">Carregando dados do médico...</div>';
   document.getElementById('med-cnes-card').innerHTML = '';
-  document.getElementById('med-cfm-card').innerHTML = '';
   document.getElementById('med-curriculo-card').innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">🔄 Carregando currículo...</div>';
   document.getElementById('vinculos-table-wrap').innerHTML = '';
   document.getElementById('vinc-fonte-chip').innerHTML = '';
