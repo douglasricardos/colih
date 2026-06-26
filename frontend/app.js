@@ -1288,14 +1288,55 @@ function renderizarDetalheMedico(m) {
       }
   }
 
+  // Tratamento dos vínculos e hospitais da COLIH
+  let hospitaisColih = [];
+  if (m.colih && m.colih.hospitais) {
+      // Divide por vírgula ou E e limpa
+      hospitaisColih = m.colih.hospitais.replace(/ e /gi, ',').split(',').map(s => s.trim()).filter(Boolean);
+  }
+  
+  let vinculosProcessados = vinculos.map(v => {
+      let isColih = false;
+      let estNome = (v.estabelecimento || '').toLowerCase();
+      // Checa se algum hospital colih bate com este estabelecimento
+      if (estNome) {
+          const match = hospitaisColih.find(hc => estNome.includes(hc.toLowerCase()) || hc.toLowerCase().includes(estNome));
+          if (match) {
+              isColih = true;
+              // Remove da lista para não duplicar
+              hospitaisColih = hospitaisColih.filter(h => h !== match);
+          }
+      }
+      return { ...v, isColih };
+  });
+
+  // Adiciona os que sobraram da COLIH que não estavam no CNES
+  hospitaisColih.forEach(hc => {
+      vinculosProcessados.push({
+          estabelecimento: hc,
+          municipio: '—',
+          tipo_unidade: 'Anotado pela COLIH',
+          ativo: true,
+          isColih: true,
+          apenasColih: true
+      });
+  });
+
   // Título
   document.getElementById('med-detail-title').innerHTML = `
     <h2 style="font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px;">
         ${m.nome || '—'}
         ${isTmoDoctor ? '<span style="background:#ef4444;color:white;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;text-transform:uppercase;box-shadow:0 2px 4px rgba(239,68,68,0.3);">🔥 Equipe de TMO</span>' : ''}
+        ${m.colih ? '<span style="background:#10b981;color:white;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;text-transform:uppercase;box-shadow:0 2px 4px rgba(16,185,129,0.3);">🤝 COLIH</span>' : ''}
     </h2>
     <p style="color:var(--text-secondary);font-size:13px;">${m.especialidade || '—'} · CNS: ${m.cns || '—'}</p>
   `;
+
+  // Telefones COLIH
+  let telHtml = '';
+  if (m.colih && (m.colih.telefone || m.colih.celular)) {
+      telHtml = `<div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Telefones (COLIH)</label><span style="font-size:14px; font-weight:600; color:var(--accent-purple);">${m.colih.telefone || ''} ${m.colih.celular || ''}</span></div>`;
+  }
 
   // Card CNES
   document.getElementById('med-cnes-card').innerHTML = `
@@ -1306,9 +1347,9 @@ function renderizarDetalheMedico(m) {
       <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Nome</label><span style="font-size:14px; font-weight:600;">${m.nome || '—'}</span></div>
       <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Especialidade</label><span style="font-size:14px; font-weight:600;">${m.especialidade || '—'}</span></div>
       <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CBO</label><span style="font-size:14px; font-weight:600;">${m.cbo || '—'}</span></div>
-      <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CRM</label><span style="font-size:14px; font-weight:600; color:var(--accent-purple);">${m.crm ? `${m.crm} ${m.crm_uf || 'BA'}` : '—'}</span></div>
       <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CNS</label><span style="font-size:14px; font-weight:600;">${m.cns || '—'}</span></div>
-      <div class="info-item" style="display:flex; flex-direction:column; grid-column: 1 / -1;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Instituições Ativas</label><span style="font-size:14px; font-weight:600; color:var(--accent-cyan);">${vinculos.filter(v=>v.ativo).length} estabelecimentos</span></div>
+      ${telHtml}
+      <div class="info-item" style="display:flex; flex-direction:column; grid-column: 1 / -1;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Instituições Ativas</label><span style="font-size:14px; font-weight:600; color:var(--accent-cyan);">${vinculos.filter(v=>v.ativo).length} estabelecimentos no CNES</span></div>
     </div>
     <div style="margin-top:auto; padding-top:16px; border-top:1px solid var(--border-color); font-size:11px; color:var(--text-muted); line-height:1.6;">
       <div style="display:flex; justify-content:space-between;">
@@ -1319,17 +1360,17 @@ function renderizarDetalheMedico(m) {
   `;
 
   // Card CFM
-  const crm = noP?.crm;
+  const crm = m.crm || noP?.crm;
   document.getElementById('med-cfm-card').innerHTML = `
     <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:800; color:var(--text-primary); border-bottom:1px dashed var(--border-color); padding-bottom:12px; display:flex; align-items:center; gap:8px;">
       🔑 Dados CFM
     </h3>
     ${crm ? `
       <div class="info-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CRM</label><span style="font-size:16px; font-weight:800; color:#fff; background:var(--accent-cyan); padding:4px 10px; border-radius:6px; display:inline-block; width:fit-content;">${crm}</span></div>
-        <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Situação</label><span style="font-size:14px; font-weight:600; color:${noP?.crm_situacao === 'Regular' ? '#10b981' : '#ef4444'};">${noP?.crm_situacao || '—'}</span></div>
+        <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">CRM</label><span style="font-size:16px; font-weight:800; color:#fff; background:var(--accent-cyan); padding:4px 10px; border-radius:6px; display:inline-block; width:fit-content;">${crm} ${m.crm_uf || 'BA'}</span></div>
+        <div class="info-item" style="display:flex; flex-direction:column;"><label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Situação</label><span style="font-size:14px; font-weight:600; color:${noP?.crm_situacao === 'Regular' ? '#10b981' : (noP?.crm_situacao ? '#ef4444' : 'var(--text-muted)')};">${noP?.crm_situacao || 'Não informada'}</span></div>
       </div>
-      <p style="font-size:11px; color:var(--text-muted); margin-top:24px; padding:12px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid rgba(255,255,255,0.05);"><i class="fas fa-info-circle"></i> CRM inserido manualmente via Portal CFM e salvo no pipeline.</p>
+      <p style="font-size:11px; color:var(--text-muted); margin-top:24px; padding:12px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid rgba(255,255,255,0.05);"><i class="fas fa-info-circle"></i> O CRM pode estar vindo do CNES, Currículo Lattes ou Doctoralia.</p>
     ` : `
       <div style="text-align:center; padding:32px 20px; color:var(--text-muted); background:var(--bg-body); border-radius:12px; border:1px dashed var(--border-color);">
         <div style="font-size:32px; margin-bottom:12px; opacity:0.5;">🔍</div>
@@ -1342,17 +1383,21 @@ function renderizarDetalheMedico(m) {
 
   // Vínculos
   document.getElementById('vinc-fonte-chip').innerHTML = fonteChip(fonte);
-  document.getElementById('vinculos-table-wrap').innerHTML = vinculos.length ? `
+  document.getElementById('vinculos-table-wrap').innerHTML = vinculosProcessados.length ? `
     <div class="table-wrap">
       <table>
         <thead><tr><th>Estabelecimento</th><th>Município</th><th>Tipo</th><th>Status</th></tr></thead>
         <tbody>
-          ${vinculos.map(v => `
+          ${vinculosProcessados.map(v => `
             <tr>
-              <td style="font-weight:600">${v.estabelecimento || '—'}</td>
+              <td style="font-weight:600; display:flex; flex-direction:column; gap:4px;">
+                ${v.estabelecimento || '—'}
+                ${v.isColih ? '<span style="font-size:10px; font-weight:700; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; width:fit-content;">✅ Validado COLIH</span>' : ''}
+                ${v.apenasColih ? '<span style="font-size:10px; font-weight:700; color:var(--accent-purple); background:rgba(167,139,250,0.1); padding:2px 6px; border-radius:4px; width:fit-content;">📌 Apenas na COLIH (sem CNES)</span>' : ''}
+              </td>
               <td class="td-muted">${v.municipio || '—'}</td>
               <td class="td-muted">${v.tipo_unidade || '—'}</td>
-              <td><span class="ativo-badge ${v.ativo ? 'ativo' : 'inativo'}">${v.ativo ? '● Ativo' : '○ Inativo'}</span></td>
+              <td>${v.apenasColih ? '<span class="ativo-badge ativo">● Informado</span>' : `<span class="ativo-badge ${v.ativo ? 'ativo' : 'inativo'}">${v.ativo ? '● Ativo' : '○ Inativo'}</span>`}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -1362,33 +1407,30 @@ function renderizarDetalheMedico(m) {
 
   // Ações de captação
   const wrap = document.getElementById('captacao-actions-wrap');
-  if (m.colih) {
-    let extra = '';
-    if (m.colih.observacoes) extra += `<div style="margin-bottom:8px;"><strong>Observações COLIH:</strong> <span style="color:var(--text-muted);">${m.colih.observacoes}</span></div>`;
-    if (m.colih.hospitais) extra += `<div style="margin-bottom:8px;"><strong>Hospitais (COLIH):</strong> <span style="color:var(--text-muted);">${m.colih.hospitais}</span></div>`;
-    if (m.colih.telefone || m.colih.celular) extra += `<div style="margin-bottom:8px;"><strong>Telefones:</strong> <span style="color:var(--text-muted);">${m.colih.telefone || ''} ${m.colih.celular || ''}</span></div>`;
-    
+  if (m.colih && m.colih.observacoes) {
     wrap.innerHTML = `
       <div style="width:100%; text-align:left; font-size:13px; line-height:1.5; padding: 12px; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.2);">
-        <div style="font-weight:600; color:#10b981; font-size:14px; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
-          🤝 Profissional Cooperador da COLIH
+        <div style="font-weight:600; color:#10b981; font-size:14px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+          🤝 Observações Extras (COLIH)
         </div>
-        ${extra}
+        <div style="color:var(--text-muted);">${m.colih.observacoes}</div>
       </div>
     `;
   } else if (noP) {
     wrap.innerHTML = `
       <span class="action-label">✅ Já está no pipeline</span>
       ${statusLabel(noP.status)}
-      <button class="btn-secondary" onclick="abrirModalEditar('${m.cns}')">✏️ Gerenciar</button>
+      <button class="btn-secondary" onclick="abrirModalEditar('${m.cns}')">⚙️ Gerenciar</button>
     `;
-  } else {
+  } else if (!m.colih) {
     wrap.innerHTML = `
       <span class="action-label">💡 Adicione este médico ao pipeline para iniciar a captação</span>
-      <button class="btn-primary" onclick="abrirModalPipeline(${JSON.stringify(m).replace(/"/g,'&quot;')}, '${(vinculos[0]?.estabelecimento||'').replace(/'/g,"'")}')">
+      <button class="btn-primary" onclick="abrirModalPipeline(${JSON.stringify(m).replace(/"/g,'&quot;')}, '${(vinculos[0]?.estabelecimento||'').replace(/'/g,"\'")}')">
         ➕ Adicionar ao Pipeline
       </button>
     `;
+  } else {
+      wrap.innerHTML = ''; // Cooperador sem observações não precisa de nada embaixo.
   }
 }
 
