@@ -1143,7 +1143,7 @@ async function abrirDetalheMedico(cns) {
     const safeName = m.nome.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     history.pushState({cns: cns, type: 'medico'}, '', '/medicos/' + safeName);
   }
-  renderizarDetalheMedico(m);
+  renderizarDetalheMedico(m, curriculo);
   renderCurriculoCard(m, curriculo);
 }
 
@@ -1155,11 +1155,14 @@ function abrirDetalheMedicoFromHosp(m) {
   document.getElementById('med-fonte-bar').style.display = 'none';
   const detail = document.getElementById('med-detail');
   detail.style.display = 'block';
-  renderizarDetalheMedico(m);
+  renderizarDetalheMedico(m, null);
   // Carrega currículo em background
   if (m.cns) {
     document.getElementById('med-curriculo-card').innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">🔄 Carregando currículo...</div>';
-    fetchAPI(`/medicos/${m.cns}/curriculo`).then(c => renderCurriculoCard(m, c)).catch(() => renderCurriculoCard(m, null));
+    fetchAPI(`/medicos/${m.cns}/curriculo`).then(c => {
+       renderCurriculoCard(m, c);
+       renderizarDetalheMedico(m, c);
+    }).catch(() => renderCurriculoCard(m, null));
   }
 }
 
@@ -1273,7 +1276,7 @@ window.enriquecerMedico = async function(cns) {
   }
 };
 
-function renderizarDetalheMedico(m) {
+function renderizarDetalheMedico(m, curriculo = null) {
   const fonte = m.fonte || {};
   const vinculos = m.vinculos || [];
   const noP = m.pipeline;
@@ -1360,7 +1363,7 @@ function renderizarDetalheMedico(m) {
   `;
 
   // Card CFM
-  const crm = m.crm || noP?.crm;
+  const crm = m.crm || curriculo?.crm_cnes || curriculo?.data?.crm_uf || noP?.crm;
   document.getElementById('med-cfm-card').innerHTML = `
     <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:800; color:var(--text-primary); border-bottom:1px dashed var(--border-color); padding-bottom:12px; display:flex; align-items:center; gap:8px;">
       🔑 Dados CFM
