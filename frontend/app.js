@@ -2350,7 +2350,7 @@ async function importarZipLocal() {
 }
 
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
     carregarUsuarios();
     carregarInfo();
     carregarEspecialidades();
@@ -2361,17 +2361,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     syncPollInterval = setInterval(fetchSyncStatus, 60000);
     
     // Auto buscar listas e esconder splash screen
-    try {
-        await Promise.all([buscarHospitais(), buscarMedicos()]);
-    } catch (e) {
-        console.error("Erro ao carregar dados iniciais:", e);
-    }
+    Promise.all([buscarHospitais(), buscarMedicos()]).finally(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.style.display = 'none', 500);
+        }
+    });
     
-    const splash = document.getElementById('splash-screen');
-    if (splash) {
-        splash.style.opacity = '0';
-        setTimeout(() => splash.style.display = 'none', 500);
-    }
+    // Failsafe
+    setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash && splash.style.display !== 'none') {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.style.display = 'none', 500);
+        }
+    }, 3000);
 });
 
 window.switchTab = function(tabId, btn) {
