@@ -20,14 +20,17 @@
 </head>
 <body>
 
-
+<div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease;">
+  <img src="logo-colih-portal.png" alt="COLIH" style="max-height: 80px; margin-bottom: 20px;">
+  <div style="color: var(--text-primary); font-size: 18px; font-weight: 600; letter-spacing: 1px;">Carregando o Dashboard...</div>
+</div>
 
 
 <div style="display: flex; height: 100vh; overflow: hidden;">
   <!-- ─── SIDEBAR ESQUERDA (GLPI Style) ───────────────────────── -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <img src="logo-colih-portal.png" alt="COLIH" style="max-height: 40px; margin-bottom: 5px; filter: brightness(0) invert(1); cursor: pointer;" onclick="window.history.replaceState({}, '', '/'); window.location.reload();"><br>
+      <img src="logo-colih-portal.png" alt="COLIH" style="max-height: 40px; margin-bottom: 5px; cursor: pointer;" onclick="window.history.replaceState({}, '', '/'); window.location.reload();"><br>
       COLIH Salvador
     </div>
     
@@ -37,10 +40,10 @@
         Dados do SUS <i data-lucide="chevron-down" id="icon-sus"></i>
       </li>
       <div id="group-sus">
+        <li class="menu-item active" onclick="openTab('stats', this)"><i data-lucide="bar-chart-3"></i> Dashboard</li>
         <li class="menu-item" onclick="openTab('hospitais', this)"><i data-lucide="building-2"></i> Instituições</li>
         <li class="menu-item" onclick="openTab('medicos', this)"><i data-lucide="stethoscope"></i> Profissionais</li>
         <li class="menu-item" onclick="openTab('pipeline', this)"><i data-lucide="list-todo"></i> Pipeline (HLC) <span class="tab-badge" id="pipeline-count">0</span></li>
-        <li class="menu-item active" onclick="openTab('stats', this)"><i data-lucide="bar-chart-3"></i> Captação / HLC</li>
         <li class="menu-item" onclick="openTab('calendario', this)"><i data-lucide="calendar-days"></i> Calendário de Visitas</li>
       </div>
     </ul>
@@ -569,8 +572,7 @@
   <!-- ─── ABA: ESTATÍSTICAS ────────────────────────────────────── -->
   <section class="tab-panel active" id="tab-stats">
     <div class="panel-header" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent); border-bottom: 1px solid rgba(16, 185, 129, 0.2);">
-      <h1>🎯 Dashboard Inteligente de Captação</h1>
-      <p>Gamificação e prospecção HLC-9. Identifique lacunas na rede (red flags) e priorize alvos estratégicos.</p>
+      <h1>Dashboard</h1>
     </div>
 
     <!-- Gamification Cards -->
@@ -793,6 +795,19 @@
          <button class="btn-primary" onclick="salvarConfigLogs()" style="align-self: flex-start;"><i data-lucide="save"></i> Salvar Configuração de Logs</button>
       </div>
     </section>
+
+  <!-- ─── ABA: CALENDÁRIO ────────────────────────────────────── -->
+  <section class="tab-panel" id="tab-calendario">
+    <div class="panel-header" style="background: linear-gradient(135deg, rgba(234, 179, 8, 0.1), transparent); border-bottom: 1px solid rgba(234, 179, 8, 0.2);">
+      <h1>📅 Calendário de Visitas</h1>
+      <p>Acompanhe e agende suas próximas visitas aos médicos cooperadores e alvos.</p>
+    </div>
+    <div style="margin-top:20px; background:var(--bg-card); padding:40px; text-align:center; border-radius:12px; border:1px solid var(--border-color); color:var(--text-secondary);">
+        <i data-lucide="calendar" style="width:48px; height:48px; opacity:0.5; margin-bottom:16px; display:inline-block;"></i>
+        <h3>Módulo em Desenvolvimento</h3>
+        <p style="font-size:14px; max-width:400px; margin:0 auto; margin-top:8px;">O calendário interativo de visitas estará disponível em breve. Continue gerenciando os contatos através do Pipeline.</p>
+    </div>
+  </section>
 
 </main>
 
