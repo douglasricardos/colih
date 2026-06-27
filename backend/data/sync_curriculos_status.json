@@ -1,12 +1,12 @@
 {
   "rodando": false,
-  "total": 1,
-  "processados": 1,
+  "total": 29602,
+  "processados": 230,
   "encontrados_lattes": 0,
   "erros": 0,
-  "ultima_rodada": "2026-06-26T09:57:07.947014",
+  "ultima_rodada": "2026-06-26T12:11:02.568237",
   "proxima_rodada": "2026-09-24",
-  "medico_atual": null,
-  "encontrados_doctoralia": 1,
+  "medico_atual": "Alessandro Nascimento Araujo Sousa",
+  "encontrados_doctoralia": 213,
   "playwright_ativo": true
 }

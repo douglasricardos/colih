@@ -125,7 +125,7 @@ window.abrirModalSyncCurriculos = async function() {
 
 window.iniciarSyncCurriculos = async function(colihOnly = false) {
   try {
-    const url = API + '/admin/sync-curriculos/start?colih_only=' + colihOnly + '&limite=500';
+    const url = API + '/admin/sync-curriculos/start?colih_only=' + colihOnly + '&limite=0';
     const r = await fetch(url, { method: 'POST' }).then(r => r.json());
     showToast(r.message || 'Sync iniciado!', 'success');
     document.getElementById('curriculo-sync-modal').style.display = 'none';
@@ -138,6 +138,73 @@ window.iniciarSyncCurriculos = async function(colihOnly = false) {
 // Polling: atualiza o widget a cada 30s
 atualizarWidgetCurriculos();
 setInterval(atualizarWidgetCurriculos, 30000);
+
+/* 📡 Widget de Sync CRM 📡 */
+async function atualizarWidgetCrm() {
+  try {
+    const s = await fetch(API + '/admin/sync-crm/status').then(r => r.json());
+    const label = document.getElementById('crm-sync-label');
+    const dot   = document.getElementById('crm-sync-dot');
+    if (!label || !dot) return;
+
+    if (s.rodando) {
+      label.textContent = `${s.api_consultas || 0}/100 (Rodando)`;
+      label.style.color = '#10b981';
+      dot.style.background = '#10b981';
+      dot.style.boxShadow = '0 0 5px #10b981';
+    } else if (s.api_consultas >= 100) {
+      label.textContent = `Limite (100/100)`;
+      label.style.color = '#ef4444';
+      dot.style.background = '#ef4444';
+      dot.style.boxShadow = '0 0 5px #ef4444';
+    } else {
+      label.textContent = `${s.api_consultas || 0}/100`;
+      label.style.color = '#94a3b8';
+      dot.style.background = '#94a3b8';
+      dot.style.boxShadow = 'none';
+    }
+  } catch(e) {}
+}
+
+window.abrirModalSyncCrm = async function() {
+  document.getElementById('crmSyncModal').style.display = 'flex';
+  const status = await fetch(API + '/admin/sync-crm/status').then(r => r.json()).catch(() => ({}));
+  
+  const elStatus = document.getElementById('modal-crm-status');
+  if (status.rodando) {
+    elStatus.textContent = 'Rodando...';
+    elStatus.style.color = '#10b981';
+    document.getElementById('btn-start-crm').disabled = true;
+    document.getElementById('btn-start-crm').style.opacity = '0.5';
+  } else {
+    elStatus.textContent = status.api_consultas >= 100 ? 'Limite Mensal Atingido' : 'Parado';
+    elStatus.style.color = status.api_consultas >= 100 ? '#ef4444' : '#94a3b8';
+    document.getElementById('btn-start-crm').disabled = (status.api_consultas >= 100);
+    document.getElementById('btn-start-crm').style.opacity = (status.api_consultas >= 100) ? '0.5' : '1';
+  }
+  
+  document.getElementById('modal-crm-cota').textContent = `${status.api_consultas || 0} / 100`;
+  document.getElementById('modal-crm-processados').textContent = status.processados || 0;
+  document.getElementById('modal-crm-erros').textContent = status.erros || 0;
+};
+
+window.iniciarSyncCrm = async function() {
+  try {
+    const r = await fetch(API + '/admin/sync-crm/start', { method: 'POST' }).then(r => r.json());
+    if (r.ok) {
+        showToast(r.message || 'Sync de CRM iniciado!', 'success');
+        document.getElementById('crmSyncModal').style.display = 'none';
+        atualizarWidgetCrm();
+    } else {
+        showToast(r.message || 'Erro', 'error');
+    }
+  } catch(e) {
+    showToast('Erro ao iniciar sync CRM', 'error');
+  }
+};
+
+atualizarWidgetCrm();
+setInterval(atualizarWidgetCrm, 30000);
 
 
 
@@ -1305,31 +1372,44 @@ function renderCurriculoCard(m, curriculo) {
   const links = curriculo?.links || curriculo?.data?.links || {};
   const doc = curriculo?.data?.doctoralia || {};
   const lattes = curriculo?.data?.lattes || {};
+  const crmApi = curriculo?.data?.consultacrm || {};
   const status = curriculo?.status || 'pendente';
 
   // Doctoralia block
   let docBlock = '';
   if (doc.status === 'encontrado') {
     const rating = doc.avaliacao ? `★ ${doc.avaliacao} (${doc.total_avaliacoes || 0} avaliações)` : '';
-    const esps = (doc.especialidades_doctoralia || []).join(', ') || '—';
+    const esps = (doc.especialidades_doctoralia && doc.especialidades_doctoralia.length > 0) ? doc.especialidades_doctoralia.join(', ') : '';
     const consultorios = (doc.consultorios || []).map(c =>
       `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:2px;"> <strong>${c.nome || ''}</strong> • ${c.endereco || ''}, ${c.cidade || ''} ${c.telefone ? '· ' + c.telefone : ''}</div>`
     ).join('');
     const convenios = (doc.convenios || []).filter(Boolean).slice(0, 6).join(', ');
     const crmDoc = doc.crm_doctoralia ? `<div><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">CRM (Doctoralia)</label><div style="font-size:13px;font-weight:700;color:var(--accent-green);">${doc.crm_doctoralia}</div></div>` : '';
-    docBlock = `
-      <div style="margin-top:0px;">
-        <div style="font-size:12px;font-weight:800;color:var(--accent-purple);text-transform:uppercase;margin-bottom:10px;">🩺 Doctoralia</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-          ${crmDoc}
-          ${doc.rqe ? `<div><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">RQE</label><div style="font-size:13px;font-weight:600;">${doc.rqe}</div></div>` : ''}
-          <div style="grid-column:1/-1;"><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">Especialidades</label><div style="font-size:13px;">${esps}</div></div>
-          ${rating ? `<div style="grid-column:1/-1;font-size:13px;color:var(--accent-yellow,#f59e0b);">${rating}</div>` : ''}
-        </div>
-        ${consultorios ? `<div style="margin-bottom:10px;"><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;display:block;margin-bottom:6px;">Consultórios</label>${consultorios}</div>` : ''}
-        ${convenios ? `<div><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;">Convênios</label><div style="font-size:12px;color:var(--text-secondary);">${convenios}</div></div>` : ''}
-        <a href="${doc.doctoralia_url || links.doctoralia || '#'}" target="_blank" style="display:inline-block;margin-top:12px;font-size:12px;color:var(--accent-cyan);text-decoration:none;font-weight:700;">Ver perfil completo na Doctoralia ↗</a>
-      </div>`;
+    
+    const hasData = crmDoc || doc.rqe || esps || rating || consultorios || convenios;
+
+    if (hasData) {
+      docBlock = `
+        <div style="margin-top:0px;">
+          <div style="font-size:12px;font-weight:800;color:var(--accent-purple);text-transform:uppercase;margin-bottom:10px;">🩺 Doctoralia</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            ${crmDoc}
+            ${doc.rqe ? `<div><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">RQE</label><div style="font-size:13px;font-weight:600;">${doc.rqe}</div></div>` : ''}
+            ${esps ? `<div style="grid-column:1/-1;"><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">Especialidades</label><div style="font-size:13px;">${esps}</div></div>` : ''}
+            ${rating ? `<div style="grid-column:1/-1;font-size:13px;color:var(--accent-yellow,#f59e0b);">${rating}</div>` : ''}
+          </div>
+          ${consultorios ? `<div style="margin-bottom:10px;"><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;display:block;margin-bottom:6px;">Consultórios</label>${consultorios}</div>` : ''}
+          ${convenios ? `<div><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;">Convênios</label><div style="font-size:12px;color:var(--text-secondary);">${convenios}</div></div>` : ''}
+          <a href="${doc.doctoralia_url || links.doctoralia || '#'}" target="_blank" style="display:inline-block;margin-top:12px;font-size:12px;color:var(--accent-cyan);text-decoration:none;font-weight:700;">Ver perfil completo na Doctoralia ↗</a>
+        </div>`;
+    } else {
+      docBlock = `
+        <div style="margin-top:0px;">
+          <div style="font-size:12px;font-weight:800;color:var(--accent-purple);text-transform:uppercase;margin-bottom:10px;">🩺 Doctoralia</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">Perfil básico (sem dados adicionais extraídos automaticamente).</div>
+          <a href="${doc.doctoralia_url || links.doctoralia || '#'}" target="_blank" style="display:inline-block;font-size:12px;color:var(--accent-cyan);text-decoration:none;font-weight:700;">Abrir perfil na Doctoralia ↗</a>
+        </div>`;
+    }
   }
 
   // Lattes block
@@ -1343,18 +1423,32 @@ function renderCurriculoCard(m, curriculo) {
       </div>`;
   }
 
+  // CRM API block
+  let crmBlock = '';
+  if (crmApi.status === 'encontrado') {
+    crmBlock = `
+      <div style="border-top:1px solid var(--border-color);margin-top:16px;padding-top:16px;">
+        <div style="font-size:12px;font-weight:800;color:var(--accent-purple);text-transform:uppercase;margin-bottom:8px;">🩺 Registro e Biografia (ConsultaCRM)</div>
+        <div style="display:flex; gap:12px; margin-bottom:8px;">
+          <div><label style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">CRM Oficial</label><div style="font-size:14px;font-weight:800;color:var(--accent-green);">${crmApi.crm}-${crmApi.uf}</div></div>
+        </div>
+        ${crmApi.biografia ? `<div style="font-size:12px; color:var(--text-primary); background:rgba(255,255,255,0.03); padding:10px; border-radius:6px; border-left:3px solid var(--accent-purple); margin-bottom:10px; font-style:italic;">"${crmApi.biografia}"</div>` : ''}
+        <a href="${crmApi.url}" target="_blank" style="font-size:12px;color:var(--accent-cyan);text-decoration:none;font-weight:700;">Abrir perfil original ↗</a>
+      </div>`;
+  }
+
   // Links de busca manual
   const btnStyle = `style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none;border:1px solid var(--border-color);color:var(--text-primary);background:var(--bg-body);cursor:pointer;"`;
+  const nomeEnc = encodeURIComponent(m.nome || '');
   const linksHtml = `
     <div style="border-top:1px solid var(--border-color);margin-top:16px;padding-top:16px;">
       <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:10px;">🔗 VERIFICAR MANUALMENTE</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;">
-        ${links.cfm ? `<a href="${links.cfm}" target="_blank" ${btnStyle}> CFM Portal</a>` : ''}
-        ${links.cfm_crm ? `<a href="${links.cfm_crm}" target="_blank" ${btnStyle}>🔢 CFM por CRM</a>` : ''}
-        ${links.doctoralia ? `<a href="${links.doctoralia}" target="_blank" ${btnStyle}>🩺 Doctoralia</a>` : ''}
-        ${links.escavador ? `<a href="${links.escavador}" target="_blank" ${btnStyle}>📄 Escavador</a>` : ''}
-        ${links.lattes ? `<a href="${links.lattes}" target="_blank" ${btnStyle}>🎓 Lattes</a>` : ''}
-        ${links.google_medico ? `<a href="${links.google_medico}" target="_blank" ${btnStyle}>🔍 Google</a>` : ''}
+        <a href="https://portal.cfm.org.br/busca-medicos/?nome=${nomeEnc}" target="_blank" ${btnStyle}>🏛️ CFM Portal</a>
+        <a href="https://www.escavador.com/busca?q=${nomeEnc}" target="_blank" ${btnStyle}>📄 Escavador</a>
+        <a href="https://www.google.com/search?q=site:lattes.cnpq.br+%22${nomeEnc}%22" target="_blank" ${btnStyle}>🎓 Lattes</a>
+        <a href="https://www.google.com/search?q=%22${nomeEnc}%22+instagram+medico" target="_blank" ${btnStyle}>📸 Instagram</a>
+        <a href="https://www.google.com/search?q=%22${nomeEnc}%22+medico" target="_blank" ${btnStyle}>🔍 Google</a>
       </div>
       ${status === 'pendente' ? `
         <button onclick="enriquecerMedico('${m.cns}')" style="margin-top:12px;padding:6px 14px;background:var(--accent-purple);color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;" id="btn-enriquecer-${m.cns}">
@@ -1369,9 +1463,10 @@ function renderCurriculoCard(m, curriculo) {
     <h3 style="margin:0 0 16px 0;font-size:18px;font-weight:800;color:var(--text-primary);border-bottom:1px dashed var(--border-color);padding-bottom:12px;">
       📚 Pesquisa Curricular
     </h3>
-    ${!docBlock && !lattesBlock ? `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px; font-style:italic;">Nenhum currículo carregado automaticamente ainda.</div>` : ''}
+    ${!docBlock && !lattesBlock && !crmBlock ? `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px; font-style:italic;">Nenhum currículo carregado automaticamente ainda.</div>` : ''}
     ${docBlock}
     ${lattesBlock}
+    ${crmBlock}
     ${linksHtml}
   `;
 }

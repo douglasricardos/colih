@@ -865,8 +865,12 @@ def buscar_medicos(
         ]
 
     if nome:
-        nome_lower = nome.lower()
-        resultado = [m for m in resultado if nome_lower in m.get("nome", "").lower()]
+        import unidecode
+        nome_terms = unidecode.unidecode(nome.lower()).split()
+        resultado = [
+            m for m in resultado
+            if all(t in unidecode.unidecode(m.get("nome", "").lower()) for t in nome_terms)
+        ]
 
     if especialidade:
         esp_lower = especialidade.lower()
@@ -1285,6 +1289,36 @@ def sync_curriculos_start(colih_only: bool = False, forcar: bool = False, limite
         subprocess.run(args)
     threading.Thread(target=run, daemon=True).start()
     return {"ok": True, "message": f"Sync iniciado ({'COLIH only' if colih_only else 'todos'}, limite={limite})"}
+
+# CRM Sync Endpoints
+@app.get("/api/admin/sync-crm/status")
+def sync_crm_status():
+    """Retorna o status do sync de CRM via ConsultaCRM."""
+    p = Path(__file__).parent / "data" / "sync_crm_status.json"
+    if p.exists():
+        import json
+        with open(p, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"rodando": False, "api_consultas": 0, "erros": 0}
+
+@app.post("/api/admin/sync-crm/start")
+def sync_crm_start():
+    """Inicia a sincronização de CRM."""
+    import subprocess, threading
+    status = sync_crm_status()
+    if status.get("rodando"):
+        return {"ok": False, "message": "Sync de CRM já está rodando."}
+    if status.get("api_consultas", 0) >= 100:
+        return {"ok": False, "message": "Limite de 100 consultas mensais atingido."}
+        
+    def run():
+        script = Path(__file__).parent.parent / "scripts" / "sync_consultacrm.py"
+        venv_py = Path(__file__).parent.parent / "backend" / "venv" / "Scripts" / "python.exe"
+        py = str(venv_py) if venv_py.exists() else "python"
+        subprocess.run([py, str(script)])
+        
+    threading.Thread(target=run, daemon=True).start()
+    return {"ok": True, "message": "Sync de CRM iniciado"}
 
 def _auto_trigger_trimestral():
     """Verifica se o sync trimestral precisa rodar e dispara se necessário."""

@@ -371,7 +371,9 @@ def main():
         alvos = [m for m in medicos if m.get("cns") not in cache]
         random.shuffle(alvos)
 
-    alvos = alvos[:args.limite]
+    if args.limite > 0:
+        alvos = alvos[:args.limite]
+    
     print("A enriquecer: " + str(len(alvos)))
     if not alvos: print("Nenhum pendente."); return
     run_sync(alvos, forcar=args.forcar)
