@@ -820,6 +820,8 @@ async function abrirDetalheHospital(cnesId, hospData) {
   }
   document.getElementById('hosp-results').innerHTML = '';
   document.getElementById('hosp-fonte-bar').style.display = 'none';
+  if(document.getElementById('hosp-search-bar')) document.getElementById('hosp-search-bar').style.display = 'none';
+  document.getElementById('hosp-fonte-bar').style.display = 'none';
   const detail = document.getElementById('hosp-detail');
   detail.style.display = 'block';
 
@@ -1139,6 +1141,9 @@ async function abrirDetalheHospital(cnesId, hospData) {
 function fecharDetalheHospital() {
   document.getElementById('hosp-detail').style.display = 'none';
   document.getElementById('hosp-results').innerHTML = '';
+  if(document.getElementById('hosp-search-bar')) document.getElementById('hosp-search-bar').style.display = 'flex';
+  window.history.pushState({}, '', '/');
+  buscarHospitais();
 }
 
 function filtrarProfissionais() {
@@ -1364,6 +1369,7 @@ function fecharDetalheMedico() {
   document.getElementById('med-detail').style.display = 'none';
   const searchBars = document.querySelectorAll('#tab-medicos .search-bar');
   searchBars.forEach(bar => bar.style.display = 'flex');
+  window.history.pushState({}, '', '/');
   document.getElementById('med-results').innerHTML = '';
   state.medicoSelecionado = null;
 }

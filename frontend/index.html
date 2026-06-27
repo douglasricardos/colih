@@ -27,7 +27,7 @@
   <!-- ─── SIDEBAR ESQUERDA (GLPI Style) ───────────────────────── -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <img src="logo-colih-portal.png" alt="COLIH" style="max-height: 40px; margin-bottom: 5px;"><br>
+      <img src="logo-colih-portal.png" alt="COLIH" style="max-height: 40px; margin-bottom: 5px; filter: brightness(0) invert(1); cursor: pointer;" onclick="window.history.replaceState({}, '', '/'); window.location.reload();"><br>
       COLIH Salvador
     </div>
     
@@ -238,7 +238,7 @@
     
 
     <!-- Search Bar Redesign -->
-    <div class="search-bar" style="display:flex; flex-direction:column; gap:16px; background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border-color); box-shadow:0 1px 3px rgba(0,0,0,0.05); margin-top:20px;">
+    <div id="hosp-search-bar" class="search-bar" style="display:flex; flex-direction:column; gap:16px; background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border-color); box-shadow:0 1px 3px rgba(0,0,0,0.05); margin-top:20px;">
         
         <!-- Linha 1: Título e Visão -->
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
