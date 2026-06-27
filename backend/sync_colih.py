@@ -104,17 +104,25 @@ def sync_colih_data(preview=False, commit=False, discard=False):
         docs_url = 'https://salvador.colih.med.br/panel/doctors/export?type=xls&moreFilters=0&isMultipleRegions=1&cooperationLevel=9&region=1&sortOrder=nm'
         docs_resp = session.get(docs_url, timeout=60, verify=False)
         
-        # Local members file
-        mem_file = r'C:\Users\e333638\Desktop\Projetos AntiGravity\COLIH_Salvador\Lista_Membros_16-06-2026.xlsx'
+        # Download Members
+        mem_url = 'https://salvador.colih.med.br/panel/users/export?type=xls&region=12&isMultipleRegions=1&moreFilters=0&name=&tipo=1&sortOrder=nm'
+        mem_resp = session.get(mem_url, timeout=60, verify=False)
         
         with tempfile.TemporaryDirectory() as tmpdir:
             docs_file = Path(tmpdir) / 'doctors.xlsx'
             with open(docs_file, 'wb') as f: f.write(docs_resp.content)
             
+            mem_file = Path(tmpdir) / 'members.xlsx'
+            with open(mem_file, 'wb') as f: f.write(mem_resp.content)
+            
             df_docs = pd.read_excel(docs_file, engine='openpyxl')
-            df_mem = pd.DataFrame()
-            if os.path.exists(mem_file):
+            
+            try:
                 df_mem = pd.read_excel(mem_file, engine='openpyxl')
+                if len(df_mem) < 20:
+                    return {"success": False, "error": f"O usuário lmc.colihba@gmail.com parece não ter permissão para listar os Membros. Apenas {len(df_mem)} usuários (admins) foram retornados pelo portal. Abortando para evitar exclusão em massa."}
+            except Exception as e:
+                return {"success": False, "error": f"Erro ao ler arquivo de membros: {e}"}
             
             # Read CSV Coordinates
             csv_path = r'C:\Users\e333638\Desktop\Projetos AntiGravity\COLIH_Salvador\lista_membros_para_coordenadas.csv'
