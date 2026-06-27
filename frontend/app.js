@@ -356,7 +356,10 @@ function renderDropdownListMedEsp() {
     if (filtered.length === 0) {
         html += `<div style="padding:10px; font-size:12px; color:var(--text-muted);">Nenhum resultado</div>`;
     } else {
-        html += filtered.map(e => `<div class="dropdown-list-item" onclick="selecionarMedEsp('${e.especialidade}', '${e.especialidade}')">${e.especialidade} <span style="font-size:11px; color:var(--text-muted);">(${e.total})</span></div>`).join('');
+        html += filtered.map(e => {
+            const hlcBadge = e.is_hlc9 ? ` <span style="font-size:10px; padding:2px 4px; border-radius:4px; background:var(--accent-blue); color:white; margin-left:4px;">HLC-9</span>` : '';
+            return `<div class="dropdown-list-item" onclick="selecionarMedEsp('${e.especialidade}', '${e.especialidade}')">${e.especialidade}${hlcBadge} <span style="font-size:11px; color:var(--text-muted);">(${e.total})</span></div>`;
+        }).join('');
     }
     box.innerHTML = html;
     box.style.display = 'block';
@@ -2086,6 +2089,19 @@ document.addEventListener('DOMContentLoaded', init);
 // STATUS DO SERVIDOR E SINCRONIZAÇÃO
 // ==========================================
 
+async function fetchSyncDates() {
+    try {
+        const res = await fetch(`${API}/sync-dates`);
+        if(res.ok) {
+            const data = await res.json();
+            if(document.getElementById('cnes-last-sync')) document.getElementById('cnes-last-sync').textContent = data.cnes;
+            if(document.getElementById('colih-last-sync')) document.getElementById('colih-last-sync').textContent = data.colih;
+            if(document.getElementById('curriculos-last-sync')) document.getElementById('curriculos-last-sync').textContent = data.curriculos;
+            if(document.getElementById('crm-last-sync')) document.getElementById('crm-last-sync').textContent = data.crm;
+        }
+    } catch(e) {}
+}
+
 async function fetchSyncStatus() {
     try {
         const res = await fetch(`${API}/status`);
@@ -2333,6 +2349,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarEspecialidades();
     carregarMapeamento();
     carregarGeoConfig();
+    fetchSyncDates();
     fetchSyncStatus();
     syncPollInterval = setInterval(fetchSyncStatus, 60000);
     

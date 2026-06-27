@@ -602,8 +602,10 @@ def buscar_hospitais(
 
     resultado = estabs
     def apply_filters(h):
-        if nome and nome.lower() not in h.get("nome", "").lower():
-            return False
+        if nome:
+            import unidecode
+            if unidecode.unidecode(nome.lower()) not in unidecode.unidecode(h.get("nome", "").lower()):
+                return False
         if tipo and h.get("tipo", "").lower() != tipo.lower():
             return False
         if distrito and h.get("_distrito", "").lower() != distrito.lower():
@@ -811,11 +813,30 @@ def listar_especialidades():
                     if clean_e.isupper() or clean_e.islower():
                         clean_e = clean_e.capitalize()
                     counts[clean_e] += 1
-                    
+    hlc_tags = set()
+    try:
+        import json
+        with open(DATA_DIR / 'hlc_dict.json', 'r', encoding='utf-8') as f:
+            hlc_dict = json.load(f)
+            for v in hlc_dict.values():
+                val_cap = v.capitalize() if (v.isupper() or v.islower()) else v
+                hlc_tags.add(val_cap)
+    except Exception:
+        pass
+        
+    all_keys = set(counts.keys()).union(hlc_tags)
+    
+    esp_list = []
+    for k in all_keys:
+        esp_list.append({
+            "especialidade": k,
+            "total": counts[k],
+            "is_hlc9": k in hlc_tags
+        })
+        
     esp_list = sorted(
-        [{"especialidade": esp, "total": count} for esp, count in counts.items()],
-        key=lambda x: x["total"],
-        reverse=True,
+        esp_list,
+        key=lambda x: (-x["total"], x["especialidade"])
     )
     return {
         "total_especialidades": len(esp_list),
@@ -885,19 +906,30 @@ def buscar_medicos(
         except Exception:
             pass
             
-        if cnes_targets:
-            resultado = [
-                m for m in resultado
-                if any(ct in m.get("especialidade", "").lower() for ct in cnes_targets)
-                or esp_lower in m.get("especialidade", "").lower()
-                or esp_lower in m.get("cbo", "").lower()
-            ]
-        else:
-            resultado = [
-                m for m in resultado
-                if esp_lower in m.get("especialidade", "").lower()
-                or esp_lower in m.get("cbo", "").lower()
-            ]
+        colih_docs = get_colih_cache().get("medicos", {})
+        import unicodedata
+        def norm(s):
+            if not s: return ""
+            return ''.join(c for c in unicodedata.normalize('NFKD', str(s).upper()) if not unicodedata.combining(c)).strip()
+
+        def has_esp(m):
+            raw_esp = m.get("especialidade", "").lower()
+            raw_cbo = m.get("cbo", "").lower()
+            
+            if cnes_targets and any(ct in raw_esp for ct in cnes_targets): return True
+            if esp_lower in raw_esp or esp_lower in raw_cbo: return True
+            
+            c_doc = colih_docs.get(norm(m.get("nome")))
+            if c_doc:
+                e1 = (c_doc.get("especialidade_1_colih") or "").lower()
+                e2 = (c_doc.get("especialidade_1_hid") or "").lower()
+                if esp_lower in e1 or esp_lower in e2: return True
+                if cnes_targets:
+                    if any(ct in e1 for ct in cnes_targets) or any(ct in e2 for ct in cnes_targets):
+                        return True
+            return False
+            
+        resultado = [m for m in resultado if has_esp(m)]
 
     if hospital:
         hosp_norm = normalize_str(hospital)
@@ -996,6 +1028,34 @@ def get_status():
         "data_fmt": "Nunca",
         "plano_usado": "Nenhum",
         "logs": ["Arquivo de status não encontrado."]
+    }
+
+@app.get("/api/sync-dates")
+def get_sync_dates():
+    import os, datetime
+    def get_mtime(filename):
+        p = DATA_DIR / filename
+        if p.exists():
+            return datetime.datetime.fromtimestamp(os.path.getmtime(p)).strftime('%d/%m/%Y %H:%M')
+        return "Desconhecido"
+    
+    colih_date = "Desconhecido"
+    if supabase:
+        try:
+            res = supabase.table("dados_colih_medicos").select("created_at").order("created_at", desc=True).limit(1).execute()
+            if res.data:
+                d_str = res.data[0]["created_at"]
+                dt = datetime.datetime.fromisoformat(d_str.replace('Z', '+00:00'))
+                dt = dt - datetime.timedelta(hours=3)
+                colih_date = dt.strftime('%d/%m/%Y %H:%M')
+        except:
+            pass
+
+    return {
+        "cnes": get_mtime("medicos_cache.json"),
+        "colih": colih_date,
+        "curriculos": get_mtime("sync_curriculos_status.json"),
+        "crm": get_mtime("sync_crm_status.json")
     }
 
 @app.post("/api/sync")
