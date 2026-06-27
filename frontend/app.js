@@ -2363,18 +2363,26 @@ document.addEventListener("DOMContentLoaded", () => {
     // Auto buscar listas e esconder splash screen
     Promise.all([buscarHospitais(), buscarMedicos()]).finally(() => {
         const splash = document.getElementById('splash-screen');
+        const mainLayout = document.getElementById('main-layout');
         if (splash) {
             splash.style.opacity = '0';
             setTimeout(() => splash.style.display = 'none', 500);
+        }
+        if (mainLayout) {
+            mainLayout.style.opacity = '1';
         }
     });
     
     // Failsafe
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
+        const mainLayout = document.getElementById('main-layout');
         if (splash && splash.style.display !== 'none') {
             splash.style.opacity = '0';
             setTimeout(() => splash.style.display = 'none', 500);
+        }
+        if (mainLayout && mainLayout.style.opacity === '0') {
+            mainLayout.style.opacity = '1';
         }
     }, 3000);
 });
