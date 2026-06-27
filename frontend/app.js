@@ -3993,7 +3993,7 @@ window.carregarCalendario = async function() {
             
             return {
                 id: v.id,
-                title: ${v.medico_nome} (),
+                title: `${v.medico_nome} (${v.instituicao_nome})`,
                 start: dateStr,
                 backgroundColor: cor,
                 borderColor: cor,
@@ -4025,11 +4025,11 @@ window.carregarCalendario = async function() {
                     // Prevent default browser jump
                     info.jsEvent.preventDefault();
                     if (props.status !== 'concluido' && props.status !== 'cancelado') {
-                        if(confirm(Visita pendente a \nInstituição: \nMembro: \n\nDeseja registrar o resultado da visita?)) {
+                        if(confirm(`Visita pendente a ${props.medico_nome}\nInstituição: ${props.instituicao_nome}\nMembro: ${props.membro_designado_nome || 'N/A'}\n\nDeseja registrar o resultado da visita?`)) {
                             abrirModalResultado(props.id);
                         }
                     } else {
-                        alert(Visita a \nStatus: \nInstituição: \nMembro: );
+                        alert(`Visita a ${props.medico_nome}\nStatus: ${props.status}\nInstituição: ${props.instituicao_nome}\nMembro: ${props.membro_designado_nome || 'N/A'}`);
                     }
                 }
             });
