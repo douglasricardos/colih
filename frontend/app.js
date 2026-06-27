@@ -2361,7 +2361,7 @@ document.addEventListener("DOMContentLoaded", () => {
     syncPollInterval = setInterval(fetchSyncStatus, 60000);
     
     // Auto buscar listas e esconder splash screen
-    Promise.all([buscarHospitais(), buscarMedicos()]).finally(() => {
+    Promise.all([buscarHospitais(), buscarMedicos(), loadColihData()]).finally(() => {
         const splash = document.getElementById('splash-screen');
         const mainLayout = document.getElementById('main-layout');
         if (splash) {
@@ -2821,11 +2821,7 @@ window.openTab = function(tabId, btnElement) {
     }
 }
 
-setTimeout(() => {
-    loadColihData();
-}, 2000);
-
-
+// loadColihData() agora é chamado no DOMContentLoaded (Promise.all)
 
 
 // ─── SYNC & HLC CONFIG LOGIC ──────────────────────────────────────────────────
