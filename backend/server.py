@@ -1317,8 +1317,34 @@ def sync_crm_start():
         py = str(venv_py) if venv_py.exists() else "python"
         subprocess.run([py, str(script)])
         
-    threading.Thread(target=run, daemon=True).start()
-    return {"ok": True, "message": "Sync de CRM iniciado"}
+@app.post("/api/colih/sync")
+def sync_colih_endpoint(action: str = "preview"):
+    """
+    Sincroniza com a COLIH.MED usando o script original que suporta preview, commit e discard.
+    """
+    import sys
+    # Add backend folder to path so we can import sync_colih
+    backend_dir = str(Path(__file__).parent)
+    if backend_dir not in sys.path:
+        sys.path.insert(0, backend_dir)
+        
+    try:
+        from sync_colih import sync_colih_data
+    except ImportError as e:
+        return {"success": False, "error": f"Não foi possível importar sync_colih_data: {e}"}
+        
+    if action == "preview":
+        res = sync_colih_data(preview=True)
+        return res
+    elif action == "commit":
+        res = sync_colih_data(commit=True)
+        reset_colih_cache()
+        return res
+    elif action == "discard":
+        res = sync_colih_data(discard=True)
+        return res
+    else:
+        return {"success": False, "error": "Invalid action"}
 
 def _auto_trigger_trimestral():
     """Verifica se o sync trimestral precisa rodar e dispara se necessário."""
