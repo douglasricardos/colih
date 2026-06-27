@@ -280,6 +280,7 @@ function openTab(name, btn) {
   if (name === 'stats') carregarEstatisticas();
   if (name === 'medicos') buscarMedicos();
   if (name === 'regioes') carregarRegioes();
+  if (name === 'calendario') carregarCalendario();
   
   // COLIH Data
   if (name === 'colih-medicos' || name === 'colih-membros') {
@@ -2349,7 +2350,7 @@ async function importarZipLocal() {
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     carregarUsuarios();
     carregarInfo();
     carregarEspecialidades();
@@ -2359,16 +2360,18 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchSyncStatus();
     syncPollInterval = setInterval(fetchSyncStatus, 60000);
     
-    // Auto buscar listas
-    setTimeout(() => {
-        buscarHospitais();
-        buscarMedicos();
-        const splash = document.getElementById('splash-screen');
-        if (splash) {
-            splash.style.opacity = '0';
-            setTimeout(() => splash.style.display = 'none', 500);
-        }
-    }, 500);
+    // Auto buscar listas e esconder splash screen
+    try {
+        await Promise.all([buscarHospitais(), buscarMedicos()]);
+    } catch (e) {
+        console.error("Erro ao carregar dados iniciais:", e);
+    }
+    
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+        splash.style.opacity = '0';
+        setTimeout(() => splash.style.display = 'none', 500);
+    }
 });
 
 window.switchTab = function(tabId, btn) {
@@ -3960,3 +3963,82 @@ function initTomSelectHospital() {
     });
 }
 
+
+
+let calendar = null;
+
+window.carregarCalendario = async function() {
+    try {
+        const res = await fetch('/api/visitas/calendario');
+        const data = await res.json();
+        
+        const eventos = data.visitas.map(v => {
+            const dateStr = v.data_agendada;
+            const status = v.status.toLowerCase();
+            const date = new Date(dateStr);
+            date.setHours(0,0,0,0);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            let cor = '#f59e0b'; // pendente default
+            if (status === 'concluido') cor = '#10b981';
+            else if (status === 'cancelado') cor = '#64748b';
+            else if (status.includes('agendado') || status.includes('andamento')) cor = '#3b82f6';
+            else if (status === 'pendente' && date < today) cor = '#ef4444'; // atrasado/red flag
+            
+            return {
+                id: v.id,
+                title: ${v.medico_nome} (),
+                start: dateStr,
+                backgroundColor: cor,
+                borderColor: cor,
+                extendedProps: {
+                    ...v
+                }
+            };
+        });
+        
+        const calendarEl = document.getElementById('calendar');
+        if (!calendar) {
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'pt-br',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                },
+                buttonText: {
+                    today: 'Hoje',
+                    month: 'Mês',
+                    week: 'Semana',
+                    list: 'Lista'
+                },
+                events: eventos,
+                eventClick: function(info) {
+                    const props = info.event.extendedProps;
+                    // Prevent default browser jump
+                    info.jsEvent.preventDefault();
+                    if (props.status !== 'concluido' && props.status !== 'cancelado') {
+                        if(confirm(Visita pendente a \nInstituição: \nMembro: \n\nDeseja registrar o resultado da visita?)) {
+                            abrirModalResultado(props.id);
+                        }
+                    } else {
+                        alert(Visita a \nStatus: \nInstituição: \nMembro: );
+                    }
+                }
+            });
+            calendar.render();
+        } else {
+            calendar.removeAllEvents();
+            calendar.addEventSource(eventos);
+        }
+        
+        setTimeout(() => {
+            if (calendar) calendar.updateSize();
+        }, 100);
+
+    } catch (e) {
+        console.error('Erro ao carregar calendário:', e);
+    }
+}
