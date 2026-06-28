@@ -524,7 +524,7 @@ def processar_estabelecimentos(df, df_equip=None, df_leito=None) -> dict:
             "municipio": nome_mun,
             "equipamentos": [],
             "leitos": [],
-            "raw": {k: str(v).strip() for k, v in row.to_dict().items() if pd.notna(v) and str(v).strip()}
+            "raw": {k: str(v).strip() for k, v in row.to_dict().items() if pd.notna(v) and str(v).strip() and k in ["NO_BAIRRO", "TP_UNIDADE", "CO_CNES", "NU_LATITUDE", "NU_LONGITUDE", "TO_CHAR(DT_ATUALIZACAO,'DD/MM/YYYY')", "TO_CHAR(DT_ATUALIZACAO_ORIGEM,'DD/MM/YYYY')", "CO_NATUREZA_JUR", "CO_MOTIVO_DESAB", "CO_CPFDIRETORCLN", "REG_DIRETORCLN", "NOME_DIRETORCLN"]}
         }
         
     # Process Equipments
