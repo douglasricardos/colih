@@ -1683,7 +1683,9 @@ class UsuarioCreateReq(BaseModel):
 def listar_usuarios():
     if not supabase: return {"usuarios": []}
     try:
-        res = supabase.table("usuarios").select("*, congregacoes(nome)").execute()
+        res = supabase.table("usuarios").select("*").execute()
+        cong_res = supabase.table("congregacoes").select("id, nome").execute()
+        cong_map = {c["id"]: c["nome"] for c in cong_res.data}
         # formatando a saida
         usuarios_list = []
         for u in res.data:
@@ -1692,7 +1694,7 @@ def listar_usuarios():
                 "nome": u["nome"],
                 "telefone": u.get("telefone"),
                 "congregacao_id": u.get("congregacao_id"),
-                "congregacao_nome": u.get("congregacoes", {}).get("nome") if u.get("congregacoes") else None,
+                "congregacao_nome": cong_map.get(u.get("congregacao_id")),
                 "criado_em": u.get("criado_em")
             })
         return {"usuarios": usuarios_list}
