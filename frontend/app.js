@@ -2078,7 +2078,7 @@ function exportarCSV() {
 
 /* 📊 ABA ESTATÍSTICAS */
 async function carregarEstatisticas() {
-    renderDashboardGamificacao();
+    await renderDashboardGamificacao();
 }
 
 /* ─── Init ──────────────────────────────────────────────────── */
@@ -2640,7 +2640,7 @@ async function loadColihData() {
         alertEl.style.display = missingCoords ? 'block' : 'none';
     }
     popularFiltrosColih();
-    renderDashboardGamificacao();
+    await renderDashboardGamificacao();
   } catch (e) {
     console.error('Erro ao carregar COLIH', e);
   }
