@@ -19,9 +19,9 @@ venv/
 .venv/
 env/
 
-# ── Cache de Dados (gerados pelo script de sync) ────
-backend/data/medicos_cache.json
-backend/data/estab_cache.json
+# 📝 Cache de Dados (comitado para o Render não perder no plano gratuito)
+# backend/data/medicos_cache.json
+# backend/data/estab_cache.json
 backend/data/dicts/
 backend/cache/
 
