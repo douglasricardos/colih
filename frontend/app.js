@@ -3,7 +3,7 @@
    Lógica principal do frontend SPA
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-const API = 'http://localhost:8000/api';
+const API = 'https://colih-backend.onrender.com/api';
 
 // Estado global
 const state = {
