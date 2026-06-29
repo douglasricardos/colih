@@ -99,14 +99,18 @@ def save_json(path: Path, data):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
+import threading
+_cache_lock = threading.Lock()
 
 _medicos_cached = None
 def get_medicos_cache():
     global _medicos_cached
     if _medicos_cached is not None:
         return _medicos_cached
-    _medicos_cached = load_json(MEDICOS_CACHE, {"meta": {}, "medicos": []})
-    return _medicos_cached
+    with _cache_lock:
+        if _medicos_cached is None:
+            _medicos_cached = load_json(MEDICOS_CACHE, {"meta": {}, "medicos": []})
+        return _medicos_cached
 
 import unicodedata
 
@@ -381,20 +385,23 @@ def get_estab_cache():
     global _cached_data
     if _cached_data is not None:
         return _cached_data
-    if not os.path.exists(ESTAB_CACHE_PATH):
-        return {"meta": {}, "estabelecimentos": []}
-    with open(ESTAB_CACHE_PATH, "r", encoding="utf-8") as f:
-        data = json.load(f)
-        validos = []
-        for h in data.get("estabelecimentos", []):
-            raw = h.get("raw", {})
-            if raw.get("CO_MOTIVO_DESAB"):
-                continue
-            enrich_estab(h)
-            validos.append(h)
-        data["estabelecimentos"] = validos
-        _cached_data = data
-        return data
+    with _cache_lock:
+        if _cached_data is not None:
+            return _cached_data
+        if not os.path.exists(ESTAB_CACHE_PATH):
+            return {"meta": {}, "estabelecimentos": []}
+        with open(ESTAB_CACHE_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            validos = []
+            for h in data.get("estabelecimentos", []):
+                raw = h.get("raw", {})
+                if raw.get("CO_MOTIVO_DESAB"):
+                    continue
+                enrich_estab(h)
+                validos.append(h)
+            data["estabelecimentos"] = validos
+            _cached_data = data
+            return data
 
 
 def get_pipeline():
@@ -1230,14 +1237,17 @@ def get_curriculos_cache() -> dict:
     global _curriculos_cached
     if _curriculos_cached is not None:
         return _curriculos_cached
-    if CURRICULOS_CACHE.exists():
-        try:
-            with open(CURRICULOS_CACHE, "r", encoding="utf-8") as f:
-                _curriculos_cached = json.load(f)
-                return _curriculos_cached
-        except Exception:
-            pass
-    return {}
+    with _cache_lock:
+        if _curriculos_cached is not None:
+            return _curriculos_cached
+        if CURRICULOS_CACHE.exists():
+            try:
+                with open(CURRICULOS_CACHE, "r", encoding="utf-8") as f:
+                    _curriculos_cached = json.load(f)
+                    return _curriculos_cached
+            except Exception:
+                pass
+        return {}
 
 @app.get("/api/medicos/{cns}/curriculo")
 def get_curriculo_medico(cns: str):
