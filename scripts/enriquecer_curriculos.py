@@ -382,6 +382,23 @@ def main(in_memory_medicos=None, arg_colih_only=False, arg_todos=False, arg_cns=
     lim = min(len(alvos), arg_limite)
     print("Alvos filtrados: " + str(len(alvos)) + " | Limite proc: " + str(lim))
     alvos = alvos[:lim]
+    
+    # Free memory
+    slim_alvos = []
+    for m in alvos:
+        slim_alvos.append({
+            "cns": m.get("cns", ""),
+            "nome": m.get("nome", ""),
+            "especialidade": m.get("especialidade", ""),
+            "crm": m.get("crm", ""),
+            "crm_uf": m.get("crm_uf", "BA")
+        })
+    alvos = slim_alvos
+    
+    if in_memory_medicos is None:
+        del medicos
+        import gc
+        gc.collect()
 
     if not alvos:
         print("Nenhum medico para processar.")

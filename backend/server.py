@@ -1363,9 +1363,14 @@ def sync_curriculos_start(colih_only: bool = False, forcar: bool = False, limite
         sys.modules["enriquecer_curriculos"] = enriquecer_curriculos
         spec.loader.exec_module(enriquecer_curriculos)
         
-        medicos = get_medicos_cache().get("medicos", [])
+        global _medicos_cached, _cached_data
+        _medicos_cached = None
+        _cached_data = None
+        import gc
+        gc.collect()
+        
         enriquecer_curriculos.main(
-            in_memory_medicos=medicos,
+            in_memory_medicos=None,
             arg_colih_only=colih_only,
             arg_todos=not colih_only,
             arg_cns=None,

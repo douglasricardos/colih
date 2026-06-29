@@ -87,9 +87,23 @@ def get_medicos_priorizados(in_memory_medicos=None, pipeline_cns=None, colih_nam
             elif m.get("nome", "").strip().upper() in colih_names:
                 score = 2
             
-            lista.append((score, m))
+            slim_m = {
+                "cns": cns,
+                "nome": m.get("nome", ""),
+                "crm": m.get("crm", ""),
+                "crm_uf": m.get("crm_uf", ""),
+                "especialidade": m.get("especialidade", "")
+            }
+            lista.append((score, slim_m))
             
     lista.sort(key=lambda x: x[0], reverse=True)
+    
+    if in_memory_medicos is None:
+        del medicos_list
+        del medicos_dict
+        import gc
+        gc.collect()
+        
     return [m for score, m in lista]
 
 def fetch_crm_api(nome):
