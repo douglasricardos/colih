@@ -4118,10 +4118,16 @@ function renderEscopoCards() {
     const container = document.getElementById('escopo-cards-container');
     container.innerHTML = '';
     
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = '1fr 1fr';
+    container.style.gap = '10px';
+    container.style.marginTop = '15px';
+    
     const countEl = document.getElementById('escopo-count');
     if (countEl) countEl.textContent = escopoAtual.length;
     
     if (escopoAtual.length === 0) {
+        container.style.display = 'block'; 
         container.innerHTML = `<div style="padding:15px; text-align:center; color:var(--text-muted); width:100%; border:1px dashed var(--border-color); border-radius:8px;">Nenhum município selecionado (todo o estado será lido).</div>`;
         return;
     }
@@ -4130,15 +4136,15 @@ function renderEscopoCards() {
         const card = document.createElement('div');
         card.style.display = 'flex';
         card.style.alignItems = 'center';
-        card.style.gap = '8px';
+        card.style.justifyContent = 'space-between';
         card.style.background = 'var(--bg-input)';
         card.style.border = '1px solid var(--border-color)';
-        card.style.borderRadius = '20px';
-        card.style.padding = '6px 14px';
+        card.style.borderRadius = '8px';
+        card.style.padding = '8px 14px';
         card.style.fontSize = '13px';
         
         const txt = document.createElement('span');
-        txt.textContent = mun;
+        txt.innerHTML = `<strong style="color:var(--accent-blue); margin-right:8px; display:inline-block; width:24px;">${index + 1}.</strong> ${mun}`;
         
         const btn = document.createElement('button');
         btn.innerHTML = '×';
@@ -4146,7 +4152,7 @@ function renderEscopoCards() {
         btn.style.border = 'none';
         btn.style.color = '#ef4444';
         btn.style.cursor = 'pointer';
-        btn.style.fontSize = '16px';
+        btn.style.fontSize = '18px';
         btn.style.fontWeight = 'bold';
         btn.style.padding = '0';
         btn.onclick = () => removerEscopoCnes(index);
