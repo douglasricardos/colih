@@ -1824,14 +1824,22 @@ def api_post_config_hlc_dict(body: dict):
 @app.get("/api/config/hlc-stats")
 def api_get_config_hlc_stats():
     config_file = DATA_DIR / "hlc_dict.json"
+    hlc9_file = DATA_DIR / "hlc9_dict.json"
     hlc_dict = {}
-    if config_file.exists():
-        try:
-            import json
+    try:
+        import json
+        if config_file.exists():
             with open(config_file, "r", encoding="utf-8") as f:
-                hlc_dict = json.load(f)
-        except:
-            pass
+                hlc_dict.update(json.load(f))
+        if hlc9_file.exists():
+            with open(hlc9_file, "r", encoding="utf-8") as f:
+                hlc9 = json.load(f)
+                for k, v in hlc9.items():
+                    hlc_dict[k.upper()] = v
+                    if "pediatra" in k.lower() or "pediatria" in k.lower():
+                        hlc_dict[k.upper()] = "Neonatologia"
+    except Exception as e:
+        print("Erro ao carregar dicionarios:", e)
             
     # Criar um dict reverso para busca mais rapida: HLC_Name -> [CNES_Name1, CNES_Name2...]
     cnes_map = {}

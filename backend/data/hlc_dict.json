@@ -41,8 +41,8 @@
   "MÉDICO NEUROCIRURGIÃO": "Neurocirurgia",
   "UROLOGIA": "Urologia",
   "MÉDICO UROLOGISTA": "Urologia",
-  "PEDIATRIA": "Pediatria",
-  "MÉDICO PEDIATRA": "Pediatria",
+  "PEDIATRIA": "Neonatologia",
+  "MÉDICO PEDIATRA": "Neonatologia",
   "CIRURGIA PEDIÁTRICA": "Pediatria",
   "MÉDICO CIRURGIÃO PEDIÁTRICO": "Pediatria",
   "NEONATOLOGIA": "Neonatologia",
@@ -64,5 +64,6 @@
   "MÉDICO CIRURGIÃO DE CABEÇA E PESCOÇO": "Cirurgia geral",
   "MÉDICO NEFROLOGISTA": "Nefrologia",
   "RADIOLOGIA INTERVENCIONISTA": "Radiologia intervencionista",
-  "MÉDICO PNEUMOLOGISTA": "Pneumologia"
+  "MÉDICO PNEUMOLOGISTA": "Pneumologia",
+  "MDICO PEDIATRA": "Neonatologia"
 }
