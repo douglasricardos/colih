@@ -100,8 +100,13 @@ def save_json(path: Path, data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+_medicos_cached = None
 def get_medicos_cache():
-    return load_json(MEDICOS_CACHE, {"meta": {}, "medicos": []})
+    global _medicos_cached
+    if _medicos_cached is not None:
+        return _medicos_cached
+    _medicos_cached = load_json(MEDICOS_CACHE, {"meta": {}, "medicos": []})
+    return _medicos_cached
 
 import unicodedata
 
@@ -1220,11 +1225,16 @@ def enrich_with_colih(medicos):
 
 CURRICULOS_CACHE = DATA_DIR / "curriculos_cache.json"
 
+_curriculos_cached = None
 def get_curriculos_cache() -> dict:
+    global _curriculos_cached
+    if _curriculos_cached is not None:
+        return _curriculos_cached
     if CURRICULOS_CACHE.exists():
         try:
             with open(CURRICULOS_CACHE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                _curriculos_cached = json.load(f)
+                return _curriculos_cached
         except Exception:
             pass
     return {}
