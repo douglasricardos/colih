@@ -93,7 +93,8 @@ def get_filtro_municipios():
     uf = config.get("uf", "BA")
     municipios = config.get("municipios_especificos", [])
     if municipios:
-        return {"tipo": "lista", "codigos": set(str(m) for m in municipios)}
+        # Extrai apenas o código IBGE antes do traço, caso esteja no formato "CODIGO - Nome"
+        return {"tipo": "lista", "codigos": set(str(m).split("-")[0].strip() for m in municipios)}
     uf_prefix = UF_PREFIXOS.get(uf.upper(), "29")
     return {"tipo": "prefixo", "prefixo": uf_prefix}
 

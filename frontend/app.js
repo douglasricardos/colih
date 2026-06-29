@@ -3373,7 +3373,7 @@ window.openTab = function(tabId, btnElement) {
 // ─── CONFIG: ESCOPO GEOGRAFICO ────────────────────────────────────────────────
 async function loadConfigEscopo() {
     try {
-        const res = await fetchAPI('/config/escopo');
+        const res = await fetchAPI('/sync-config');
         if (res) {
             if (res.uf) {
                 const ufSelect = document.getElementById('config-uf');
@@ -3381,7 +3381,7 @@ async function loadConfigEscopo() {
             }
             if (res.municipios_especificos) {
                 const munInput = document.getElementById('config-municipios');
-                if(munInput) munInput.value = res.municipios_especificos.join(', ');
+                if(munInput) munInput.value = res.municipios_especificos.join('\n');
             }
         }
     } catch(e) { console.error('Erro load escopo', e); }
@@ -3390,12 +3390,12 @@ async function loadConfigEscopo() {
 async function salvarConfigEscopo() {
     const uf = document.getElementById('config-uf').value;
     const munRaw = document.getElementById('config-municipios').value;
-    const municipios = munRaw.split(',').map(m => m.trim()).filter(Boolean);
+    const linhas = munRaw.split('\n').map(m => m.trim()).filter(Boolean);
     
     try {
-        await fetchAPI('/config/escopo', {
+        await fetchAPI('/sync-config', {
             method: 'POST',
-            body: JSON.stringify({ uf: uf, municipios_especificos: municipios })
+            body: JSON.stringify({ uf: uf, municipios_especificos: linhas })
         });
         alert('Escopo salvo com sucesso! As alterações farão efeito na próxima sincronização do CNES.');
     } catch(e) { alert('Erro ao salvar escopo'); }

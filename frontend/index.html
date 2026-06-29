@@ -737,9 +737,9 @@
             </select>
         </div>
         <div style="margin-bottom:15px;">
-            <label style="display:block; font-weight:700; color:var(--text-secondary); margin-bottom:5px;">Códigos IBGE (Separados por vírgula)</label>
-            <input type="text" id="config-municipios" placeholder="Ex: 292740, 291920 (Deixe em branco para o estado todo)" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;">
-            <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">Atenção: Apenas os hospitais e médicos destes municípios serão lidos e importados na próxima sincronização do CNES.</p>
+            <label style="display:block; font-weight:700; color:var(--text-secondary); margin-bottom:5px;">Municípios do Escopo (Código IBGE - Nome)</label>
+            <textarea id="config-municipios" placeholder="Ex:&#10;292740 - Salvador&#10;290570 - Camaçari&#10;(Deixe em branco para o estado todo)" style="width:100%; height:150px; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px; resize:vertical;"></textarea>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">Atenção: Apenas os hospitais e médicos destes municípios serão mantidos na base. Formato esperado por linha: CODIGO - Nome da Cidade (ou apenas o código).</p>
         </div>
         <div style="text-align:right;">
             <button class="btn-primary" onclick="salvarConfigEscopo()">💾 Salvar Escopo</button>
