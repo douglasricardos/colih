@@ -3255,8 +3255,9 @@ async function renderDashboardGamificacao() {
                 const coveredTargets = {};
                 const otherColihDocs = [];
                 const hospColihDocs = colihDocs.filter(d => {
-                    const hStr = (d.hospitais || '').toLowerCase();
-                    const hNome = (h.nome || '').toLowerCase();
+                    const norm = s => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const hStr = norm(d.hospitais);
+                    const hNome = norm(h.nome);
                     if (!hStr) return false;
                     return hStr.includes(hNome) || (hNome.length > 8 && hNome.includes(hStr) && hStr.length > 8);
                 });
