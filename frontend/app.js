@@ -3377,11 +3377,14 @@ async function loadConfigEscopo() {
         if (res) {
             if (res.uf) {
                 const ufSelect = document.getElementById('config-uf');
-                if(ufSelect) ufSelect.value = res.uf;
+                if(ufSelect) {
+                    ufSelect.value = res.uf;
+                    carregarMunicipiosIBGE();
+                }
             }
             if (res.municipios_especificos) {
-                const munInput = document.getElementById('config-municipios');
-                if(munInput) munInput.value = res.municipios_especificos.join('\n');
+                escopoAtual = [...res.municipios_especificos];
+                renderEscopoCards();
             }
         }
     } catch(e) { console.error('Erro load escopo', e); }
@@ -3389,13 +3392,11 @@ async function loadConfigEscopo() {
 
 async function salvarConfigEscopo() {
     const uf = document.getElementById('config-uf').value;
-    const munRaw = document.getElementById('config-municipios').value;
-    const linhas = munRaw.split('\n').map(m => m.trim()).filter(Boolean);
     
     try {
         await fetchAPI('/sync-config', {
             method: 'POST',
-            body: JSON.stringify({ uf: uf, municipios_especificos: linhas })
+            body: JSON.stringify({ uf: uf, municipios_especificos: escopoAtual })
         });
         alert('Escopo salvo com sucesso! As alterações farão efeito na próxima sincronização do CNES.');
     } catch(e) { alert('Erro ao salvar escopo'); }
@@ -4051,3 +4052,117 @@ window.carregarCalendario = async function() {
         console.error('Erro ao carregar calendário:', e);
     }
 }
+
+// --- LOGICA NOVO ESCOPO CNES ---
+let ibgeMunicipios = [];
+let escopoAtual = [];
+
+async function carregarMunicipiosIBGE() {
+    const uf = document.getElementById('config-uf').value;
+    try {
+        const res = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
+        if (!res.ok) throw new Error('Erro IBGE');
+        const data = await res.json();
+        ibgeMunicipios = data.map(m => ({ codigo: m.id.toString(), nome: m.nome }));
+        filtrarDropdownEscopo();
+    } catch(e) {
+        console.error("Erro ao carregar municipios IBGE", e);
+    }
+}
+
+function abrirDropdownEscopo() {
+    if (ibgeMunicipios.length === 0) carregarMunicipiosIBGE();
+    document.getElementById('escopo-list-box').style.display = 'block';
+    filtrarDropdownEscopo();
+}
+
+function fecharDropdownEscopo() {
+    setTimeout(() => {
+        const box = document.getElementById('escopo-list-box');
+        if(box) box.style.display = 'none';
+    }, 200);
+}
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#dropdown-escopo')) {
+        const box = document.getElementById('escopo-list-box');
+        if(box) box.style.display = 'none';
+    }
+});
+
+function filtrarDropdownEscopo() {
+    const term = document.getElementById('escopo-input').value.toLowerCase();
+    const box = document.getElementById('escopo-list-box');
+    box.innerHTML = '';
+    
+    const filt = ibgeMunicipios.filter(m => m.nome.toLowerCase().includes(term) || m.codigo.includes(term));
+    filt.slice(0,50).forEach(m => {
+        const d = document.createElement('div');
+        d.className = 'dropdown-item';
+        d.style.padding = '8px 12px';
+        d.style.cursor = 'pointer';
+        d.style.borderBottom = '1px solid var(--border-color)';
+        d.textContent = `${m.codigo} - ${m.nome}`;
+        d.onclick = () => {
+            document.getElementById('escopo-input').value = `${m.codigo} - ${m.nome}`;
+            fecharDropdownEscopo();
+        };
+        box.appendChild(d);
+    });
+}
+
+function renderEscopoCards() {
+    const container = document.getElementById('escopo-cards-container');
+    container.innerHTML = '';
+    
+    if (escopoAtual.length === 0) {
+        container.innerHTML = `<div style="padding:15px; text-align:center; color:var(--text-muted); width:100%; border:1px dashed var(--border-color); border-radius:8px;">Nenhum município selecionado (todo o estado será lido).</div>`;
+        return;
+    }
+    
+    escopoAtual.forEach((mun, index) => {
+        const card = document.createElement('div');
+        card.style.display = 'flex';
+        card.style.alignItems = 'center';
+        card.style.gap = '8px';
+        card.style.background = 'var(--bg-input)';
+        card.style.border = '1px solid var(--border-color)';
+        card.style.borderRadius = '20px';
+        card.style.padding = '6px 14px';
+        card.style.fontSize = '13px';
+        
+        const txt = document.createElement('span');
+        txt.textContent = mun;
+        
+        const btn = document.createElement('button');
+        btn.innerHTML = '×';
+        btn.style.background = 'none';
+        btn.style.border = 'none';
+        btn.style.color = '#ef4444';
+        btn.style.cursor = 'pointer';
+        btn.style.fontSize = '16px';
+        btn.style.fontWeight = 'bold';
+        btn.style.padding = '0';
+        btn.onclick = () => removerEscopoCnes(index);
+        
+        card.appendChild(txt);
+        card.appendChild(btn);
+        container.appendChild(card);
+    });
+}
+
+function adicionarEscopoCnes() {
+    const val = document.getElementById('escopo-input').value.trim();
+    if (!val) return;
+    
+    if (!escopoAtual.includes(val)) {
+        escopoAtual.push(val);
+        renderEscopoCards();
+    }
+    document.getElementById('escopo-input').value = '';
+}
+
+function removerEscopoCnes(index) {
+    escopoAtual.splice(index, 1);
+    renderEscopoCards();
+}
+// ---------------------------------

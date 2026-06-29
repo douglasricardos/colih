@@ -1187,8 +1187,17 @@ def save_sync_config(body: dict):
     municipios = body.get("municipios_especificos", [])
     descricao = body.get("descricao") or (f"{uf} (estado completo)" if not municipios else f"{len(municipios)} município(s) selecionado(s)")
     config = {"uf": uf, "municipios_especificos": municipios, "descricao": descricao}
+    
     with open(config_file, "w", encoding="utf-8") as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
+        
+    if supabase:
+        try:
+            # Update Supabase too
+            supabase.table("app_state").upsert({"id": "sync_config", "data": config}).execute()
+        except Exception as e:
+            print("Failed to save sync_config to Supabase:", e)
+            
     return {"ok": True, "config": config}
 
 
