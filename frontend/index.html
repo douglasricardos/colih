@@ -21,6 +21,48 @@
 </head>
 <body>
 
+<!-- TELA DE BLOQUEIO -->
+<div id="lock-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body, #0f172a); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Urbanist', sans-serif;">
+  <img src="logo-colih-portal.png" alt="COLIH" style="max-height: 80px; margin-bottom: 20px;">
+  <h2 style="color: #fff; margin-bottom: 20px; font-weight: 700; letter-spacing: 0.5px;">Acesso Restrito</h2>
+  <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 300px;">
+    <input type="password" id="lock-password" placeholder="Digite a senha" style="padding: 12px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; outline: none; font-size: 15px; text-align: center;">
+    <button id="lock-btn" style="padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 15px; transition: 0.2s;">Entrar</button>
+  </div>
+  <div id="lock-error" style="color: #ef4444; margin-top: 15px; font-size: 14px; display: none; font-weight: 600;">Senha incorreta.</div>
+</div>
+
+<script>
+  // Bloqueio Simples de Frontend
+  (function() {
+    const lockScreen = document.getElementById('lock-screen');
+    const lockBtn = document.getElementById('lock-btn');
+    const lockInput = document.getElementById('lock-password');
+    const lockError = document.getElementById('lock-error');
+    const correctPass = "HLC@Salvador2026";
+    
+    // Verifica cache local
+    if(localStorage.getItem('colih_auth') === correctPass) {
+      lockScreen.style.display = 'none';
+    }
+    
+    lockBtn.addEventListener('click', () => {
+      if(lockInput.value === correctPass) {
+        localStorage.setItem('colih_auth', correctPass);
+        lockScreen.style.display = 'none';
+      } else {
+        lockError.style.display = 'block';
+        lockInput.value = '';
+        lockInput.focus();
+      }
+    });
+    
+    lockInput.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter') lockBtn.click();
+    });
+  })();
+</script>
+
 <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease;">
   <img src="logo-colih-portal.png" alt="COLIH" style="max-height: 80px; margin-bottom: 20px;">
   <div style="color: var(--text-primary); font-size: 18px; font-weight: 600; letter-spacing: 1px;">Carregando o Dashboard...</div>
