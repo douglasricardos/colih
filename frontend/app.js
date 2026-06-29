@@ -3230,8 +3230,26 @@ async function renderDashboardGamificacao() {
         // Target Hospitals List
         if (!hospRes.estabelecimentos) return;
         
-        const highComp = hospRes.estabelecimentos.filter(h => h._altaComplexidade && Array.isArray(h._altaComplexidade) && h._altaComplexidade.length > 0);
-        const medComp = hospRes.estabelecimentos.filter(h => h._complexidade && h._complexidade.includes('Média') && !(h._altaComplexidade && h._altaComplexidade.length > 0)).slice(0, 50);
+        const estratNames = [
+            "hospital santo antonio",
+            "hospital geral roberto santos",
+            "hospital universitario professor edgard santos",
+            "hospital geral do estado",
+            "hospital do suburbio",
+            "hospital ana nery",
+            "hospital estadual da mulher",
+            "hospital aristides maltez",
+            "hospital ortopedico do estado da bahia",
+            "hospital municipal de salvador hms"
+        ];
+        const isEstrat = h => {
+            const hNome = (h.nome || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return estratNames.some(en => hNome.includes(en));
+        };
+
+        const estratComp = hospRes.estabelecimentos.filter(h => isEstrat(h));
+        const highComp = hospRes.estabelecimentos.filter(h => !isEstrat(h) && h._altaComplexidade && Array.isArray(h._altaComplexidade) && h._altaComplexidade.length > 0);
+        const medComp = hospRes.estabelecimentos.filter(h => !isEstrat(h) && h._complexidade && h._complexidade.includes('Média') && !(h._altaComplexidade && h._altaComplexidade.length > 0)).slice(0, 50);
         
         const renderHospCards = (hospitals, containerId, isMedium) => {
             const targetsEl = document.getElementById(containerId);
@@ -3373,7 +3391,11 @@ async function renderDashboardGamificacao() {
             if (hospitals.length === 0) targetsEl.innerHTML = '<div style="color:var(--text-muted); font-size:13px;">Nenhum hospital encontrado.</div>';
         };
         
+        renderHospCards(estratComp, 'dash-targets-estrat', false);
         renderHospCards(highComp, 'dash-targets-list', false);
+        
+        const estratCountEl = document.getElementById('estrat-comp-count');
+        if (estratCountEl) estratCountEl.textContent = estratComp.length;
         
         const countEl = document.getElementById('alta-comp-count');
         if (countEl) countEl.textContent = highComp.length;
