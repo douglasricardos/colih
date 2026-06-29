@@ -3329,7 +3329,7 @@ async function renderDashboardGamificacao() {
                 <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border-color); border-left:4px solid ${isMedium ? '#f59e0b' : '#ef4444'}; display:flex; flex-direction:column; height:100%;">
                     <div style="font-weight:700; font-size:14px; margin-bottom:4px; display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">
                         <span>${h.nome}</span>
-                        ${h._isSus ? '<span style="background:#22c55e; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; flex-shrink:0;">SUS</span>' : '<span style="background:#64748b; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; flex-shrink:0;">Privado</span>'}
+                        ${(h._isSus || (h.convenios && h.convenios.some(c => c.toUpperCase().includes('PUBLICO') || c.toUpperCase().includes('PÚBLICO') || c.toUpperCase().includes('SUS')))) ? '<span style="background:#22c55e; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; flex-shrink:0;">SUS</span>' : '<span style="background:#64748b; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; flex-shrink:0;">Privado</span>'}
                     </div>
                     <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">${h.municipio || ''}</div>
                     
