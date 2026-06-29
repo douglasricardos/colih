@@ -645,15 +645,12 @@
 
     <!-- Hospitais Alvos -->
     <div style="margin-top:24px;">
-        <h3 style="display:flex; align-items:center; gap:8px; color:#f59e0b;"><i data-lucide="circle"></i> Hospitais Alvo (Alta Complexidade)</h3>
+        <h3 style="display:flex; align-items:center; gap:8px; color:#f59e0b;">
+            <i data-lucide="circle"></i> Hospitais Alvo (Alta Complexidade)
+            <span id="alta-comp-count" style="font-size:12px; background:rgba(245,158,11,0.1); color:#f59e0b; padding:2px 8px; border-radius:12px; font-weight:600;">0</span>
+        </h3>
         <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">Hospitais com alta complexidade onde podemos prospectar os especialistas ausentes.</p>
         <div id="dash-targets-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px;"></div>
-    </div>
-
-    <div style="margin-top:24px;">
-        <h3 style="display:flex; align-items:center; gap:8px; color:#8b5cf6;"><i data-lucide="circle"></i> Hospitais Alvo (Média Complexidade)</h3>
-        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">Hospitais com média complexidade focados nos mesmos especialistas.</p>
-        <div id="dash-targets-med-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px;"></div>
     </div>
   </section>
 
