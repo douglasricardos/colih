@@ -4187,22 +4187,22 @@ function removerEscopoCnes(index) {
 // DASHBOARD DADOS COLIH
 // ==========================================
 let colihChart = null;
-let colihMedicosCache = null;
+let colihDashMedicosCache = null;
 
 async function renderColihDashboard(periodo = 'global') {
     const canvas = document.getElementById('colih-growth-chart');
     if (!canvas) return;
 
-    if (!colihMedicosCache) {
-        colihMedicosCache = await fetchAPI('/colih/medicos').catch(() => []);
+    if (!colihDashMedicosCache) {
+        colihDashMedicosCache = await fetchAPI('/colih/medicos').catch(() => []);
     }
 
-    if (!colihMedicosCache || colihMedicosCache.length === 0) {
+    if (!colihDashMedicosCache || colihDashMedicosCache.length === 0) {
         return; // Sem dados
     }
 
     // Ordenar por data
-    const sorted = colihMedicosCache
+    const sorted = colihDashMedicosCache
         .filter(m => m.created_at)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
