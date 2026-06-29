@@ -3164,8 +3164,12 @@ async function renderDashboardGamificacao() {
                 if (directMatch && !coverageMap[directMatch].find(doc => doc.id === d.id)) coverageMap[directMatch].push(d);
                 
                 // 2. Dictionary match
-                if (hlcDict[esp] && coverageMap[hlcDict[esp]] && !coverageMap[hlcDict[esp]].find(doc => doc.id === d.id)) {
-                    coverageMap[hlcDict[esp]].push(d);
+                const dictMapped = hlcDict[esp];
+                if (dictMapped) {
+                    const actualTarget = targetSpecialties.find(t => t.toUpperCase() === dictMapped.toUpperCase());
+                    if (actualTarget) {
+                        if (!coverageMap[actualTarget].find(doc => doc.id === d.id)) coverageMap[actualTarget].push(d);
+                    }
                 }
             };
             
