@@ -3255,11 +3255,26 @@ async function renderDashboardGamificacao() {
                 const coveredTargets = {};
                 const otherColihDocs = [];
                 const hospColihDocs = colihDocs.filter(d => {
+                    if (!d.hospitais) return false;
                     const norm = s => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/hospital e maternidade/g, "hospital maternidade");
-                    const hStr = norm(d.hospitais);
                     const hNome = norm(h.nome);
-                    if (!hStr) return false;
-                    return hStr.includes(hNome) || (hNome.length > 8 && hNome.includes(hStr) && hStr.length > 8) || (hStr.includes("luiz argolo") && hNome.includes("luiz argolo"));
+                    
+                    const aliases = [hNome];
+                    if (hNome.includes("hospital ortopedico do estado da bahia")) aliases.push("hospital ortopedico do estado");
+                    if (hNome.includes("hospital estadual da mulher")) aliases.push("hospital da mulher - maria luzia costa dos santos", "hospital da mulher");
+                    if (hNome.includes("instituto couto maia")) aliases.push("hospital couto maia", "couto maia");
+                    if (hNome.includes("hospital eladio lasserre")) aliases.push("hospital professor eladio lassere", "hospital professor eladio lasserre", "eladio lassere");
+                    if (hNome.includes("cardio pulmonar da bahia")) aliases.push("hospital cardio pulmonar", "cardio pulmonar");
+
+                    const hospList = d.hospitais.split('|').map(s => norm(s.trim()));
+                    
+                    return hospList.some(hStr => {
+                        for (const alias of aliases) {
+                            if (hStr.includes(alias) || (alias.length > 8 && alias.includes(hStr) && hStr.length > 8)) return true;
+                            if (hStr.includes("luiz argolo") && alias.includes("luiz argolo")) return true;
+                        }
+                        return false;
+                    });
                 });
                 
                 hospColihDocs.forEach(d => {
