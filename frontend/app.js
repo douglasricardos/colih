@@ -4094,7 +4094,10 @@ function filtrarDropdownEscopo() {
     const box = document.getElementById('escopo-list-box');
     box.innerHTML = '';
     
-    const filt = ibgeMunicipios.filter(m => m.nome.toLowerCase().includes(term) || m.codigo.includes(term));
+    const currentCodes = escopoAtual.map(m => m.split('-')[0].trim());
+    let filt = ibgeMunicipios.filter(m => m.nome.toLowerCase().includes(term) || m.codigo.includes(term));
+    filt = filt.filter(m => !currentCodes.includes(m.codigo));
+    
     filt.slice(0,50).forEach(m => {
         const d = document.createElement('div');
         d.className = 'dropdown-item';
@@ -4105,6 +4108,7 @@ function filtrarDropdownEscopo() {
         d.onclick = () => {
             document.getElementById('escopo-input').value = `${m.codigo} - ${m.nome}`;
             fecharDropdownEscopo();
+            adicionarEscopoCnes(); // Auto add for convenience
         };
         box.appendChild(d);
     });
