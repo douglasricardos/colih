@@ -3261,13 +3261,24 @@ async function renderDashboardGamificacao() {
                 
                 // Covered Targets
                 const hospTargets = new Set();
-                (h.especialidades || []).forEach(espStr => {
-                    const parts = espStr.split(' / ');
-                    parts.forEach(p => {
-                        const pUp = p.trim().toUpperCase();
-                        if (hlcDict[pUp]) hospTargets.add(hlcDict[pUp]);
+                const hospTargetTotals = {};
+                if (h._cnes_counts) {
+                    for (const [cboStr, count] of Object.entries(h._cnes_counts)) {
+                        const t = hlcDict[cboStr];
+                        if (t) {
+                            hospTargets.add(t);
+                            hospTargetTotals[t] = (hospTargetTotals[t] || 0) + count;
+                        }
+                    }
+                } else {
+                    (h.especialidades || []).forEach(espStr => {
+                        const parts = espStr.split(' / ');
+                        parts.forEach(p => {
+                            const pUp = p.trim().toUpperCase();
+                            if (hlcDict[pUp]) hospTargets.add(hlcDict[pUp]);
+                        });
                     });
-                });
+                }
                 
                 // Build coverage maps
                 const coveredTargets = {};
@@ -3332,7 +3343,9 @@ async function renderDashboardGamificacao() {
                     
                     coveredKeys.forEach(t => {
                         const docs = coveredTargets[t].map(d => d.nome).join('&#10;');
-                        coveredHtml += `<span title="${docs}" style="background:rgba(16,185,129,0.1); color:#10b981; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600; border:1px solid #10b981; cursor:help;">✓ ${t} (${coveredTargets[t].length})</span>`;
+                        const total = hospTargetTotals[t] || 0;
+                        const suffix = total > 0 ? ` de ${total}` : '';
+                        coveredHtml += `<span title="${docs}" style="background:rgba(16,185,129,0.1); color:#10b981; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600; border:1px solid #10b981; cursor:help;">✓ ${t} (${coveredTargets[t].length}${suffix})</span>`;
                     });
                     
                     if (otherColihDocs.length > 0) {
@@ -3358,7 +3371,11 @@ async function renderDashboardGamificacao() {
                     <div style="margin-bottom:12px;">
                         <div style="font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">Alvos de Recrutamento:</div>
                         <div style="display:flex; flex-wrap:wrap; gap:4px;">
-                            ${missingTargets.map(t => `<span style="background:rgba(239,68,68,0.1); color:#ef4444; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600; border:1px solid #ef4444; cursor:pointer;" onclick="window.abrirRecrutamentoSUS('${h.nome.replace(/'/g, "\\'")}', '${t}')" title="Buscar médicos desta especialidade no hospital">⚠️ ${t}</span>`).join('')}
+                            ${missingTargets.map(t => {
+                                const total = hospTargetTotals[t] || 0;
+                                const suffix = total > 0 ? ` (${total})` : '';
+                                return `<span style="background:rgba(239,68,68,0.1); color:#ef4444; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600; border:1px solid #ef4444; cursor:pointer;" onclick="window.abrirRecrutamentoSUS('${h.nome.replace(/'/g, "\\'")}', '${t}')" title="Buscar médicos desta especialidade no hospital">⚠️ ${t}${suffix}</span>`;
+                            }).join('')}
                         </div>
                     </div>`;
                 }
