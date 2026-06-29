@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="Diego Souza">
+        <meta name="robots" content="noindex, nofollow" />
+
+        <meta name="theme-color" content="#2196f3">
+        <link rel="manifest" href="/manifest.json">
+
+        <title>COLIH BA Salvador - Comissão de Ligação com Hospitais</title>
+
+        <link href="/css/app.css" rel="stylesheet">
+    </head>
+
+    <body class="bg-gradient-login">
+        
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-12">
+                    <div class="card o-hidden border-0 shadow-lg my-4">
+                        <div class="card-body p-0">
+                            <div class="row">
+                                <div class="col-lg-7 d-none d-lg-block bg-login-image"></div>
+                                <div class="col-lg-5">
+                                    <div class="p-5">
+                                        <div class="row justify-content-center">
+                                            <div class="text-center">
+												<img src="/img/logo-colih-portal.png" title="Logo Colih">
+
+                                                <h1 class="h4 text-gray-900 mb-4">
+                                                    COLIH BA Salvador
+                                                </h1>
+                                            </div>
+                                            
+                                            
+                                                                                    </div>
+                                        <div class="row justify-content-center mb-3">
+                                            <div class="text-center">
+                                               Clique no icone do provedor da<br/>sua conta para fazer login:
+                                            </div>
+                                        </div>
+                                        <div id='divLoginSocial' class="row justify-content-center">
+                                            <div class="col-4 text-center">
+                                                <a href="https://salvador.colih.med.br/login/google">
+                                                    <i class="fab fa-google fa-2x"></i><br/><small>Google (gmail)</small></a>
+                                            </div>
+                                            <div class="col-4 text-center">
+                                                <a href="https://salvador.colih.med.br/login/azure">
+                                                    <i class="fab fa-windows fa-2x"></i><br/><small>Outlook Hotmail</small></a>
+                                            </div>
+                                            <div class="col-4 text-center">
+                                                <a href="https://salvador.colih.med.br/login/yahoo">
+                                                    <i class="fab fa-yahoo fa-2x"></i><br/><small>Yahoo</small></a>
+                                            </div>
+                                        </div>
+                                        <div id="divUserPassword" class="row justify-content-center">
+                                            <form method="POST" action="https://salvador.colih.med.br/auth/login" accept-charset="UTF-8" id="form-login" autocomplete="off" class="user"><input name="_token" type="hidden" value="XYyCaVnSOKwKFkd7hrNeyjJPi5Yo4ci6WDZztBnX">
+
+                                            <div class="form-check remember mt-3">
+                                                <input class="form-check-input" name="remember" type="checkbox" value="1" id="checkRemember">
+                                                <label class="form-check-label" for="flexCheckChecked">
+                                                    Permanecer conectado
+                                                </label>
+                                            </div>
+
+                                            <div class="row justify-content-center" id="toogleForm">
+                                                <small class="text-center">
+                                                   Ou clique aqui para fazer login com seu usuário e senha
+                                                </small>
+                                            </div>  
+
+                                            <div style="display: none" id="inputForms">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control form-control-user" id="username" name="username" aria-describedby="usernameHelp" placeholder="Digite seu nome de usuário">
+                                                </div>
+                                                <div class="form-group">
+                                                    <input type="password" class="form-control form-control-user" id="password" name="password" placeholder="Digite sua senha">
+                                                </div>
+                                                <button type="submit" class="btn btn-primary btn-user btn-block">ACESSAR</button>
+    
+    
+                                                <a href="https://salvador.colih.med.br/auth/forgot-password" class="mt-2 d-block">Esqueci a senha</a>
+                                            </div>
+                                            
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+					<div class="card o-hidden border-0 ">
+                        <div class="card-body p-0">
+                            <div class="row">
+                            <div class="col-12 text-center">
+                                <div class='alert alert-primary h5 mb-0'>
+				                    <a class="small text-gray-700" href='https://jw.org/pt/biblioteca-medica/informacoes-medicas/comissoes-de-ligacao-com-hospitais/hln'>
+				                        Este site é apenas para membros. Para mais informações para a Comissão de Ligação com Hospitais (Colih), acesse <b>jw.org/medical</b>
+                    				</a>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
+				</div>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="/js/app.js"></script>
+    </body>
+</html>
+<script>
+    $('#checkRemember').on('change',function(){
+        let isRemember = $(this).is(":checked");
+
+        $('#divLoginSocial a').each(function(){
+            var url = new URL($(this).attr('href'));
+            if (isRemember) {
+                url.searchParams.set("remember", '1');
+            } else {
+                url.searchParams.delete("remember");
+            }
+            
+            $(this).attr('href', url.href)
+        })
+    });
+
+    $('#toogleForm').on('click', function(){
+        $('#inputForms').slideToggle()
+    })
+</script>
+<style>
+    .form-check.remember{
+        margin: 10px 0; 
+        text-align: center;
+    }
+
+    #toogleForm {
+        margin: 60px 0 20px;
+        cursor: pointer;
+    }
+
+    #toogleForm:hover {
+        text-decoration: underline;
+    }
+</style>

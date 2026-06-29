@@ -1,12 +1,12 @@
 {
-  "rodando": false,
-  "total": 29602,
-  "processados": 230,
+  "rodando": true,
+  "total": 29372,
+  "processados": 50,
   "encontrados_lattes": 0,
   "erros": 0,
-  "ultima_rodada": "2026-06-26T12:11:02.568237",
-  "proxima_rodada": "2026-09-24",
-  "medico_atual": "Alessandro Nascimento Araujo Sousa",
-  "encontrados_doctoralia": 213,
+  "ultima_rodada": "2026-06-27T08:56:59.203089",
+  "proxima_rodada": "2026-09-25",
+  "medico_atual": "Alexandra Duarte Oliveira",
+  "encontrados_doctoralia": 50,
   "playwright_ativo": true
 }

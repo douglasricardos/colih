@@ -1,0 +1,33 @@
+    <rss version="2.0"
+    	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+    	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+    	xmlns:dc="http://purl.org/dc/elements/1.1/"
+    	xmlns:atom="http://www.w3.org/2005/Atom"
+    	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+    	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+    	>
+        
+    <channel>
+        <url><![CDATA[https://www.consultacrm.com.br/]]></url>
+        <post><![CDATA[]]></post>
+        <total>1</total>
+        <status>true</status>
+        <mensagem></mensagem>
+        
+        <api_limite>100</api_limite>
+        <api_consultas>0</api_consultas>
+        
+                    <item>
+                <uid>9af57764-f5c5-11ec-9e74-0a4aa568c625</uid>
+                <tipo>CRM</tipo>
+                <numero>9883</numero>
+                <nome>ROMILTON VIANA MACHADO</nome>
+                <uf>BA</uf>
+                <profissao>CIRURGIA TOR�CICA</profissao>
+                <situacao>Ativo</situacao>
+                <link>https://www.consultacrm.com.br/medicos/uid-9af57764-f5c5-11ec-9e74-0a4aa568c625/romilton_viana_machado</link>
+                <texto></texto>
+            </item>
+                </channel>
+    </rss>
+    

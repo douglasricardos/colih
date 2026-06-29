@@ -1,8 +1,8 @@
 {
-  "rodando": false,
+  "rodando": true,
   "mes_atual": "2026-06",
-  "api_consultas": 0,
+  "api_consultas": 19,
   "total_medicos": 30130,
-  "processados": 0,
+  "processados": 27,
   "erros": 0
 }

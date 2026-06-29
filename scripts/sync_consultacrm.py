@@ -47,23 +47,28 @@ def carregar_status():
     
     return status
 
-def get_medicos_priorizados():
-    medicos_dict = load_json(MEDICOS_FILE, {})
-    
-    try:
-        pipeline_data = requests.get("http://127.0.0.1:8000/api/pipeline").json()
-        pipeline_cns = [p.get("cns") for p in pipeline_data if p.get("cns")]
-    except:
-        pipeline_cns = []
+def get_medicos_priorizados(in_memory_medicos=None, pipeline_cns=None, colih_names=None):
+    if in_memory_medicos is not None:
+        medicos_list = in_memory_medicos
+    else:
+        medicos_dict = load_json(MEDICOS_FILE, {})
+        medicos_list = medicos_dict.get("medicos", [])
         
-    try:
-        colih_data = requests.get("http://127.0.0.1:8000/api/colih/medicos").json()
-        colih_names = [m.get("nome", "").strip().upper() for m in colih_data]
-    except:
-        colih_names = []
+    if pipeline_cns is None:
+        try:
+            pipeline_data = requests.get("http://127.0.0.1:8000/api/pipeline").json()
+            pipeline_cns = [p.get("cns") for p in pipeline_data if p.get("cns")]
+        except:
+            pipeline_cns = []
+            
+    if colih_names is None:
+        try:
+            colih_data = requests.get("http://127.0.0.1:8000/api/colih/medicos").json()
+            colih_names = [m.get("nome", "").strip().upper() for m in colih_data]
+        except:
+            colih_names = []
     
     lista = []
-    medicos_list = medicos_dict.get("medicos", [])
     for m in medicos_list:
         cns = m.get("cns")
         if not cns: continue
@@ -164,7 +169,7 @@ def scrape_biografia(link):
         print(f"Erro no scraping de {link}: {e}")
     return ""
 
-def main():
+def main(in_memory_medicos=None, pipeline_cns=None, colih_names=None):
     status = carregar_status()
     
     if status["api_consultas"] >= MONTHLY_LIMIT:
@@ -177,7 +182,7 @@ def main():
     save_json(STATUS_FILE, status)
     
     print("Obtendo fila de médicos...")
-    fila = get_medicos_priorizados()
+    fila = get_medicos_priorizados(in_memory_medicos, pipeline_cns, colih_names)
     status["total_medicos"] = len(fila)
     save_json(STATUS_FILE, status)
     

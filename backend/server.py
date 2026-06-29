@@ -1356,17 +1356,22 @@ def sync_curriculos_start(colih_only: bool = False, forcar: bool = False, limite
     if status.get("rodando"):
         return {"ok": False, "message": "Sync já está rodando."}
     def run():
-        script = Path(__file__).parent.parent / "scripts" / "enriquecer_curriculos.py"
-        venv_py = Path(__file__).parent.parent / "backend" / "venv" / "Scripts" / "python.exe"
-        py = str(venv_py) if venv_py.exists() else "python"
-        args = [py, str(script), "--limite", str(limite)]
-        if colih_only:
-            args.append("--colih-only")
-        else:
-            args.append("--todos")
-        if forcar:
-            args.append("--forcar")
-        subprocess.run(args)
+        import sys, importlib.util
+        script_path = str(Path(__file__).parent.parent / "scripts" / "enriquecer_curriculos.py")
+        spec = importlib.util.spec_from_file_location("enriquecer_curriculos", script_path)
+        enriquecer_curriculos = importlib.util.module_from_spec(spec)
+        sys.modules["enriquecer_curriculos"] = enriquecer_curriculos
+        spec.loader.exec_module(enriquecer_curriculos)
+        
+        medicos = get_medicos_cache().get("medicos", [])
+        enriquecer_curriculos.main(
+            in_memory_medicos=medicos,
+            arg_colih_only=colih_only,
+            arg_todos=not colih_only,
+            arg_cns=None,
+            arg_forcar=forcar,
+            arg_limite=limite
+        )
     threading.Thread(target=run, daemon=True).start()
     return {"ok": True, "message": f"Sync iniciado ({'COLIH only' if colih_only else 'todos'}, limite={limite})"}
 
@@ -1392,10 +1397,23 @@ def sync_crm_start():
         return {"ok": False, "message": "Limite de 100 consultas mensais atingido."}
         
     def run():
-        script = Path(__file__).parent.parent / "scripts" / "sync_consultacrm.py"
-        venv_py = Path(__file__).parent.parent / "backend" / "venv" / "Scripts" / "python.exe"
-        py = str(venv_py) if venv_py.exists() else "python"
-        subprocess.run([py, str(script)])
+        import sys, importlib.util
+        script_path = str(Path(__file__).parent.parent / "scripts" / "sync_consultacrm.py")
+        spec = importlib.util.spec_from_file_location("sync_consultacrm", script_path)
+        sync_consultacrm = importlib.util.module_from_spec(spec)
+        sys.modules["sync_consultacrm"] = sync_consultacrm
+        spec.loader.exec_module(sync_consultacrm)
+        
+        medicos = get_medicos_cache().get("medicos", [])
+        pipeline = get_pipeline()
+        pipeline_cns = [p.get("cns") for p in pipeline.values()]
+        colih_names = [m.get("nome", "").strip().upper() for m in get_colih_cache().get("medicos", {}).values()]
+        
+        sync_consultacrm.main(
+            in_memory_medicos=medicos,
+            pipeline_cns=pipeline_cns,
+            colih_names=colih_names
+        )
         
 @app.post("/api/colih/sync")
 def sync_colih_endpoint(action: str = "preview"):

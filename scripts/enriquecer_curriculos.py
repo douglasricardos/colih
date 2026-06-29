@@ -337,25 +337,34 @@ def _run_sync_playwright(alvos, cache, status, forcar):
     print("Concluido (Playwright): " + str(status["processados"]) + " | Doc: " + str(status["encontrados_doctoralia"]) + " | Lattes: " + str(status["encontrados_lattes"]))
 
 # ---- CLI ----
-def main():
-    parser = argparse.ArgumentParser(description="Enriquecer Curriculos")
-    parser.add_argument("--todos", action="store_true")
-    parser.add_argument("--colih-only", action="store_true")
-    parser.add_argument("--cns", type=str)
-    parser.add_argument("--forcar", action="store_true")
-    parser.add_argument("--limite", type=int, default=100)
-    args = parser.parse_args()
+def main(in_memory_medicos=None, arg_colih_only=False, arg_todos=False, arg_cns=None, arg_forcar=False, arg_limite=100):
+    if in_memory_medicos is None:
+        parser = argparse.ArgumentParser(description="Enriquecer Curriculos")
+        parser.add_argument("--todos", action="store_true")
+        parser.add_argument("--colih-only", action="store_true")
+        parser.add_argument("--cns", type=str)
+        parser.add_argument("--forcar", action="store_true")
+        parser.add_argument("--limite", type=int, default=100)
+        args = parser.parse_args()
+        arg_colih_only = args.colih_only
+        arg_todos = args.todos
+        arg_cns = args.cns
+        arg_forcar = args.forcar
+        arg_limite = args.limite
 
-    print("Playwright: " + ("ATIVO" if PLAYWRIGHT_OK else "inativo (so Lattes)"))
-    with open(MEDICOS_FILE, "r", encoding="utf-8") as f:
-        medicos = json.load(f).get("medicos", [])
+        print("Playwright: " + ("ATIVO" if PLAYWRIGHT_OK else "inativo (so Lattes)"))
+        with open(MEDICOS_FILE, "r", encoding="utf-8") as f:
+            medicos = json.load(f).get("medicos", [])
+    else:
+        medicos = in_memory_medicos
+        print("Playwright: " + ("ATIVO" if PLAYWRIGHT_OK else "inativo (so Lattes)"))
     print("Base: " + str(len(medicos)) + " medicos")
     cache = carregar_cache()
     print("Cache: " + str(len(cache)) + " enriquecidos")
 
-    if args.cns:
-        alvos = [m for m in medicos if m.get("cns") == args.cns]
-    elif args.colih_only:
+    if arg_cns:
+        alvos = [m for m in medicos if m.get("cns") == arg_cns]
+    elif arg_colih_only:
         colih_file = DATA_DIR / "dados_colih_medicos.json"
         if colih_file.exists():
             with open(colih_file, "r", encoding="utf-8") as f:
@@ -365,18 +374,20 @@ def main():
             print("Modo COLIH-only: " + str(len(alvos)) + " cooperadores")
         else:
             alvos = [m for m in medicos if m.get("cns") not in cache]
-    elif args.todos:
-        alvos = [m for m in medicos if m.get("cns") not in cache or args.forcar]
+    elif arg_todos:
+        alvos = [m for m in medicos if m.get("cns") not in cache or arg_forcar]
     else:
         alvos = [m for m in medicos if m.get("cns") not in cache]
-        random.shuffle(alvos)
 
-    if args.limite > 0:
-        alvos = alvos[:args.limite]
-    
-    print("A enriquecer: " + str(len(alvos)))
-    if not alvos: print("Nenhum pendente."); return
-    run_sync(alvos, forcar=args.forcar)
+    lim = min(len(alvos), arg_limite)
+    print("Alvos filtrados: " + str(len(alvos)) + " | Limite proc: " + str(lim))
+    alvos = alvos[:lim]
+
+    if not alvos:
+        print("Nenhum medico para processar.")
+        return
+
+    run_sync(alvos, forcar=arg_forcar)
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="Colih">
+	<meta name="csrf-token" content="RGvhsOWlv0RdeJosbvmJvCXfHECX3nG3Q5Qn5pxU">
+
+	<link rel="apple-touch-icon" sizes="57x57" href='https://salvador.colih.med.br/apple-icon-57x57.png'>
+	<link rel="apple-touch-icon" sizes="60x60" href='https://salvador.colih.med.br/apple-icon-60x60.png'>
+	<link rel="apple-touch-icon" sizes="72x72" href='https://salvador.colih.med.br/apple-icon-72x72.png'>
+	<link rel="apple-touch-icon" sizes="76x76" href='https://salvador.colih.med.br/apple-icon-76x76.png'>
+	<link rel="apple-touch-icon" sizes="114x114" href='https://salvador.colih.med.br/apple-icon-114x114.png'>
+	<link rel="apple-touch-icon" sizes="120x120" href='https://salvador.colih.med.br/apple-icon-120x120.png'>
+	<link rel="apple-touch-icon" sizes="144x144" href='https://salvador.colih.med.br/apple-icon-144x144.png'>
+	<link rel="apple-touch-icon" sizes="152x152" href='https://salvador.colih.med.br/apple-icon-152x152.png'>
+	<link rel="apple-touch-icon" sizes="180x180" href='https://salvador.colih.med.br/apple-icon-180x180.png'>
+	<link rel="icon" type="image/png" sizes="192x192"  href='https://salvador.colih.med.br/android-icon-192x192.png'>
+	<link rel="icon" type="image/png" sizes="32x32" href='https://salvador.colih.med.br/favicon-32x32.png'>
+	<link rel="icon" type="image/png" sizes="96x96" href='https://salvador.colih.med.br/favicon-96x96.png'>
+	<link rel="icon" type="image/png" sizes="16x16" href='https://salvador.colih.med.br/favicon-16x16.png'>
+	<link rel="manifest" href='https://salvador.colih.med.br/manifest.json'>
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content='https://salvador.colih.med.br/ms-icon-144x144.png'>
+	<meta name="theme-color" content="#ffffff">
+
+	<title>Membros</title>
+
+		            <link href="/css/app.css" rel="stylesheet">
+		<style>
+		.card-filter:first-child {
+			border-radius: calc(0.35rem - 1px) calc(0.35rem - 1px) 0 0;
+		}
+		.card .card-filter[data-toggle=collapse] {
+		text-decoration: none;
+		position: relative;
+		padding: 0.75rem 3.25rem 0.75rem 1.25rem;
+		}
+		.card .card-filter[data-toggle=collapse]::after {
+		position: absolute;
+		right: 0;
+		top: 0;
+		padding-right: 1rem;
+		line-height: 32px;
+		font-weight: 900;
+		content: "\F107";
+		font-family: "Font Awesome 5 Free";
+		color: #ffffff;
+		}
+		.card .card-filter[data-toggle=collapse].collapsed {
+		border-radius: 0.35rem;
+		}
+		.card .card-filter[data-toggle=collapse].collapsed::after {
+		content: "\F105";
+		}
+	</style>
+
+	<!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak] {display: none !important;}[wire\:cloak] {display: none !important;}</style>
+</head>
+
+<body id="page-top" class="sidebar-toggled" data-base-url='https://salvador.colih.med.br'>
+		<div id="wrapper">
+		<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion toggled" id="accordionSidebar">
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="https://salvador.colih.med.br/panel/dashboard">
+        <div class="sidebar-brand-icon">
+            <img src="/img/logo-colih-small.png" title="Colih" >
+        </div>
+        <div class="sidebar-brand-text mx-3">Colih</div>
+    </a>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">
+        Módulos
+    </div>
+
+			<li class="nav-item ">
+			<a class="nav-link" href="https://salvador.colih.med.br/panel/doctors">
+				<i class="fas fa-fw fa-stethoscope"></i>
+				<span>Médicos</span>
+			</a>
+		</li>
+	
+			<li class="nav-item ">
+			<a class="nav-link" href="https://salvador.colih.med.br/panel/hospitals">
+				<i class="fas fa-fw fa-hospital"></i>
+				<span>Instituições</span>
+			</a>
+		</li>
+	
+        		<li class="nav-item ">
+			<a class="nav-link" href="
+			 https://salvador.colih.med.br/panel/visits ">
+				<i class="fas fa-fw fa-calendar"></i>
+				<span>Visitas</span>
+            </a>
+		</li>
+	
+		 
+		<li class="nav-item">
+			<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTrigger" aria-expanded="true" aria-controls="collapseTrigger">
+				<i class="fas fa-fw fa-ambulance"></i>
+				<span>Casos</span>
+			</a>
+			<div id="collapseTrigger" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+				<div class="bg-white py-2 collapse-inner rounded">
+											<a class="collapse-item " href="https://salvador.colih.med.br/panel/triggers-colih">Colih</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/triggers-gvp">GVP</a>
+									</div>
+			</div>
+		</li>
+		
+			<li class="nav-item ">
+			<a class="nav-link" href="https://salvador.colih.med.br/panel/remedies">
+				<i class="fas fa-fw fa-pills"></i>
+				<span>Medicamentos</span>
+			</a>
+		</li>
+	
+			<li class="nav-item">
+			<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMembers" aria-expanded="true" aria-controls="collapseMembers">
+				<i class="fas fa-fw fa-user"></i>
+				<span>Pessoas</span>
+			</a>
+			<div id="collapseMembers" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+				<div class="bg-white py-2 collapse-inner rounded">
+											<a class="collapse-item active" href="https://salvador.colih.med.br/panel/users">Membros</a>
+																<a class="collapse-item" href="#" onclick="Swal.fire({title: 'Este recurso mudou de lugar', 
+							text: 'O cadastro de assistentes foi unificado com o cadastro de membros. Selecione \'Assistentes\' no filtro de membros para gerenciar assistentes.',
+							customClass: {
+								confirmButton: 'btn btn-primary mr-2',
+								cancelButton: 'btn btn-secondary',
+								title: 'h4 text-primary mb-2',
+								html: 'h5 text-secondary'
+							},
+							buttonsStyling: false})">
+							Assistentes</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/oncall">Plantões</a>
+																	<a class="collapse-item " href="https://salvador.colih.med.br/panel/easers">Facilitadores</a>
+									</div>
+			</div>
+		</li>
+	
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">
+                Outros
+        </div>
+	
+		<li class="nav-item">
+			<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="true" aria-controls="collapseSettings">
+				<i class="fas fa-fw fa-cog"></i>
+				<span>Configurações</span>
+			</a>
+			<div id="collapseSettings" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+				<div class="bg-white py-2 collapse-inner rounded">
+
+											<a class="collapse-item " href="https://salvador.colih.med.br/panel/specialities">Especialidades</a>
+							
+											<a class="collapse-item " href="https://salvador.colih.med.br/panel/agreements">Convênios</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/regions">Regiões</a>
+						<a class="collapse-item " href="https://salvador.colih.med.br/panel/congregations">Congregações</a>
+						<a class="collapse-item " href="https://salvador.colih.med.br/panel/privileges">Privilégios</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/fields">Áreas de atuação</a>
+						<a class="collapse-item " href="https://salvador.colih.med.br/panel/occupations">Profissões</a>
+										
+											<a class="collapse-item " href="https://salvador.colih.med.br/panel/roles">
+							Níveis de Acesso
+							<i class="fas fa fa-lock fa-sm fa-fw ml-1 text-gray-400"></i>
+						</a>
+					                                        
+											<div class="dropdown-divider"></div>
+						<a class="collapse-item " href="https://salvador.colih.med.br/panel/whatsapp">Whatsapp</a>
+						<a class="collapse-item "  href="https://salvador.colih.med.br/panel/settings">
+							Preferências <i class="fas fa-gear fa-sm fa-fw ml-1 text-gray-400"></i>
+						</a>
+                    				
+				</div>
+			</div>
+		</li>
+	
+
+        <li class="nav-item ">
+        <a class="nav-link" href="https://salvador.colih.med.br/panel/documents">
+            <i class="fas fa-fw fa-file-alt"></i>
+            <span>Documentos</span>
+        </a>
+    </li>
+        
+    <li class="nav-item">
+        <a class="nav-link" href="https://salvador.colih.med.br/panel/documents/doar">
+            <i class="fas fa-fw fa-dollar"></i>
+            <span>Doar</span>
+        </a>
+    </li>
+    
+
+			<hr class="sidebar-divider">
+
+		<div class="sidebar-heading">
+			Gerencial
+		</div>
+ 
+		<li class="nav-item">
+			<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collpseMetrics" aria-expanded="true" aria-controls="collpseMetrics">
+				<i class="fas fa-fw fa-chart-bar"></i>
+				<span>Relatórios</span>
+			</a>
+			<div id="collpseMetrics" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+				<div class="bg-white py-2 collapse-inner rounded">
+
+                    						<a class="collapse-item " href="https://salvador.colih.med.br/panel/profile/colih">
+							Estrutura da Colih 
+							<i class="fas fa-house-user fa-sm fa-fw ml-1 text-gray-400"></i>
+						</a>
+                    
+                    						<a class="collapse-item " href="https://salvador.colih.med.br/panel/profile/maps">
+							Mapa da Colih 
+							<i class="fas fa-map fa-sm fa-fw ml-1 text-gray-400"></i>
+						</a>
+                    											<a class="collapse-item " href="https://salvador.colih.med.br/panel/metrics/doctorsgraph">Médicos</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/visits/digest">Acompanhamento de Visitas</a>
+						<a class="collapse-item " href="https://salvador.colih.med.br/panel/metrics/visits">Visitas (antigo)</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/metrics/hlccases">Casos Colih</a>
+																<a class="collapse-item " href="https://salvador.colih.med.br/panel/metrics/pvgcases">Casos GVP</a>
+
+									</div>
+			</div>
+		</li>
+	
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+</ul>
+
+		<div id="content-wrapper" class="d-flex flex-column">
+			<div id="content">
+				<style>
+#header-nav .nav-link {
+    cursor: pointer;
+}
+
+#header-nav .nav-link:hover {
+    opacity: 0.8;
+    transform: scale(1.2);
+    transition: all 0.2s ease-in-out;
+}
+</style>
+
+<nav class="navbar navbar-expand navbar-light bg-white topbar mb-3 static-top shadow">
+    <div class="container-fluid justify-content-between">
+        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+        </button>
+
+        <ul class="navbar-nav d-flex flex-row" id="header-nav">
+                        <li class="nav-item mx-1">
+                <i class="nav-link fas fa-fw fa-stethoscope text-primary colihlink" title="Médicos" data-url="https://salvador.colih.med.br/panel/doctors"></i>
+            </li>
+                                    <li class="nav-item mx-1">
+                <i class="nav-link fas fa-fw fa-user text-success colihlink" title="Membros" data-url="https://salvador.colih.med.br/panel/users"></i>
+            </li>
+                                    <li class="nav-item mx-1">
+                <i class="nav-link fas fa-fw fa-calendar text-secondary colihlink" title="Disponibilidade" data-url="https://salvador.colih.med.br/panel/users/disponibility"></i>
+            </li>
+                                    <li class="nav-item mx-1">
+                <i class="nav-link fas fa-fw fa-truck-medical text-danger colihlink" title="Casos Colih" data-url="https://salvador.colih.med.br/panel/triggers-colih"></i>
+            </li>
+                                    <li class="nav-item mx-1">
+                <i class="nav-link fas fa-fw fa-bed text-info colihlink" title="Casos GVP" data-url="https://salvador.colih.med.br/panel/triggers-gvp"></i>
+            </li>
+                    </ul>
+        <ul class="navbar-nav flex-row">
+            <li class="nav-item dropdown no-arrow mx-1">
+                <span class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-bell fa-fw" title="Notificações"></i>
+                                    </span>
+                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+                    <h6 class="dropdown-header">
+                        Notificações
+                    </h6>
+                     
+                    <div class="text-center text-red-500 m-3">Nenhuma nova notificação</div>
+                                    </div>
+            </li>
+
+
+            <li class="nav-item dropdown no-arrow">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="mr-2 d-md-none d-lg-inline text-gray-600 small" style="cursor: pointer;">
+						svc_colih
+					</span>
+                        	                <i class="fa fa-user-circle align-middle fa-lg" style="color:cornflowerblue" data-tooltip="tooltip" data-delay=300 title="svc_colih"></i>
+                                    </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                    <a class="dropdown-item" href="https://salvador.colih.med.br/panel/profile">
+                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+						Meus dados
+                    </a>
+
+                                        					                    <a class="dropdown-item" href="https://webmail.colih.med.br" target="_blank">
+                        <i class="fas fa-envelope fa-sm fa-fw mr-2 text-gray-400"></i>
+                        WebMail
+                    </a>
+                    
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Sair
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Deseja realmente sair?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">Clique no botão "Sair" abaixo se realmente deseja finalizar sua sessão.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                <a class="btn btn-primary" href="https://salvador.colih.med.br/session/logout">Sair</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="POST" action="https://salvador.colih.med.br/panel/users/cardgenerate" accept-charset="UTF-8" id="formCard" autocomplete="off"><input name="_token" type="hidden" value="RGvhsOWlv0RdeJosbvmJvCXfHECX3nG3Q5Qn5pxU">
+<input type="hidden" name="_method" value="POST">    <input type="hidden" name="iduser" value="207">
+</form>
+
+				<div class="px-3 pt-0 pb-0 container-fluid">
+					
+
+<div class='row mb-3 '>
+	<div class="col-12">
+		<a href="https://salvador.colih.med.br/panel/users/create" class="btn btn-sm btn-icon-split mr-2 btn-primary 
+				" 
+                                
+		 
+			data-placement="top" data-tooltip="tooltip" data-delay=500 title="Adicionar novo membro ou usuário"
+				
+		>
+		<span class="icon text-white-50">
+			<i class="fas fa-plus-circle"></i>
+		</span>
+
+		<span class="text  ">
+			Novo Membro
+		</span>
+	</a>
+
+
+	<a href="https://salvador.colih.med.br/panel/users/import" class="btn btn-sm btn-icon-split mr-2 btn-secondary 
+				" 
+                                
+		 
+			data-placement="top" data-tooltip="tooltip" data-delay=500 title="Importa membros conforme a lista no JW Hub"
+				
+		>
+		<span class="icon text-white-50">
+			<i class="fas fa-file-import"></i>
+		</span>
+
+		<span class="text  d-none d-md-block  ">
+			Importar do JW Hub
+		</span>
+	</a>
+
+
+	<a href="https://salvador.colih.med.br/panel/users/export?type=xls&region=1&isMultipleRegions=1&moreFilters=0&name=&tipo=O&sortOrder=nm" class="btn btn-sm btn-icon-split mr-2 btn-success 
+		 
+			float-right
+				" 
+                                
+		 
+			data-placement="top" data-tooltip="tooltip" data-delay=500 title="Exportar lista em formato MS Excel"
+				
+		>
+		<span class="icon text-white-50">
+			<i class="fas fa-file-excel"></i>
+		</span>
+
+		<span class="text  d-none d-md-block  ">
+			Exportar Excel
+		</span>
+	</a>
+
+        
+	<a href="https://salvador.colih.med.br/panel/users/export?type=pdf&region=1&isMultipleRegions=1&moreFilters=0&name=&tipo=O&sortOrder=nm" class="btn btn-sm btn-icon-split mr-2 btn-danger 
+		 
+			float-right
+				" 
+                                
+		 
+			data-placement="top" data-tooltip="tooltip" data-delay=500 title="Exportar lista em formato PDF"
+				
+		>
+		<span class="icon text-white-50">
+			<i class="fas fa-file-pdf"></i>
+		</span>
+
+		<span class="text  d-none d-md-block  ">
+			Exportar PDF
+		</span>
+	</a>
+
+
+	<a href="https://salvador.colih.med.br/panel/users/digest" class="btn btn-sm btn-icon-split mr-2 btn-warning 
+		 
+			float-right
+				" 
+                                
+		 
+			data-placement="top" data-tooltip="tooltip" data-delay=500 title="Relação designações por especialidade, médico e hospital."
+				
+		>
+		<span class="icon text-white-50">
+			<i class="fas fa-chart-bar"></i>
+		</span>
+
+		<span class="text  d-none d-md-block  ">
+			Designações
+		</span>
+	</a>
+	</div>
+</div>
+
+
+
+
+<form method="POST" action="https://salvador.colih.med.br/panel/users" accept-charset="UTF-8" id="form-filter-index" autocomplete="off"><input name="_token" type="hidden" value="RGvhsOWlv0RdeJosbvmJvCXfHECX3nG3Q5Qn5pxU">
+<input type="hidden" name="_method" value="GET">
+<div class="card shadow mb-3 bg-light">
+    <a href="#filterBox" class="d-block bg-info card-filter px-1 pt-1 pb-2 " data-toggle="collapse" role="button" aria-expanded="true" aria-controls="filterBox">
+        <span class="h6 pt-1 m-0 font-weight-bold text-white small">
+			<i class="fas fa-filter ml-2"></i>&nbsp;Filtrar membros
+		</span>
+		    </a>
+    <div class="collapse show mt-0 pt-0" id="filterBox">
+		<div class="form-row card-body px-2 pt-1 input-group input-group-sm">
+			<div class="col-12 col-sm-6 col-md-4 col-xl-4 mt-1">
+	<label for="" class="col-12 p-0 mb-0 col-form-label-sm">Nome</label>
+	<div class="col-12 p-0">
+		<input placeholder="digite o nome" id="name" class="form-control form-control-sm " name="name" type="text" value="">
+	</div>
+</div>
+	<div class="col-12 col-sm-6 col-md-3 col-lg-2 mt-1" >
+	<label for="" class="col-12 p-0 mb-0 col-form-label-sm">Tipo</label>
+	<div class="col-12 p-0">
+		<select id="tipo" class="form-control form-control-sm " name="tipo"></select>
+	</div>
+</div>
+	<div class="col-sm-6 col-md mt-1" >
+	<label for="" class="col-12 p-0 mb-0 col-form-label-sm">Onde</label>
+	<div class="col-12 p-0 ">
+		<select class="form-control" id="fieldWhere" name="where"><option value="All" selected="selected">Toda a Colih</option><option value="region">Região</option><option value="city">Cidade</option><option value="hosp">Hospital</option><option value="cong">Congregação</option></select>
+	</div>
+</div>
+
+<div id="regionSelect" class="col-sm-6 col-md mt-1" style="display: none;">
+	<label for="" class="col-12 p-0 mb-0 col-form-label-sm">Região</label>
+	<div class="col-12 p-0 ">
+		<select class="form-control" name="region"><option value="2">Alagoinhas</option><option value="3">Camaçari</option><option value="4">Dias D&#039;ávila</option><option value="8">Grupo A</option><option value="10">Grupo C</option><option value="11">Grupo D</option><option value="12">Grupo E</option><option value="5">Itaparica</option><option value="6">Mata de Sâo João</option><option value="7">Recôncavo</option><option value="13">Santo Antônio de Jesus</option><option value="1" selected="selected">Sem Grupo</option><option value="14">Valença</option></select>
+	</div>
+</div>
+
+<div id="citySelect" class="col-sm-6 col-md mt-1" style="display: none;">
+	<label for="" class="col-12 p-0 mb-0 col-form-label-sm">Cidade</label>
+	<div class="col-12 p-0 ">
+		<select class="form-control" name="city"><option value="287">Alagoinhas</option><option value="303">Araças</option><option value="341">Cachoeira</option><option value="350">Camaçari</option><option value="358">Candeias</option><option value="367">Cardeal da Silva</option><option value="372">Catu</option><option value="377">Cipó</option><option value="384">Conde</option><option value="399">Dias d`Ávila</option><option value="404">Entre Rios</option><option value="406">Esplanada</option><option value="445">Inhambupe</option><option value="471">Itaparica</option><option value="511">Lauro de Freitas</option><option value="520">Madre de Deus</option><option value="533">Mata de São João</option><option value="550">Muritiba</option><option value="560">Nova Soure</option><option value="564">Olindina</option><option value="589">Pojuca</option><option value="607">Ribeira do Pombal</option><option value="616">Salvador</option><option value="629">Santo Amaro</option><option value="630">Santo Antônio de Jesus</option><option value="635">São Félix</option><option value="637">São Francisco do Conde</option><option value="643">São Sebastião do Passé</option><option value="646">Saubara</option><option value="657">Simões Filho</option><option value="685">Valença</option><option value="691">Vera Cruz</option></select>
+	</div>
+</div>
+
+<div id="hospitalSelect" class="col-sm-6 col-md mt-1" style="display: none;">
+	<label for="" class="col-12 p-0 mb-0 col-form-label-sm">Hospital</label>
+	<div class="col-12 p-0 ">
+		<select class="form-control" name="hospital"><option value="52">AMG Day Hospital Simões Filho (AMG Day Hospital Simões Filho)</option><option value="6">CETRO - Hospital Dia Hapvida (CETRO CENTRO ESPECIALIZADO EM TRAUMATOLOGIA REABILITACAO E)</option><option value="125">CICAN (Centro Estadual de Oncologia)</option><option value="39">CLIMA (Clima - Hospital da Clínica Maria Albano)</option><option value="28">CLIMETRO (CLINICA METROPOLITANA LTDA CLIMETRO)</option><option value="20">Centro Médico Agnus Dei - Pojuca (CENTRO MEDICO AGNUS DEI)</option><option value="29">Centro de Cirurgias Eletivas CCE (CENTRO DE CIRURGIAS ELETIVAS CCE)</option><option value="122">Clínica Sermec - Pioneiro (SERMEC)</option><option value="4">HCA - Hospital Alagoinhas (HOSPITAL DAS CLINICAS DE ALAGOINHAS)</option><option value="62">HGESF - Hospital Geral Ernesto Simões Filho (Hospital Geral Ernesto Simões Filho)</option><option value="74">HJV - Hospital Jorge Valente (Hospital Jorge Valente)</option><option value="68">Hospital 2 de Julho (Hospital 2 de Julho)</option><option value="100">Hospital Aeroporto (Hospital Aeroporto)</option><option value="85">Hospital Agenor Paiva (Hospital Agenor Paiva)</option><option value="11">Hospital Agnus Dei - Catu (HOSPITAL AGNUS DEI)</option><option value="90">Hospital Alayde Costa (Hospital Alayde Costa)</option><option value="83">Hospital Aliança (Hospital Aliança)</option><option value="55">Hospital Ana Nery (HOSPITAL ANA NERY)</option><option value="76">Hospital Aristides Maltez - HAM (Hospital Aristides Maltez)</option><option value="113">Hospital COT (Hospital COT)</option><option value="25">Hospital Central Sermege (SERMEGE SERVICOS MEDICOS EM GERAL LTDA)</option><option value="98">Hospital Couto Maia (Hospital Couto Maia)</option><option value="75">Hospital Cárdio Pulmonar (Hospital Cárdio Pulmonar)</option><option value="49">Hospital Célia Almeida Lima (Hospital Docente Assistencial Célia Almeida Lima)</option><option value="124">Hospital Dr. Francino Borges dos Reis (Hospital Dr. Francino Borges dos Reis)</option><option value="110">Hospital Dr. Heitor Guedes de Mello (Hospital Dr. Heitor Guedes de Mello)</option><option value="63">Hospital Especializado Octávio Mangabeira (HEOM) (Hospital Especializado Octávio Mangabeira)</option><option value="123">Hospital Estadual Mont Serrat - Cuidados Paliativos (Hospital Estadual Mont Serrat)</option><option value="24">Hospital Evanice Rocha - Unidade Camaçari (HOSPITAL EVANICE ROCHA UNIDADE CAMACARI)</option><option value="82">Hospital Fundação Bahiana de Cardiologia (Hospital Fundação Bahiana de Cardiologia)</option><option value="94">Hospital Geral Roberto Santos (HGRS) (Hospital Geral Roberto Santos)</option><option value="121">Hospital Geral Santa Tereza (HOSPITAL GERAL SANTA TEREZA)</option><option value="31">Hospital Geral de Camaçari (HOSPITAL GERAL DE CAMACARI)</option><option value="35">Hospital Geral de Itaparica (Hospital Geral de Itaparica)</option><option value="84">Hospital Geral do Estado (HGE) (Hospital Geral do Estado)</option><option value="101">Hospital Hapvida Lauro de Freitas (Hospital Hapvida Lauro de Freitas)</option><option value="109">Hospital Incar (Hospital Incar)</option><option value="8">Hospital Julia Trindade Leal (UNIDADE MISTA JULIA TRINDADE LEAL)</option><option value="58">Hospital Manoel Victorino (Hospital Manoel Victorino)</option><option value="67">Hospital Martagão Gesteira (Hospital Martagão Gesteira)</option><option value="71">Hospital Mater Dei (Hospital Mater Dei)</option><option value="7">Hospital Maternidade Doutor Joao Carlos Meireles Paolilo (CENTRO DE CIRURGIAS ELETIVAS JUDELIO DE SOUZA CARMO)</option><option value="23">Hospital Maternidade de Santo Amaro (HOSPITAL MATERNIDADE DE SANTO AMARO)</option><option value="40">Hospital Medicina Humana (Hospital Medicina Humana)</option><option value="102">Hospital Metropolitano (Lauro de Freitas) (Hospital Metropolitano)</option><option value="44">Hospital Municipal Albino Leitão (Hospital Municipal Albino Leitão)</option><option value="15">Hospital Municipal Antônio Carlos Magalhães (Hospital Municipal Antônio Carlos Magalhães)</option><option value="34">Hospital Municipal Dilton Bispo de Santana</option><option value="19">Hospital Municipal Dr. Carlito Silva (HOSPITAL MUNICIPAL DR CARLITO SILVA)</option><option value="36">Hospital Municipal Dr. Eurico de Freitas (Hospital Municipal Dr. Eurico de Freitas)</option><option value="50">Hospital Municipal Dr. Francino Borges dos Reis (Hospital Municipal Dr. Francino Borges dos Reis)</option><option value="12">Hospital Municipal Dr. Givaldo Fontes Costa (HOSPITAL DR GIVALDO FONTES COSTA)</option><option value="43">Hospital Municipal Lucila Fraga (Hospital Municipal Lucila Fraga)</option><option value="42">Hospital Municipal Madre de Deus Dr. Eduardo Ribeiro Bahia (Hospital Municipal Madre de Deus Dr. Eduardo Ribeiro Bahia)</option><option value="18">Hospital Municipal Maria Socorro Narciso Coelho (HOSPITAL MUNICIPAL MARIA SOCORRO NARCISO COELHO)</option><option value="13">Hospital Municipal Prof. Edgard Santos (HOSPITAL MUN PRF EDGARD SANTOS)</option><option value="17">Hospital Municipal Sagrado Coração de Jesus (HOSPITAL MUNICIPAL SAGRADO CORACAO DE JESUS)</option><option value="38">Hospital Municipal de Candeias (Hospital Municipal de Candeias)</option><option value="10">Hospital Municipal de Catu (HOSPITAL DE CATU SANTA CASA DA BAHIA)</option><option value="120">Hospital Municipal de Cipó (HOSPITAL MUNICIPAL DE CIPÓ)</option><option value="96">Hospital Municipal de Salvador - HMS (Hospital Municipal de Salvador)</option><option value="51">Hospital Municipal de Simões Filho (Hospital Municipal de Simões Filho)</option><option value="86">Hospital Municipal do Homem (Hospital Municipal do Homem)</option><option value="95">Hospital Ortopédico do Estado (HOE) (Hospital Ortopédico do Estado)</option><option value="99">Hospital PROHOPE (Hospital PROHOPE)</option><option value="69">Hospital Português da Bahia (Hospital Português da Bahia)</option><option value="59">Hospital Professor Carvalho Luz (Hospital Professor Carvalho Luz)</option><option value="93">Hospital Professor Eládio Lassére (Hospital Professor Eládio Lassére)</option><option value="33">Hospital Promater (Hospital Promater)</option><option value="5">Hospital Regional Dantas Bião (HOSPITAL REGIONAL DANTAS BIAO)</option><option value="105">Hospital Regional de Santo Antônio de Jesus (Hospital Regional de Santo Antônio de Jesus)</option><option value="72">Hospital Salvador (Hospital Salvador)</option><option value="22">Hospital Santa Helena - Camaçari (HOSPITAL SANTA HELENA)</option><option value="60">Hospital Santa Izabel (HOSPITAL SANTA IZABEL)</option><option value="73">Hospital Santo Amaro (Hospital Santo Amaro)</option><option value="108">Hospital Santo Antônio do Recôncavo (Hospital Santo Antônio do Recôncavo)</option><option value="14">Hospital São Francisco e São Vicente (HOSPITAL SAO FRANCISCO E SAO VICENTE)</option><option value="37">Hospital São João de Deus (Hospital São João de Deus)</option><option value="104">Hospital São Rafael (Hospital São Rafael)</option><option value="80">Hospital Teresa de Lisieux (Hospital Teresa de Lisieux)</option><option value="70">Hospital Universitário Professor Edgard Santos (HUPES) (Hospital Universitário Professor Edgard Santos)</option><option value="81">Hospital da Bahia (Hospital da Bahia)</option><option value="56">Hospital da Cidade (Hospital da Cidade)</option><option value="132">Hospital da Criança Deputado Alan Sanches (MATERNIDADE E HOSPITAL DA CRIANCA DEPUTADO ALAN SANCHES)</option><option value="92">Hospital da Mulher (Hospital da Mulher - Maria Luzia Costa dos Santos)</option><option value="77">Hospital de Brotas (Hospital de Brotas)</option><option value="91">Hospital do Subúrbio (Hospital do Subúrbio)</option><option value="107">Hospital e Maternidade Luiz Argolo Santa Casa de Misericórdia de Santo Antonio de Jesus BA (Hospital e Maternidade Luiz Argolo Santa Casa de Misericórdia de Santo Antonio de Jesus BA)</option><option value="16">Hospital e Maternidade Maria Luiza Laudano (MATERNIDADE MARIA LUIZA DIAS LAUDANO)</option><option value="45">INERE Instituto de Nefrologia do Recôncavo (INERE Instituto de Nefrologia do Recôncavo)</option><option value="78">IPERBA - Instituto de Perinatologia da Bahia (Instituto de Perinatologia da Bahia)</option><option value="97">Maternidade Albert Sabin (Maternidade Albert Sabin)</option><option value="61">Maternidade Climério de Oliveira (Maternidade Climério de Oliveira)</option><option value="89">Maternidade Maria da Conceição Santos de Jesus (Maternidade Maria da Conceição Santos de Jesus)</option><option value="32">Maternidade Regional de Camaçari (Maternidade Regional de Camaçari)</option><option value="53">Maternidade Tsylla Balbino (Maternidade Tsylla Balbino)</option><option value="64">Maternidade de Referência Prof. José Maria de Magalhães Netto (MATERNIDADE PROFESSOR JOSE MARIA DE MAGALHAES NETO)</option><option value="1">Menandro de Faria (Hospital Geral Menandro de Faria)</option><option value="106">ONCOCENTER (ONCOCENTER - Centro de Oncologia e Hematologia)</option><option value="87">OSID - Hospital Obras Sociais Irmã Dulce (Hospital Santo Antonio)</option><option value="117">Pronto Atendimento Dr. Rodrigo Argolo (Pronto Atendimento Dr. Rodrigo Argolo)</option><option value="9">Pronto atendimento 24h - Cardeal da Silva (CENTRO DE ESPECIALIDADES)</option><option value="79">SARAH (Rede Sarah de Hospitais de Reabilitação)</option><option value="26">SEMED (Hospital SEMED)</option><option value="48">Santa Casa De São Felix (Hospital Nossa Senhora da Pompeia)</option><option value="47">Santa Casa de Misericordia de Oliveira dos Campinhos (Hospital Nossa Senhora da Vitória)</option><option value="46">Santa Casa de Misericórdia de Santo Amaro (Santa Casa de Misericórdia de Santo Amaro)</option><option value="27">São Matheus Hospital Dia (São Matheus Hospital Dia)</option><option value="57">UE Curuzu (UE Mãe Hilda)</option><option value="112">UPA Barris (UPA Barris)</option><option value="129">UPA DO CABULA (UPA DO CABULA)</option><option value="118">UPA Dr. Hélio Machado (UPA Dr. Hélio Machado)</option><option value="114">UPA Paripe (UPA Paripe)</option><option value="130">UPA Pau miudo (PA MARIA DA CONCEICAO SANTIAGO IMBASSAY)</option><option value="127">UPA Periperi (UPA 24H PROF ADROALDO ALBERGARIA)</option><option value="65">UPA San Martins (UPA San Martin)</option><option value="88">UPA Santo Antônio (UPA Santo Antônio)</option><option value="66">UPA São Caetano (UPA São Caetano)</option><option value="30">UPA da Gleba A (UPA da Gleba A)</option><option value="131">UPA de Cajazeiras (UNIDADE DE EMERGENCIA PROF HOSANAH D OLIVEIRA)</option><option value="41">UPA de Ilha de Maré (UPA de Ilha de Maré)</option><option value="128">UPA de Itinga (UNIDADE DE PRONTO ATENDIMENTO DE ITINGA)</option><option value="126">UPA de Valéria (UPA 24H Valéria)</option><option value="54">USF Bom Juá (USF Bom Juá)</option><option value="116">USF Plataforma (USF Plataforma)</option><option value="111">USF Santa Mônica (USF Santa Mônica)</option><option value="103">USF São Cristóvão (USF São Cristóvão)</option><option value="119">USF Tubarão (USF Tubarão)</option><option value="115">USF Vista Alegre</option><option value="21">Upa Arembepe (Upa Arembepe)</option></select>
+	</div>
+</div>
+        
+	<div id="congregationSelect" class="col-sm-6 col-md mt-1" style="display: none;">
+		<label for="" class="col-12 p-0 mb-0 col-form-label-sm">Congregação</label>
+		<div class="col-12 p-0 ">
+			<select class="form-control" name="congregation"><option value="2">Abadia - Jandaíra BA</option><option value="3">Abaeté - Salvador BA</option><option value="4">Acajutiba - BA</option><option value="5">Acesso Norte - Salvador BA</option><option value="52">Açu da Torre - Mata de São João BA</option><option value="6">Acupe - Santo Amaro BA</option><option value="7">Adustina - BA</option><option value="8">Aeroporto - Salvador BA</option><option value="726">Águas Claras - Salvador BA</option><option value="9">Alegria - Salvador BA</option><option value="10">Aliança - Salvador BA</option><option value="11">Altamira - Conde BA</option><option value="14">Alto da Alegria - Salvador BA</option><option value="15">Alto da Palestina - Salvador BA</option><option value="16">Alto da Torre - Lauro de Freitas BA</option><option value="17">Alto da Vitória - Salvador BA</option><option value="18">Alto das Palmeiras - Salvador BA</option><option value="19">Alto do Cruzeiro - Salvador BA</option><option value="20">Alto do Formoso - Salvador BA</option><option value="21">Alto do Pará - Salvador BA</option><option value="22">Alto do Peru - Salvador BA</option><option value="23">Alto do Porto - Salvador BA</option><option value="24">Alto dos Coqueiros - Salvador BA</option><option value="12">Alto Sobradinho - Santo Antônio de Jesus BA</option><option value="13">Alto Tropical - Lauro de Freitas BA</option><option value="25">Alvorada - Camaçari BA</option><option value="26">Alvorada - Salvador BA</option><option value="27">Alvorecer - Camaçari BA</option><option value="28">Alvorecer - Salvador BA</option><option value="29">Amado Bahia - Mata de São João BA</option><option value="30">Amaralina - Salvador BA</option><option value="31">Amazonas - Salvador BA</option><option value="32">Andaiá - Santo Antônio de Jesus BA</option><option value="33">Antas - BA</option><option value="34">Antônio Balbino - Salvador BA</option><option value="35">Antônio Viana - Salvador BA</option><option value="41">Araçás - BA</option><option value="39">Araçatiba - São Sebastião do Passé BA</option><option value="40">Araçatuba - Salvador BA</option><option value="36">Aramari - BA</option><option value="37">Aratu - Simões Filho BA</option><option value="38">Aratuípe - BA</option><option value="42">Areal - Camaçari BA</option><option value="727">Áreas Verdes - Salvador BA</option><option value="43">Areia Branca - Lauro de Freitas BA</option><option value="44">Areial Bairro da Paz - Salvador BA</option><option value="45">Areias (Jauá) - Camaçari BA</option><option value="46">Arenoso - Salvador BA</option><option value="47">Arraial - Salvador BA</option><option value="48">Arvoredo - Salvador BA</option><option value="49">Atalaia - Salvador BA</option><option value="50">Atlântico Norte - Lauro de Freitas BA</option><option value="51">Augusto Lacerda - Salvador BA</option><option value="53">Bahia - Salvador BA</option><option value="54">Baiacu - Vera Cruz BA</option><option value="55">Bairro da Paz - Salvador BA</option><option value="57">Baixa do Petróleo - Salvador BA</option><option value="56">Baixa Grande - Inhambupe BA</option><option value="58">Bambui - Salvador BA</option><option value="59">Banco da Areia - São Sebastião do Passé BA</option><option value="60">Banzaê - BA</option><option value="71">Barão de Camaçari - Catu BA</option><option value="61">Barra Avenida - Salvador BA</option><option value="63">Barra do Carvalho - Nilo Peçanha BA</option><option value="64">Barra do Jacuípe - Camaçari BA</option><option value="65">Barra do Pojuca - Camaçari BA</option><option value="62">Barra Grande - Vera Cruz BA</option><option value="66">Barradas - Salvador BA</option><option value="67">Barragem de Santa Helena - Dias D&#039;Ávila BA</option><option value="68">Barreiras - Salvador BA</option><option value="69">Barreiro - Salvador BA</option><option value="70">Barros Reis - Salvador BA</option><option value="72">Beira Mar - Salvador BA</option><option value="73">Beira Rio - Jaguaripe BA</option><option value="74">Beira Rio - Lauro de Freitas BA</option><option value="75">Bela Vista - Camaçari BA</option><option value="76">Bela Vista - Candeias BA</option><option value="77">Bela Vista - Ituberá BA</option><option value="78">Bela Vista - Salvador BA</option><option value="79">Bela Vista - Santo Antônio de Jesus BA</option><option value="80">Bela Vista de Itapuã - Salvador BA</option><option value="81">Bela Vista de Jauá - Camaçari BA</option><option value="82">Bela Vista do Ceasa - Salvador BA</option><option value="83">Bela Vista do Paraíso - Salvador BA</option><option value="84">Belo Monte - Salvador BA</option><option value="85">Belo Oriente - Salvador BA</option><option value="86">Boa Esperança - Amargosa BA</option><option value="87">Boa União - Alagoinhas BA</option><option value="88">Boa Vista - Catu BA</option><option value="89">Boa Vista de São Caetano - Salvador BA</option><option value="90">Boca do Rio - Salvador BA</option><option value="91">Bolívia - Valença BA</option><option value="92">Bom Jesus dos Pobres - Saubara BA</option><option value="93">Bom Juá - Salvador BA</option><option value="95">Bosque da Lagoa - Salvador BA</option><option value="96">Bosque das Mangueiras - Lauro de Freitas BA</option><option value="97">Bosque das Mangueiras - Salvador BA</option><option value="94">Bosque Verde - Dias D&#039;Ávila BA</option><option value="98">Brasília - Valença BA</option><option value="99">Brotas - Salvador BA</option><option value="100">Buri - Alagoinhas BA</option><option value="101">Buril - Crisópolis BA</option><option value="103">Caboto - Candeias BA</option><option value="105">Cabuçu - Saubara BA</option><option value="104">Cabula 6 - Salvador BA</option><option value="106">Cacha Pregos - Vera Cruz BA</option><option value="107">Cachoeira do Itanhy - Jandaíra BA</option><option value="135">Caípe - São Francisco do Conde BA</option><option value="108">Cairu - Salinas da Margarida BA</option><option value="109">Caixa D&#039;Água - Salvador BA</option><option value="110">Cajazeiras 5 - Salvador BA</option><option value="111">Cajazeiras Dez - Salvador BA</option><option value="112">Cajazeiras Nove - Salvador BA</option><option value="113">Cajazeiras Oito - Salvador BA</option><option value="114">Cajazeiras Onze - Salvador BA</option><option value="115">Caji - Lauro de Freitas BA</option><option value="116">Calabetão - Salvador BA</option><option value="117">Camassandi - Jaguaripe BA</option><option value="118">Cambuí - Salvador BA</option><option value="119">Caminho de Areia - Salvador BA</option><option value="120">Campinas - Salvador BA</option><option value="121">Campinas - São Francisco do Conde BA</option><option value="122">Campo Alegre - Dias D&#039;Ávila BA</option><option value="123">Campo Seco - Salvador BA</option><option value="124">Campo Velho - Salvador BA</option><option value="125">Campo Verde - Salvador BA</option><option value="126">Camurujipe - Salvador BA</option><option value="127">Candeal - Salvador BA</option><option value="128">Canta Galo - Candeias BA</option><option value="129">Canto dos Pássaros - Camaçari BA</option><option value="130">Capelinha - Salvador BA</option><option value="131">Capuame - Dias D&#039;Ávila BA</option><option value="132">Caroba - Candeias BA</option><option value="133">Caruaçu - Candeias BA</option><option value="134">Cassange - Salvador BA</option><option value="1">Central</option><option value="137">Central - Alagoinhas BA</option><option value="138">Central - Amargosa BA</option><option value="139">Central - Aporá BA</option><option value="140">Central - Cabaceiras do Paraguaçu BA</option><option value="141">Central - Camaçari BA</option><option value="142">Central - Candeias BA</option><option value="143">Central - Cardeal da Silva BA</option><option value="144">Central - Castro Alves BA</option><option value="145">Central - Catu BA</option><option value="146">Central - Conceição da Feira BA</option><option value="147">Central - Conde BA</option><option value="148">Central - Crisópolis BA</option><option value="149">Central - Dias D&#039;Ávila BA</option><option value="150">Central - Entre Rios BA</option><option value="151">Central - Esplanada BA</option><option value="152">Central - Governador Mangabeira BA</option><option value="153">Central - Inhambupe BA</option><option value="732">Central - Itanhém BA</option><option value="154">Central - Itaparica BA</option><option value="155">Central - Ituberá BA</option><option value="156">Central - Jaguaripe BA</option><option value="157">Central - Jandaíra BA</option><option value="158">Central - Laje BA</option><option value="159">Central - Lauro de Freitas BA</option><option value="160">Central - Madre de Deus BA</option><option value="161">Central - Maragogipe BA</option><option value="162">Central - Mata de São João BA</option><option value="163">Central - Nazaré BA</option><option value="164">Central - Nilo Peçanha BA</option><option value="165">Central - Pojuca BA</option><option value="166">Central - Presidente Tancredo Neves BA</option><option value="167">Central - Ribeira do Pombal BA</option><option value="168">Central - Rio Real BA</option><option value="169">Central - Salinas da Margarida BA</option><option value="170">Central - Salvador BA</option><option value="171">Central - Santa Terezinha BA</option><option value="172">Central - Santo Amaro BA</option><option value="173">Central - Santo Antônio de Jesus BA</option><option value="176">Central - São Francisco do Conde BA</option><option value="177">Central - São Sebastião do Passé BA</option><option value="174">Central - Saubara BA</option><option value="175">Central - Simões Filho BA</option><option value="178">Central - Valença BA</option><option value="136">Central (Vila de Abrantes) - Camaçari BA</option><option value="185">Central de Águas Claras - Salvador BA</option><option value="180">Central de Arembepe - Camaçari BA</option><option value="181">Central de Cajazeiras - Salvador BA</option><option value="182">Central de Castelo Branco - Salvador BA</option><option value="183">Central de Itinga - Lauro de Freitas BA</option><option value="184">Central de Jauá - Camaçari BA</option><option value="186">Central do Arenoso - Salvador BA</option><option value="187">Central do Planalto - Catu BA</option><option value="188">Central do Uruguai - Salvador BA</option><option value="179">Central Parque - Salvador BA</option><option value="189">Centro Oeste - Salvador BA</option><option value="190">Centro-Oeste - Esplanada BA</option><option value="191">Chapada - Salvador BA</option><option value="102">CIA 1 - Simões Filho BA</option><option value="215">Cícero Dantas - BA</option><option value="192">Cidade Baixa - Salvador BA</option><option value="193">Cidade Castelo Branco - Salvador BA</option><option value="194">Cidade Industrial - Simões Filho BA</option><option value="195">Cinco Rios - São Sebastião do Passé BA</option><option value="196">Cipó - BA</option><option value="197">Clião Arouca - Salvador BA</option><option value="198">Colina Azul - Salvador BA</option><option value="199">Colina de Itapuã - Salvador BA</option><option value="200">Colonial - Simões Filho BA</option><option value="201">Conceição do Almeida - BA</option><option value="202">Condor - Salvador BA</option><option value="203">Conjunto Simões Filho I - Simões Filho BA</option><option value="204">Conjunto Tamandaré - Salvador BA</option><option value="205">Coqueirinho - Salvador BA</option><option value="206">Coqueiro Grande - Salvador BA</option><option value="207">Cosme de Farias - Salvador BA</option><option value="208">Costa Azul - Salvador BA</option><option value="209">Costa do Sol - Salvador BA</option><option value="210">Coutos - Salvador BA</option><option value="211">Cristal - Salvador BA</option><option value="212">Cristo Rei - Simões Filho BA</option><option value="213">Cruzeiro - Laje BA</option><option value="214">Curuzu - Salvador BA</option><option value="216">Daniel Lisboa - Salvador BA</option><option value="217">Derba - Santo Amaro BA</option><option value="218">Diamante - Mata de São João BA</option><option value="219">Diamantina - Salvador BA</option><option value="220">Dique do Vale - Salvador BA</option><option value="221">Dom Macedo Costa - BA</option><option value="222">Domingos Rabelo - Salvador BA</option><option value="223">Doron - Salvador BA</option><option value="224">Eduardo Santos - Salvador BA</option><option value="225">Elísio Medrado - BA</option><option value="226">Encarnação de Salinas - Salinas da Margarida BA</option><option value="227">Engenheiro Pontes - Laje BA</option><option value="228">Engenho Novo - Simões Filho BA</option><option value="229">Engenho Velho da Federação - Salvador BA</option><option value="230">Engenho Velho de Brotas - Salvador BA</option><option value="231">Engomadeira - Salvador BA</option><option value="232">Escada - Salvador BA</option><option value="236">Espanhola - Lauro de Freitas BA</option><option value="233">Espanhola (Boca do Rio) - Salvador BA</option><option value="234">Espanhola (Central) - Salvador BA</option><option value="235">Espanhola (Cidade Baixa) - Salvador BA</option><option value="237">Esperança - Alagoinhas BA</option><option value="238">Esperança - Salvador BA</option><option value="239">Estrada da Cocisa - Salvador BA</option><option value="240">Estrada da Rainha - Salvador BA</option><option value="241">Estrada do Coco - Lauro de Freitas BA</option><option value="242">Eucaliptos - Simões Filho BA</option><option value="243">Farol da Barra - Salvador BA</option><option value="244">Farol de Itapuã - Salvador BA</option><option value="264">Fátima - BA</option><option value="245">Fazenda Grande Dois - Salvador BA</option><option value="246">Fazenda Grande Quatro - Salvador BA</option><option value="247">Fazenda Grande Três - Salvador BA</option><option value="248">Fazenda Grande Um - Salvador BA</option><option value="249">Fazenda Madeira - Candeias BA</option><option value="250">Fazenda Tauá - Catu BA</option><option value="251">Federação - Salvador BA</option><option value="252">Felicidade - Salvador BA</option><option value="253">Ferroviários - Salvador BA</option><option value="254">Flor Brilhante - Salvador BA</option><option value="255">Flor da Nascente - Salvador BA</option><option value="256">Flor do Castelo - Salvador BA</option><option value="257">Floresta - Salvador BA</option><option value="258">Floresta da Fonte - Salvador BA</option><option value="259">Florestal - Salvador BA</option><option value="260">Folha do Norte - Simões Filho BA</option><option value="261">Fonte da Colina - Salvador BA</option><option value="262">Fonte das Águas - Dias D&#039;Ávila BA</option><option value="263">Formoso - Inhambupe BA</option><option value="265">Galiléia - Salvador BA</option><option value="266">Gamboa - Vera Cruz BA</option><option value="728">Gandu - BA</option><option value="267">Garibaldi - Salvador BA</option><option value="268">Genaro de Carvalho - Salvador BA</option><option value="269">General Labatut - Salvador BA</option><option value="270">Geolândia - Cabaceiras do Paraguaçu BA</option><option value="271">Goes Calmon - Salvador BA</option><option value="273">Graça - Valença BA</option><option value="272">Gravito - Catu BA</option><option value="274">Guaibim - Valença BA</option><option value="275">Guarajuba - Camaçari BA</option><option value="276">Guerém - Valença BA</option><option value="277">Haiti - Salvador BA</option><option value="278">Heliópolis - BA</option><option value="279">Horizonte - Salvador BA</option><option value="280">Horto Florestal - Salvador BA</option><option value="281">Iapi - Salvador BA</option><option value="282">Ilha Amarela - Salvador BA</option><option value="285">Ilha de Maré - Salvador BA</option><option value="286">Ilha de São João - Simões Filho BA</option><option value="283">Ilha Mar - Vera Cruz BA</option><option value="284">Ilha Verde - Vera Cruz BA</option><option value="287">Imbassaí - Mata de São João BA</option><option value="288">Imbui - Salvador BA</option><option value="289">Independência - Salvador BA</option><option value="290">Ipiranga - Salvador BA</option><option value="291">Ipitanga - Lauro de Freitas BA</option><option value="292">Iriguaçu - Salvador BA</option><option value="293">Itacimirim - Camaçari BA</option><option value="294">Itajaí - Salvador BA</option><option value="295">Itamira - Aporá BA</option><option value="296">Itanagra - BA</option><option value="297">Itapagipe - Salvador BA</option><option value="298">Itapicuru - BA</option><option value="299">Itapuã - Salvador BA</option><option value="300">Itaquaraci - Salvador BA</option><option value="301">Itinga - Lauro de Freitas BA</option><option value="302">Jaguaripe - Salvador BA</option><option value="303">Jambeiro - Valença BA</option><option value="304">Jardim Alvorada - Dias D&#039;Ávila BA</option><option value="305">Jardim Alvorada - Salvador BA</option><option value="306">Jardim Amendoeira - Salvador BA</option><option value="307">Jardim Arenoso - Salvador BA</option><option value="308">Jardim Armação - Salvador BA</option><option value="309">Jardim Atlântico - Salvador BA</option><option value="310">Jardim Avalice - Salvador BA</option><option value="311">Jardim Bela Vista - Salvador BA</option><option value="312">Jardim Betel - Salvador BA</option><option value="313">Jardim Botânico - Salvador BA</option><option value="314">Jardim Brasil - Santo Antônio de Jesus BA</option><option value="315">Jardim Brasília - Camaçari BA</option><option value="316">Jardim Brasília - Salvador BA</option><option value="317">Jardim Cabula - Salvador BA</option><option value="318">Jardim Cajazeiras - Salvador BA</option><option value="319">Jardim Centenário - Lauro de Freitas BA</option><option value="320">Jardim Cruzeiro - Salvador BA</option><option value="347">Jardim das Árvores - Santo Antônio de Jesus BA</option><option value="348">Jardim do Norte - Conceição da Feira BA</option><option value="321">Jardim Eldorado - Salvador BA</option><option value="322">Jardim Esmeralda - Salvador BA</option><option value="323">Jardim Estrela - Salvador BA</option><option value="324">Jardim Guarany - Salvador BA</option><option value="325">Jardim Guiomar - Salvador BA</option><option value="326">Jardim Imperial - Lauro de Freitas BA</option><option value="327">Jardim Ipitanga - Lauro de Freitas BA</option><option value="328">Jardim Itacaranha - Salvador BA</option><option value="329">Jardim Limoeiro - Camaçari BA</option><option value="330">Jardim Los Angeles - Pojuca BA</option><option value="331">Jardim Metrópole - Lauro de Freitas BA</option><option value="332">Jardim Mussurunga - Salvador BA</option><option value="333">Jardim Nova Esperança - Salvador BA</option><option value="334">Jardim Panorama - Camaçari BA</option><option value="335">Jardim Perseverança - Salvador BA</option><option value="336">Jardim Petrolar - Alagoinhas BA</option><option value="337">Jardim Portão - Lauro de Freitas BA</option><option value="338">Jardim Praia Grande - Salvador BA</option><option value="339">Jardim Santa Mônica - Salvador BA</option><option value="340">Jardim Santo Inácio - Salvador BA</option><option value="342">Jardim São Cristovão - Salvador BA</option><option value="341">Jardim Sussuarana - Salvador BA</option><option value="343">Jardim Tarumã - Lauro de Freitas BA</option><option value="344">Jardim Terra Nova - Salvador BA</option><option value="345">Jardim Tropical - Camaçari BA</option><option value="346">Jardim Valença - Valença BA</option><option value="349">Jatimane do Jequiriçá - Valença BA</option><option value="350">Jeremoabo - BA</option><option value="351">Jiquiriçá - BA</option><option value="352">Jiribatuba - Vera Cruz BA</option><option value="353">Joanes - Salvador BA</option><option value="354">Joia do Rio - Camaçari BA</option><option value="355">Jozino Azevedo - Salvador BA</option><option value="356">Km 22 - Jaguaripe BA</option><option value="357">Km 29 de Inhambupe - Inhambupe BA</option><option value="358">Km 37 - Valença BA</option><option value="373">Lago Azul - Camaçari BA</option><option value="374">Lago Azul - Dias D&#039;Ávila BA</option><option value="376">Lagoa de Baixo - Rio Real BA</option><option value="375">Lagoa Dourada - Salvador BA</option><option value="377">Lagos Verdes - Salvador BA</option><option value="378">Lamarão do Passé - São Sebastião do Passé BA</option><option value="379">Laranjeiras - Alagoinhas BA</option><option value="380">Laranjeiras - São Sebastião do Passé BA</option><option value="381">Largo da Mangueira - Salvador BA</option><option value="382">Largo do Ouro - Salvador BA</option><option value="383">Largo do Tamarineiro - Salvador BA</option><option value="384">Legalidade - Salvador BA</option><option value="385">Leste - Alagoinhas BA</option><option value="386">Leste - Candeias BA</option><option value="387">Leste - Entre Rios BA</option><option value="388">Leste - Madre de Deus BA</option><option value="389">Leste - Pojuca BA</option><option value="390">Leste - Rio Real BA</option><option value="391">Leste - Santo Amaro BA</option><option value="392">Leste - Valença BA</option><option value="393">Liberdade - Salvador BA</option><option value="394">Linha Verde - Mata de São João BA</option><option value="395">Litoral - Salvador BA</option><option value="397">Litoral de Arembepe - Camaçari BA</option><option value="396">Litoral Norte (Vila de Abrantes) - Camaçari BA</option><option value="398">Lobato - Salvador BA</option><option value="399">Loreto - Rio Real BA</option><option value="400">Loteamento Imar - Salvador BA</option><option value="401">Loteamento Nogueira - Salvador BA</option><option value="365">LS - Alagoinhas BA</option><option value="366">LS - Camaçari BA</option><option value="367">LS - Candeias BA</option><option value="368">LS - Dias D&#039;Ávila BA</option><option value="369">LS - Lauro de Freitas BA</option><option value="370">LS - Santo Antônio de Jesus BA</option><option value="371">LS - São Sebastião do Passé BA</option><option value="372">LS - Vera Cruz BA</option><option value="359">LS (Barreiras) - Salvador BA</option><option value="360">LS (Castelo Branco) - Salvador BA</option><option value="361">LS (Itacaranha) - Salvador BA</option><option value="362">LS (Liberdade) - Salvador BA</option><option value="363">LS (Pituba) - Salvador BA</option><option value="364">LS (São Caetano) - Salvador BA</option><option value="402">Macaúbas - Salvador BA</option><option value="403">Madragoa - Salvador BA</option><option value="404">Malhadas - Mata de São João BA</option><option value="405">Malombê - Esplanada BA</option><option value="406">Mangalô - Alagoinhas BA</option><option value="407">Mapele - Simões Filho BA</option><option value="408">Mar Azul - Mata de São João BA</option><option value="409">Mar Azul - Salvador BA</option><option value="410">Mar Del Plata - Salvador BA</option><option value="411">Mar Grande - Vera Cruz BA</option><option value="412">Marechal Rondon - Salvador BA</option><option value="413">Maricoabo - Valença BA</option><option value="415">Mata dos Oitis - Salvador BA</option><option value="414">Mata Escura - Salvador BA</option><option value="416">Meireles - Salvador BA</option><option value="417">Melo Moraes - Salvador BA</option><option value="418">Menino Jesus - Candeias BA</option><option value="419">Milagres - BA</option><option value="420">Miramar - Salvador BA</option><option value="421">Mirante - São Francisco do Conde BA</option><option value="422">Mirante de Águas Claras - Salvador BA</option><option value="423">Mirantes de Periperi - Salvador BA</option><option value="424">Misericórdia - Itaparica BA</option><option value="425">Monte Alegre - Salvador BA</option><option value="426">Monte Belém - Salvador BA</option><option value="427">Monte Gordo - Camaçari BA</option><option value="428">Monte Verde - Camaçari BA</option><option value="429">Morada das Árvores - Lauro de Freitas BA</option><option value="430">Morada do Parque - Salvador BA</option><option value="431">Moradas do Rio - Lauro de Freitas BA</option><option value="432">Mundo Novo - Camaçari BA</option><option value="433">Muniz Ferreira - BA</option><option value="434">Muribeca - São Francisco do Conde BA</option><option value="435">Mussurunga - Salvador BA</option><option value="437">Mutá - Jaguaripe BA</option><option value="436">Mutuípe - BA</option><option value="438">Nagé - Maragogipe BA</option><option value="439">Narandiba - Salvador BA</option><option value="440">Nascente do Vale - Salvador BA</option><option value="441">Nazaré do Jacuípe - São Sebastião do Passé BA</option><option value="442">Nordeste - Alagoinhas BA</option><option value="443">Nordeste - Candeias BA</option><option value="444">Nordeste - Salvador BA</option><option value="445">Nordeste - Valença BA</option><option value="446">Noroeste - Mata de São João BA</option><option value="447">Noroeste - Salvador BA</option><option value="448">Noroeste - Santo Antônio de Jesus BA</option><option value="449">Norte - Alagoinhas BA</option><option value="450">Norte - Candeias BA</option><option value="451">Norte - Cardeal da Silva BA</option><option value="452">Norte - Ribeira do Pombal BA</option><option value="453">Norte - Rio Real BA</option><option value="454">Norte - Salvador BA</option><option value="455">Norte - Valença BA</option><option value="456">Norte da Fazenda Grande - Salvador BA</option><option value="457">Norte de Itapuã - Salvador BA</option><option value="458">Norte de Pau da Lima - Salvador BA</option><option value="459">Nova Aliança - Camaçari BA</option><option value="460">Nova Aratu - Simões Filho BA</option><option value="461">Nova Castelo Branco - Salvador BA</option><option value="462">Nova Cidade - Salvador BA</option><option value="463">Nova Concórdia - Dias D&#039;Ávila BA</option><option value="480">Nova do Cruzeiro - Salvador BA</option><option value="464">Nova Esperança - Pojuca BA</option><option value="465">Nova Esperança - Simões Filho BA</option><option value="466">Nova Eucaliptos - Simões Filho BA</option><option value="467">Nova Mussurunga - Salvador BA</option><option value="468">Nova Narandiba - Salvador BA</option><option value="469">Nova Oeste - Camaçari BA</option><option value="470">Nova Ondina - Salvador BA</option><option value="471">Nova Paraguaçu - Dias D&#039;Ávila BA</option><option value="472">Nova Paz - Salvador BA</option><option value="473">Nova Pirajá - Salvador BA</option><option value="474">Nova Pituaçu - Salvador BA</option><option value="476">Nova Pôr do Sol - Salvador BA</option><option value="475">Nova Primavera - Salvador BA</option><option value="477">Nova Riachuelo - Santo Amaro BA</option><option value="478">Nova Sussuarana - Salvador BA</option><option value="479">Nova Terra - Salvador BA</option><option value="481">Novo Horizonte - Camaçari BA</option><option value="482">Novo Horizonte - Entre Rios BA</option><option value="483">Novo Horizonte - Lauro de Freitas BA</option><option value="484">Novo Horizonte - Salvador BA</option><option value="485">Novo Horizonte - Valença BA</option><option value="486">Novo Inhambupe - Inhambupe BA</option><option value="487">Novo Mar - Salvador BA</option><option value="488">Novo Marotinho - Salvador BA</option><option value="490">Novo Mundo - Alagoinhas BA</option><option value="491">Novo Mundo - Salvador BA</option><option value="489">Novo Mundo (Vila de Abrantes) - Camaçari BA</option><option value="492">Novo Oriente - Catu BA</option><option value="493">Novo Paraíso - Salvador BA</option><option value="494">Novo Triunfo - BA</option><option value="495">Oeste - Alagoinhas BA</option><option value="496">Oeste - Candeias BA</option><option value="497">Oeste - Pojuca BA</option><option value="498">Oeste - Salinas da Margarida BA</option><option value="499">Oeste - Salvador BA</option><option value="500">Oeste - Santo Antônio de Jesus BA</option><option value="501">Oeste - São Sebastião do Passé BA</option><option value="502">Olindina - BA</option><option value="503">Oliveira dos Campinhos - Santo Amaro BA</option><option value="504">Onze de Novembro - Salvador BA</option><option value="505">Oriente - Salvador BA</option><option value="506">Otavio Mangabeira - Camaçari BA</option><option value="507">Ouriçangas - BA</option><option value="508">Ouro Negro - Mata de São João BA</option><option value="509">Pajuçara - Salvador BA</option><option value="510">Palame - Esplanada BA</option><option value="511">Palma - Jaguaripe BA</option><option value="512">Palmares - Simões Filho BA</option><option value="513">Palmeiras - Pojuca BA</option><option value="514">Panelas - Catu BA</option><option value="733">Panorama - Campo Grande MS</option><option value="515">Pantanal - Salvador BA</option><option value="516">Paraguari - Salvador BA</option><option value="522">Paraíso - Alagoinhas BA</option><option value="523">Paraíso - Camaçari BA</option><option value="524">Paraíso - Candeias BA</option><option value="525">Paraíso - Catu BA</option><option value="517">Paraiso - Lauro de Freitas BA</option><option value="526">Paraíso - Pojuca BA</option><option value="518">Paraiso - Salvador BA</option><option value="527">Paraíso - Santo Amaro BA</option><option value="519">Paralela - Salvador BA</option><option value="520">Paralela Park - Salvador BA</option><option value="521">Paramirim - São Francisco do Conde BA</option><option value="528">Paripe - Salvador BA</option><option value="529">Paripiranga - BA</option><option value="530">Parque Bela Vista - Candeias BA</option><option value="531">Parque Bela Vista - Salvador BA</option><option value="532">Parque Continental - Simões Filho BA</option><option value="533">Parque Costa Azul - Salvador BA</option><option value="544">Parque das Mangabas - Camaçari BA</option><option value="545">Parque das Palmeiras - Camaçari BA</option><option value="546">Parque do Jacuípe - Camaçari BA</option><option value="534">Parque Florestal - Camaçari BA</option><option value="535">Parque Jocélia - Salvador BA</option><option value="536">Parque Petropólis - Dias D&#039;Ávila BA</option><option value="537">Parque Real - Camaçari BA</option><option value="539">Parque São Cristóvão - Salvador BA</option><option value="540">Parque São José - Salvador BA</option><option value="541">Parque São Paulo - Lauro de Freitas BA</option><option value="538">Parque Setúbal - Salvador BA</option><option value="542">Parque Urbano - Candeias BA</option><option value="543">Parque Verde - Camaçari BA</option><option value="547">Passagem dos Teixeiras - Candeias BA</option><option value="548">Passé - Candeias BA</option><option value="550">Pau da Lima - Salvador BA</option><option value="549">Pau Lavrado - Catu BA</option><option value="551">Paulo Maia - Salvador BA</option><option value="552">Pedra Branca - Santa Terezinha BA</option><option value="555">Pedrão - BA</option><option value="553">Pedras - Catu BA</option><option value="554">Pedras - Santo Amaro BA</option><option value="556">Península - Salvador BA</option><option value="557">Península do Joanes - Salvador BA</option><option value="558">Periperi - Salvador BA</option><option value="559">Pernambués - Salvador BA</option><option value="560">Pero Vaz - Salvador BA</option><option value="595">Pérola - Salvador BA</option><option value="596">Pérola Negra - Lauro de Freitas BA</option><option value="561">Piaçaveira - Camaçari BA</option><option value="570">Piçarra - Aporá BA</option><option value="562">Pirajá - Salvador BA</option><option value="563">Pirineus - Salvador BA</option><option value="564">Pitangueiras - Salvador BA</option><option value="565">Pitangueiras - Valença BA</option><option value="566">Pitanguinha - Simões Filho BA</option><option value="567">Pituaçu - Salvador BA</option><option value="568">Pituba - Salvador BA</option><option value="569">Pituba Norte - Salvador BA</option><option value="571">Planalto - Catu BA</option><option value="572">Planalto Real - Salvador BA</option><option value="573">Plataforma - Salvador BA</option><option value="574">Pomar do Jambeiro - Lauro de Freitas BA</option><option value="575">Pomar do Rio - Lauro de Freitas BA</option><option value="576">Ponto Farol - Salvador BA</option><option value="597">Pôr do Sol - Salvador BA</option><option value="577">Portal de Abrantes - Camaçari BA</option><option value="578">Portal de Arembepe - Camaçari BA</option><option value="579">Portal de Cajazeiras - Salvador BA</option><option value="580">Portal de Salvador - Salvador BA</option><option value="581">Porto Alegre - Salvador BA</option><option value="582">Porto Sauípe - Entre Rios BA</option><option value="583">Porto Seco - Salvador BA</option><option value="730">Potim - SP</option><option value="584">Pouso Alegre - Lauro de Freitas BA</option><option value="585">Povoado Encantado - Alagoinhas BA</option><option value="586">Povoado Limoeiro - Alagoinhas BA</option><option value="587">Povoado Riacho da Guia - Alagoinhas BA</option><option value="588">Praia da Coroa - Vera Cruz BA</option><option value="589">Praia de São Tomé - Salvador BA</option><option value="590">Primavera - Camaçari BA</option><option value="591">Primavera - Salvador BA</option><option value="592">Progresso - Camaçari BA</option><option value="593">Progresso - Salvador BA</option><option value="594">Providência - Santo Antônio de Jesus BA</option><option value="598">Quilômetro Cinco - Nilo Peçanha BA</option><option value="599">Quintas - Salvador BA</option><option value="600">Quinze de Maio - Salvador BA</option><option value="601">Quixabeira - Governador Mangabeira BA</option><option value="602">Quizambu - Alagoinhas BA</option><option value="603">Raposo - Salvador BA</option><option value="605">Recanto - Lauro de Freitas BA</option><option value="604">Recanto (Vila de Abrantes) - Camaçari BA</option><option value="607">Recanto da Lagoa - Salvador BA</option><option value="608">Recanto da Urbis - Salvador BA</option><option value="609">Recanto das Ilhas - Salvador BA</option><option value="610">Recanto dos Pássaros - Salvador BA</option><option value="606">Recanto Verde - Salvador BA</option><option value="611">Redenção - Salvador BA</option><option value="630">Régis Pacheco - Salvador BA</option><option value="612">Resende Costa - Salvador BA</option><option value="613">Resgate - Salvador BA</option><option value="614">Retiro - Pojuca BA</option><option value="615">Retiro - Salvador BA</option><option value="616">Ribeira - Salvador BA</option><option value="617">Rio Branco - Alagoinhas BA</option><option value="618">Rio Camaçari - Camaçari BA</option><option value="626">Rio da Prata - Camaçari BA</option><option value="627">Rio das Pedras - Salvador BA</option><option value="619">Rio Jordão - Salvador BA</option><option value="620">Rio Nilo - Salvador BA</option><option value="621">Rio Paraguaçu - Salvador BA</option><option value="622">Rio Preto - Entre Rios BA</option><option value="623">Rio Sena - Salvador BA</option><option value="624">Rio Una - Valença BA</option><option value="625">Rio Vermelho - Salvador BA</option><option value="628">Rodelas - BA</option><option value="629">Roma - Salvador BA</option><option value="631">Saboeiro - Salvador BA</option><option value="632">Salgado Grande - Rio Real BA</option><option value="633">Sambaíba - Itapicuru BA</option><option value="634">San Martin - Salvador BA</option><option value="635">Santa Brígida - BA</option><option value="659">São Brás - Santo Amaro BA</option><option value="660">São Caetano - Salvador BA</option><option value="661">São Felipe - BA</option><option value="662">São Félix - BA</option><option value="663">São José - Esplanada BA</option><option value="664">São Marcos - Salvador BA</option><option value="665">São Miguel das Matas - BA</option><option value="666">São Roque do Paraguaçu - Maragogipe BA</option><option value="636">Sapeaçu - BA</option><option value="637">Saramandaia - Salvador BA</option><option value="658">Sátiro Dias - BA</option><option value="639">Saúde - Salvador BA</option><option value="638">Sauípe - Mata de São João BA</option><option value="640">Seis de Janeiro - Salvador BA</option><option value="641">Sergi Mirim - Santo Amaro BA</option><option value="643">Serra do Frio - Laje BA</option><option value="642">Serra Grande - Valença BA</option><option value="644">Sete de Abril - Salvador BA</option><option value="645">Silva Jardim - Alagoinhas BA</option><option value="667">Sítio Camaçari - Santo Amaro BA</option><option value="670">Sítio do Quinto - BA</option><option value="668">Sítio Novo - Catu BA</option><option value="669">Sítio Verde - Camaçari BA</option><option value="646">Sol Nascente - Salvador BA</option><option value="647">Soledade - Salvador BA</option><option value="648">Subaúma - Entre Rios BA</option><option value="649">Sudeste - Candeias BA</option><option value="650">Sul - Candeias BA</option><option value="651">Sul - Castro Alves BA</option><option value="652">Sul - Nazaré BA</option><option value="653">Sul - Pojuca BA</option><option value="654">Sul - Santo Antônio de Jesus BA</option><option value="655">Sul - São Sebastião do Passé BA</option><option value="656">Sussuarana - Salvador BA</option><option value="657">Sussuarana Velha - Salvador BA</option><option value="671">Tabuleiro - Presidente Tancredo Neves BA</option><option value="672">Tairu - Vera Cruz BA</option><option value="673">Tamandaré - Salvador BA</option><option value="674">Taubaté - Lauro de Freitas BA</option><option value="675">Teotônio Vilela - Salvador BA</option><option value="676">Teresópolis - Alagoinhas BA</option><option value="677">Thomé de Souza - Salvador BA</option><option value="678">Tomaz Gonzaga - Salvador BA</option><option value="679">Trobogy - Salvador BA</option><option value="680">Tupi Caldas - Salvador BA</option><option value="681">Turiema - Salvador BA</option><option value="683">Ubaíra - BA</option><option value="682">Ubaranas - Salvador BA</option><option value="684">Uruguai - Salvador BA</option><option value="686">Vale das Pedrinhas - Salvador BA</option><option value="687">Vale do Jordão - Salvador BA</option><option value="688">Vale do Matatu - Salvador BA</option><option value="689">Vale do Sol - Alagoinhas BA</option><option value="690">Vale dos Lagos - Salvador BA</option><option value="691">Vale dos Rios - Salvador BA</option><option value="685">Vale Mirim - Salvador BA</option><option value="692">Valéria - Salvador BA</option><option value="693">Varzedo - BA</option><option value="694">Vasco da Gama - Salvador BA</option><option value="695">Ventosa - Salvador BA</option><option value="696">Verdes Campos - Mata de São João BA</option><option value="697">Verdes Campos - Salvador BA</option><option value="698">Verdes Horizontes - Camaçari BA</option><option value="699">Verdes Mares - Salvador BA</option><option value="700">Victor Serra - Salvador BA</option><option value="701">Vida Nova - Lauro de Freitas BA</option><option value="702">Vila Canária - Salvador BA</option><option value="703">Vila Cristalina - Salvador BA</option><option value="715">Vila de Senna - Lauro de Freitas BA</option><option value="731">Vila do Jambeiro - Dias D&#039;Ávila BA</option><option value="729">Vila do Jambeiro - Dias D&#039;Ávila BA</option><option value="716">Vila do Jambeiro - Dias D&#039;Ávila BA</option><option value="717">Vila do Vale - Salvador BA</option><option value="704">Vila Laura - Salvador BA</option><option value="705">Vila Mar - Salvador BA</option><option value="706">Vila Nova - Camaçari BA</option><option value="707">Vila Nova - Conde BA</option><option value="708">Vila Nova - Rio Real BA</option><option value="709">Vila Praiana - Lauro de Freitas BA</option><option value="710">Vila Rodrigues - Ribeira do Pombal BA</option><option value="711">Vila Rui Barbosa - Salvador BA</option><option value="712">Vila Tiradentes - Salvador BA</option><option value="713">Vila União - Salvador BA</option><option value="714">Vila Verde (Porto de Sauípe) - Entre Rios BA</option><option value="718">Vilamar - Lauro de Freitas BA</option><option value="719">Vilas do Atlântico - Lauro de Freitas BA</option><option value="720">Vinte e Três de Março - Salvador BA</option><option value="721">Vista Alegre - Camaçari BA</option><option value="722">Vista Alegre - Salvador BA</option><option value="723">Vista do Mar - Salvador BA</option><option value="724">Vitória - Salvador BA</option><option value="725">Vivenda - Salvador BA</option></select>
+		</div>
+	</div>
+
+	<div class="col-auto mx-0 pl-0 pr-1 mt-1">
+	<label></label>
+	<div class="col-12 p-0 mx-0">
+		<a href="#" class="btn btn-sm btn-secondary ml-1" 
+	 id="btnMoreFilters" 		data-placement="top" data-tooltip="tooltip" title="Mais filtros" data-delay=500>
+	<i class="fas fa-plus"></i>
+	
+</a>
+	</div>
+</div>
+
+	<div id='divMoreFilters' class='col-12 ml-0 px-1' 
+	 style="display: none;" >
+	<div class="alert-secondary alert mt-2 ml-1 mx-1 mb-0 pt-0 px-3">
+	<div class='form-row p-0'>
+		<div class='col-auto mx-0 pl-0 pr-1 mt-1'>
+			<label></label>
+			<div class="col-12 p-0 mx-0">
+				<a href="#" class="btn btn-sm btn-secondary ml-1" 
+	 id="btnLessFilters" 		data-placement="top" data-tooltip="tooltip" title="Menos filtros" data-delay=500>
+	<i class="fas fa-minus"></i>
+	
+</a>
+			</div>
+		</div>
+		<div class="col col-sm mt-1" >
+	<label for="" class="col-12 p-0 mb-0 col-form-label-sm">Especialidade</label>
+	<div class="col-12 p-0">
+		<select id="speciality" class="form-control form-control-sm " name="speciality"><option value="" selected="selected">Todas</option><option value="-1">&gt;&gt; Com especialidade &lt;&lt;</option><option value="-2">&gt;&gt; Sem especialidade &lt;&lt;</option><option value="87">Anestesiologia</option><option value="90">Angiologia</option><option value="3">Atendimento ao queimado</option><option value="5">Cardiologia</option><option value="10">Cirurgia aparelho digestivo e bariátrica</option><option value="49">Cirurgia bucomaxilofacial</option><option value="76">Cirurgia Cardiotorácica</option><option value="28">Cirurgia Cardiovascular</option><option value="22">Cirurgia de cabeça e pescoço</option><option value="83">Cirurgia do Trauma</option><option value="17">Cirurgia geral</option><option value="91">Cirurgia oncológica</option><option value="58">Cirurgia pediátrica</option><option value="68">Cirurgia plástica</option><option value="75">Cirurgia Vascular</option><option value="33">Clínica médica</option><option value="6">Coloproctologia</option><option value="13">Endocrinologia</option><option value="92">Endoscopia digestiva</option><option value="16">Gastroenterologia</option><option value="20">Ginecologia e obstetrícia</option><option value="23">Hematologia e hemoterapia</option><option value="93">Hemodinâmica e cardiologia intervencionista</option><option value="24">Hepatologia</option><option value="26">Infectologia</option><option value="31">Mastologia</option><option value="12">Medicina de emergência</option><option value="7">Medicina Intensiva</option><option value="37">Nefrologia</option><option value="36">Neonatologia</option><option value="39">Neurocirurgia</option><option value="38">Neurologia</option><option value="42">Obstetrícia</option><option value="88">Odontologia</option><option value="48">Oftalmologia</option><option value="46">Oncologia</option><option value="94">Oncologia clínica</option><option value="50">Ortopedia</option><option value="52">Otorrinolaringologia</option><option value="54">Pediatria</option><option value="65">Perfusionista</option><option value="72">Pneumologia</option><option value="89">Psicologia</option><option value="70">Psiquiatria</option><option value="29">Radiologia Intervencionista</option><option value="73">Radioterapia</option><option value="96">Transplante de Coração</option><option value="97">Transplante de Fígado</option><option value="98">Transplante de Medula Óssea</option><option value="99">Transplante de Pulmão</option><option value="100">Transplante de Rim</option><option value="85">Urologia</option></select>
+	</div>
+</div>
+
+		<div class="col col-sm mt-1" >
+	<label for="" class="col-12 p-0 mb-0 col-form-label-sm">Função</label>
+	<div class="col-12 p-0">
+		<select id="function" class="form-control form-control-sm " name="function"><option value="" selected="selected">Todas as funções</option><option value="13">Ajudante Coord. Apresentações</option><option value="15">Ajudante Coord. GVP</option><option value="14">Ajudante Coord. Lista</option><option value="23">Ajudante da lista de hospedagens</option><option value="20">Ajudante Lista de Assistentes</option><option value="11">Ajudante Presidente</option><option value="12">Ajudante Secretário</option><option value="10">Assistente</option><option value="6">Conselheiro</option><option value="4">Coordenador da Lista de Médicos</option><option value="3">Coordenador de Apresentações</option><option value="18">Coordenador de Plantões</option><option value="5">Coordenador do GVP</option><option value="9">Facilitador</option><option value="7">Membro da Colih</option><option value="8">Membro do GVP</option><option value="21">Outra</option><option value="1">Presidente</option><option value="22">Responsável de lista de hospedagens</option><option value="16">Responsável Lista de Assistentes</option><option value="17">Responsável Lista de Facilitadores</option><option value="19">Responsável pelos Membros da Ordem</option><option value="2">Secretário</option></select>
+	</div>
+</div>
+
+		<div class="col-12 col-sm mt-1" >
+	<label for="" class="col-12 p-0 mb-0 col-form-label-sm">Nivel de Acesso</label>
+	<div class="col-12 p-0">
+		<select id="role" class="form-control form-control-sm " name="role"><option value="" selected="selected">Todos os níveis</option><option value="1">Administrador</option><option value="9">Assistente da Colih</option><option value="5">Coordenador da Lista de Médicos</option><option value="7">Coordenador de Apresentações</option><option value="6">Coordenador do GVP</option><option value="15">Coordenador do Plantão</option><option value="11">Lista de Assistentes</option><option value="14">Lista de Facilitadores</option><option value="12">Membro Consultor</option><option value="3">Membro da Colih</option><option value="8">Membro do GVP</option><option value="2">Presidente/Secretário</option><option value="4">Sem acesso</option><option value="13">Sem acesso</option></select>
+	</div>
+</div>
+	</div>
+	</div>
+</div>
+			
+			<div class="col-auto mt-3 pr-2 form-row justify-content-end">
+				<label for="" class="col-12 p-0 mb-2 col-form-label-sm"></label>
+				<div class="btn-group mt-1 ml-2" role="group" aria-label="Filter actions">
+					<button type="submit" class="btn btn-sm btn-info btn-icon-split pr-1">
+						<span class="icon text-white-50">
+							<i class="fas fa-filter"></i>
+						</span>
+						<span class="text">Filtrar</span>
+					</button>
+					<button type="button" class="btn btn-sm btn-info dropdown-toggle p-1 pl-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
+						<i class="fa fa-bars p-0 m-0" aria-hidden="true"></i>
+					</button>
+					<div class="dropdown-menu">
+						<a class="dropdown-item text-secondary" href="">
+							<div wire:snapshot="{&quot;data&quot;:{&quot;code&quot;:&quot;users&quot;,&quot;redirectUrl&quot;:&quot;https:\/\/salvador.colih.med.br\/panel\/users&quot;,&quot;label&quot;:null,&quot;saveFilterEnabled&quot;:false},&quot;memo&quot;:{&quot;id&quot;:&quot;voRKHokcETgcvO5Q5WHn&quot;,&quot;name&quot;:&quot;form.filter-options&quot;,&quot;path&quot;:&quot;panel\/users&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;pt_BR&quot;},&quot;checksum&quot;:&quot;bc97132de73128697eb5d44f64d88cc356eea4d718a2112851657d62078e0815&quot;}" wire:effects="[]" wire:id="voRKHokcETgcvO5Q5WHn">
+    <div wire:click="removeFilter" class="text-secondary d-inline-block mr-2" style="cursor: pointer;">
+        <!--[if BLOCK]><![endif]-->            <img src="https://salvador.colih.med.br/img/icons/broom.gif" alt="Limpar filtros" class="img-fluid" style="width: 16px; height: 16px;"> Limpar filtros
+        <!--[if ENDBLOCK]><![endif]-->
+    </div>
+	<br/>
+    <label for="save-filter" class="m-0 mt-2 align-middle">
+        <input type="checkbox" name="saveFilter" id="save-filter"
+            wire:model="saveFilterEnabled" />
+        &nbsp;Sempre salvar filtros
+    </label>
+</div>
+						</a>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>	
+</div>
+
+
+<input id="currentRoute" name="currentRoute" type="hidden" value="https://salvador.colih.med.br/panel/users">
+
+
+
+	<div class="card shadow mb-4">
+		<div class="card-header py-3">
+			<div class="row  input-group input-group-sm">
+				<div class="col-auto h6 pt-1 m-0 font-weight-bold text-primary text-uppercase">
+					<i class="fas fa-user mr-1"></i>Lista de membros
+				</div>
+				<div class="col px-3 m-0">
+				</div>
+				<div class="col-auto m-0 text-primary">
+					<select class="form-control select-compact disableSelect2 text-primary" id="sortOrder" name="sortOrder"><option value="nm" selected="selected">Nome</option><option value="rg">Região</option><option value="dt">Designação</option></select>
+				</div>
+
+				<div class="col-auto h6 m-0 pt-1 pr-0 text-primary float-right">
+					(Total 6)
+				</div>
+			</div>
+		</div>
+
+		<div class="card-body pt-1">
+			<div class= "row">
+				<div id="tr6" class="col-12 col-lg-6 px-1 my-1 h-100 bg-white">
+	<div class="shadow border-left-secondary h-100">
+		<div class="row mx-1 pt-2 px-2 mt-1 mb-0">
+			<div class="col-12 p-0 m-0">
+				<div class="d-flex">
+										<div class="flex-grow-1">
+						<div class="row p-0 m-0">
+							<div class="col p-0 pb-0 pr-4 text-dark">
+				<i class="fas" 
+					data-placement="top" data-tooltip="tooltip" data-delay=500 title="">
+				</i>
+				<a href="https://salvador.colih.med.br/panel/users/6" class="text-dark" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Ver detalhes do membro">
+										Admin Colih
+										<i class="fas fa-eye text-info pl-2"></i>
+					
+				</a>
+			</div>
+
+			
+				
+			<div class="w-100"></div>
+	
+	<div class="col-auto p-0 pb-1 pr-1 small mr-1 text-secondary"> 
+				
+				<i class="fa fa-fw ml-1 d-none d-md-inline-block" aria-hidden="true"></i>	
+					<span class="ml-0"></span>
+				                			</div>
+			
+																<div class="col-auto p-0 pb-1 pr-1 text-danger small">
+					<i class="fa fa-screwdriver-wrench" aria-hidden="true"
+						data-placement="top" data-html="true" data-tooltip="tooltip" data-delay=500 
+						title="Administrador do site">
+					</i>
+				</div>
+						
+			
+							<div class="col-12 p-0 pb-1 pr-1 text-secondary"> 
+									</div>
+			
+			<div class="w-100"></div>
+			
+
+
+
+
+			<div class="col col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+									<span class="ml-4"></span>
+											
+			</div>
+
+			
+			<div class="col-12 col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+																</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row mx-1 pb-2 px-2 mt-0 mb-1">
+			<div class="col p-0 m-0">
+				<div class="row p-0 m-0">
+											<div class="col-auto p-0 mt-2"> 
+					<a href='mailto:Admin Colih <contato@colih.org>'>
+						<i class='fa fa-envelope' aria-hidden='true' data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar mensagem para contato@colih.org">
+						</i>
+					</a>
+				</div>
+				
+				
+				<div class="col-auto ml-2 mt-2 p-0 pb-1 pr-1 text-secondary d-block d-md-none small"> 
+					<span class="urlwhatsapp" style="cursor:pointer" data-url="/send?phone=5519999999999" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar WhatsApp"><i class="fa fa-whatsapp fa-lg mr-2" style="color:green"></i></span>19 99999-9999					
+				</div>
+				<div class="col-auto ml-2 mt-2 p-0 pl-1 pb-1 pr-1 text-secondary d-none d-md-block"> 
+					<span class="urlwhatsapp" style="cursor:pointer" data-url="/send?phone=5519999999999" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar WhatsApp"><i class="fa fa-whatsapp fa-lg mr-2" style="color:green"></i></span>19 99999-9999					
+				</div>
+									</div>
+			</div>
+			<div class="col-auto p-0 m-0 ">
+				<div class="col-auto float-right mr-0 pr-1" >
+					<div class="d-flex flex-nowrap">
+													
+											</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+			<div id="tr7" class="col-12 col-lg-6 px-1 my-1 h-100 bg-white">
+	<div class="shadow border-left-secondary h-100">
+		<div class="row mx-1 pt-2 px-2 mt-1 mb-0">
+			<div class="col-12 p-0 m-0">
+				<div class="d-flex">
+										<div class="flex-grow-1">
+						<div class="row p-0 m-0">
+							<div class="col p-0 pb-0 pr-4 text-dark">
+				<i class="fas" 
+					data-placement="top" data-tooltip="tooltip" data-delay=500 title="">
+				</i>
+				<a href="https://salvador.colih.med.br/panel/users/7" class="text-dark" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Ver detalhes do membro">
+										Eduardo B. (desenvolvedor)
+										<i class="fas fa-eye text-info pl-2"></i>
+					
+				</a>
+			</div>
+
+			
+				
+			<div class="w-100"></div>
+	
+	<div class="col-auto p-0 pb-1 pr-1 small mr-1"> 
+				
+				<i class="fa fa-fw ml-1 d-none d-md-inline-block" aria-hidden="true"></i>	
+					<span class="ml-0"></span>
+				                                    Outra
+                			</div>
+			
+																<div class="col-auto p-0 pb-1 pr-1 text-danger small">
+					<i class="fa fa-screwdriver-wrench" aria-hidden="true"
+						data-placement="top" data-html="true" data-tooltip="tooltip" data-delay=500 
+						title="Administrador do site">
+					</i>
+				</div>
+						
+			
+							<div class="col-12 p-0 pb-1 pr-1 text-secondary"> 
+									</div>
+			
+			<div class="w-100"></div>
+			
+
+
+
+
+			<div class="col col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+									<span class="ml-4"></span>
+													<div class="badge badge-primary ml-0">Alagoinhas</div>
+							
+			</div>
+
+			
+			<div class="col-12 col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+																</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row mx-1 pb-2 px-2 mt-0 mb-1">
+			<div class="col p-0 m-0">
+				<div class="row p-0 m-0">
+											<div class="col-auto p-0 mt-2"> 
+					<a href='mailto:Eduardo Borges (desenvolvedor) <eduardoborgesferreira@gmail.com>'>
+						<i class='fa fa-envelope' aria-hidden='true' data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar mensagem para eduardoborgesferreira@gmail.com">
+						</i>
+					</a>
+				</div>
+				
+				
+				<div class="col-auto ml-2 mt-2 p-0 pb-1 pr-1 text-secondary d-block d-md-none small"> 
+					<span class="urlwhatsapp" style="cursor:pointer" data-url="/send?phone=553189051811" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar WhatsApp"><i class="fa fa-whatsapp fa-lg mr-2" style="color:green"></i></span>(31) 8905-1811					
+				</div>
+				<div class="col-auto ml-2 mt-2 p-0 pl-1 pb-1 pr-1 text-secondary d-none d-md-block"> 
+					<span class="urlwhatsapp" style="cursor:pointer" data-url="/send?phone=553189051811" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar WhatsApp"><i class="fa fa-whatsapp fa-lg mr-2" style="color:green"></i></span>(31) 8905-1811					
+				</div>
+									</div>
+			</div>
+			<div class="col-auto p-0 m-0 ">
+				<div class="col-auto float-right mr-0 pr-1" >
+					<div class="d-flex flex-nowrap">
+													
+											</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+			<div id="tr3" class="col-12 col-lg-6 px-1 my-1 h-100 bg-white">
+	<div class="shadow border-left-secondary h-100">
+		<div class="row mx-1 pt-2 px-2 mt-1 mb-0">
+			<div class="col-12 p-0 m-0">
+				<div class="d-flex">
+										<div class="flex-grow-1">
+						<div class="row p-0 m-0">
+							<div class="col p-0 pb-0 pr-4 text-dark">
+				<i class="fas" 
+					data-placement="top" data-tooltip="tooltip" data-delay=500 title="">
+				</i>
+				<a href="https://salvador.colih.med.br/panel/users/3" class="text-dark" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Ver detalhes do membro">
+										Éricson Sousa
+										<i class="fas fa-eye text-info pl-2"></i>
+					
+				</a>
+			</div>
+
+			
+				
+			<div class="w-100"></div>
+	
+	<div class="col-auto p-0 pb-1 pr-1 small mr-1 text-secondary"> 
+				
+				<i class="fa fa-fw ml-1 d-none d-md-inline-block" aria-hidden="true"></i>	
+					<span class="ml-0"></span>
+				                			</div>
+			
+																<div class="col-auto p-0 pb-1 pr-1 text-danger small">
+					<i class="fa fa-screwdriver-wrench" aria-hidden="true"
+						data-placement="top" data-html="true" data-tooltip="tooltip" data-delay=500 
+						title="Administrador do site">
+					</i>
+				</div>
+						
+			
+							<div class="col-12 p-0 pb-1 pr-1 text-secondary"> 
+									</div>
+			
+			<div class="w-100"></div>
+			
+
+
+
+
+			<div class="col col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+									<span class="ml-4"></span>
+											
+			</div>
+
+			
+			<div class="col-12 col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+																</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row mx-1 pb-2 px-2 mt-0 mb-1">
+			<div class="col p-0 m-0">
+				<div class="row p-0 m-0">
+											<div class="col-auto p-0 mt-2"> 
+					<a href='mailto:Éricson Sousa <dbesistemas@gmail.com>'>
+						<i class='fa fa-envelope' aria-hidden='true' data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar mensagem para dbesistemas@gmail.com">
+						</i>
+					</a>
+				</div>
+				
+				
+				<div class="col-auto ml-2 mt-2 p-0 pb-1 pr-1 text-secondary d-block d-md-none small"> 
+										
+				</div>
+				<div class="col-auto ml-2 mt-2 p-0 pl-1 pb-1 pr-1 text-secondary d-none d-md-block"> 
+										
+				</div>
+									</div>
+			</div>
+			<div class="col-auto p-0 m-0 ">
+				<div class="col-auto float-right mr-0 pr-1" >
+					<div class="d-flex flex-nowrap">
+													
+											</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+			<div id="tr1" class="col-12 col-lg-6 px-1 my-1 h-100 bg-white">
+	<div class="shadow border-left-secondary h-100">
+		<div class="row mx-1 pt-2 px-2 mt-1 mb-0">
+			<div class="col-12 p-0 m-0">
+				<div class="d-flex">
+										<div class="flex-grow-1">
+						<div class="row p-0 m-0">
+							<div class="col p-0 pb-0 pr-4 text-dark">
+				<i class="fas" 
+					data-placement="top" data-tooltip="tooltip" data-delay=500 title="">
+				</i>
+				<a href="https://salvador.colih.med.br/panel/users/1" class="text-dark" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Ver detalhes do membro">
+										Rodrigo Cafaro
+										<i class="fas fa-eye text-info pl-2"></i>
+					
+				</a>
+			</div>
+
+			
+				
+			<div class="w-100"></div>
+	
+	<div class="col-auto p-0 pb-1 pr-1 small mr-1 text-secondary"> 
+				
+				<i class="fa fa-fw ml-1 d-none d-md-inline-block" aria-hidden="true"></i>	
+					<span class="ml-0"></span>
+				                			</div>
+			
+																<div class="col-auto p-0 pb-1 pr-1 text-danger small">
+					<i class="fa fa-screwdriver-wrench" aria-hidden="true"
+						data-placement="top" data-html="true" data-tooltip="tooltip" data-delay=500 
+						title="Administrador do site">
+					</i>
+				</div>
+						
+			
+							<div class="col-12 p-0 pb-1 pr-1 text-secondary"> 
+									</div>
+			
+			<div class="w-100"></div>
+			
+
+
+
+
+			<div class="col col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+									<span class="ml-4"></span>
+											
+			</div>
+
+			
+			<div class="col-12 col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+																</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row mx-1 pb-2 px-2 mt-0 mb-1">
+			<div class="col p-0 m-0">
+				<div class="row p-0 m-0">
+											<div class="col-auto p-0 mt-2"> 
+					<a href='mailto:Rodrigo Cafaro <rcafaro@gmail.com>'>
+						<i class='fa fa-envelope' aria-hidden='true' data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar mensagem para rcafaro@gmail.com">
+						</i>
+					</a>
+				</div>
+				
+				
+				<div class="col-auto ml-2 mt-2 p-0 pb-1 pr-1 text-secondary d-block d-md-none small"> 
+										
+				</div>
+				<div class="col-auto ml-2 mt-2 p-0 pl-1 pb-1 pr-1 text-secondary d-none d-md-block"> 
+										
+				</div>
+									</div>
+			</div>
+			<div class="col-auto p-0 m-0 ">
+				<div class="col-auto float-right mr-0 pr-1" >
+					<div class="d-flex flex-nowrap">
+													
+											</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+			<div id="tr2" class="col-12 col-lg-6 px-1 my-1 h-100 bg-white">
+	<div class="shadow border-left-secondary h-100">
+		<div class="row mx-1 pt-2 px-2 mt-1 mb-0">
+			<div class="col-12 p-0 m-0">
+				<div class="d-flex">
+										<div class="flex-grow-1">
+						<div class="row p-0 m-0">
+							<div class="col p-0 pb-0 pr-4 text-dark">
+				<i class="fas" 
+					data-placement="top" data-tooltip="tooltip" data-delay=500 title="">
+				</i>
+				<a href="https://salvador.colih.med.br/panel/users/2" class="text-dark" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Ver detalhes do membro">
+										Rogerio Soares
+										<i class="fas fa-eye text-info pl-2"></i>
+					
+				</a>
+			</div>
+
+			
+				
+			<div class="w-100"></div>
+	
+	<div class="col-auto p-0 pb-1 pr-1 small mr-1 text-secondary"> 
+				
+				<i class="fa fa-fw ml-1 d-none d-md-inline-block" aria-hidden="true"></i>	
+					<span class="ml-0"></span>
+				                			</div>
+			
+																<div class="col-auto p-0 pb-1 pr-1 text-danger small">
+					<i class="fa fa-screwdriver-wrench" aria-hidden="true"
+						data-placement="top" data-html="true" data-tooltip="tooltip" data-delay=500 
+						title="Administrador do site">
+					</i>
+				</div>
+						
+			
+							<div class="col-12 p-0 pb-1 pr-1 text-secondary"> 
+									</div>
+			
+			<div class="w-100"></div>
+			
+
+
+
+
+			<div class="col col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+									<span class="ml-4"></span>
+											
+			</div>
+
+			
+			<div class="col-12 col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+																</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row mx-1 pb-2 px-2 mt-0 mb-1">
+			<div class="col p-0 m-0">
+				<div class="row p-0 m-0">
+											<div class="col-auto p-0 mt-2"> 
+					<a href='mailto:Rogerio Soares <rogeriosoares.colih@gmail.com>'>
+						<i class='fa fa-envelope' aria-hidden='true' data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar mensagem para rogeriosoares.colih@gmail.com">
+						</i>
+					</a>
+				</div>
+				
+				
+				<div class="col-auto ml-2 mt-2 p-0 pb-1 pr-1 text-secondary d-block d-md-none small"> 
+										
+				</div>
+				<div class="col-auto ml-2 mt-2 p-0 pl-1 pb-1 pr-1 text-secondary d-none d-md-block"> 
+										
+				</div>
+									</div>
+			</div>
+			<div class="col-auto p-0 m-0 ">
+				<div class="col-auto float-right mr-0 pr-1" >
+					<div class="d-flex flex-nowrap">
+													
+											</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+			<div id="tr207" class="col-12 col-lg-6 px-1 my-1 h-100 bg-white">
+	<div class="shadow border-left-secondary h-100">
+		<div class="row mx-1 pt-2 px-2 mt-1 mb-0">
+			<div class="col-12 p-0 m-0">
+				<div class="d-flex">
+										<div class="flex-grow-1">
+						<div class="row p-0 m-0">
+							<div class="col p-0 pb-0 pr-4 text-dark">
+				<i class="fas" 
+					data-placement="top" data-tooltip="tooltip" data-delay=500 title="">
+				</i>
+				<a href="https://salvador.colih.med.br/panel/users/207" class="text-dark" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Ver detalhes do membro">
+										svc_colih
+										<i class="fas fa-eye text-info pl-2"></i>
+					
+				</a>
+			</div>
+
+			
+				
+			<div class="w-100"></div>
+	
+	<div class="col-auto p-0 pb-1 pr-1 small mr-1"> 
+				
+				<i class="fa fa-fw ml-1 d-none d-md-inline-block" aria-hidden="true"></i>	
+					<span class="ml-0"></span>
+				                                    Ajudante Presidente
+                			</div>
+			
+															
+			
+							<div class="col-12 p-0 pb-1 pr-1 text-secondary"> 
+									</div>
+			
+			<div class="w-100"></div>
+			
+
+
+
+
+			<div class="col col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+									<i class="fas fa-location-dot text-secondary pl-0 pr-2" ></i>
+					<span >
+						Salvador
+					(BA)	
+					</span>
+					&nbsp;
+													<div class="badge badge-primary ml-0">Sem Grupo</div>
+							
+			</div>
+
+			
+			<div class="col-12 col-xl-6 p-0 pb-1 pr-1 text-secondary"> 
+																</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row mx-1 pb-2 px-2 mt-0 mb-1">
+			<div class="col p-0 m-0">
+				<div class="row p-0 m-0">
+											<div class="col-auto p-0 mt-2"> 
+					<a href='mailto:svc_colih <lmc.colihba@gmail.com>'>
+						<i class='fa fa-envelope' aria-hidden='true' data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar mensagem para lmc.colihba@gmail.com">
+						</i>
+					</a>
+				</div>
+				
+				
+				<div class="col-auto ml-2 mt-2 p-0 pb-1 pr-1 text-secondary d-block d-md-none small"> 
+					<span class="urlwhatsapp" style="cursor:pointer" data-url="/send?phone=557199999999" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar WhatsApp"><i class="fa fa-whatsapp fa-lg mr-2" style="color:green"></i></span>(71) 9999-9999					
+				</div>
+				<div class="col-auto ml-2 mt-2 p-0 pl-1 pb-1 pr-1 text-secondary d-none d-md-block"> 
+					<span class="urlwhatsapp" style="cursor:pointer" data-url="/send?phone=557199999999" data-placement="top" data-tooltip="tooltip" data-delay=500 title="Enviar WhatsApp"><i class="fa fa-whatsapp fa-lg mr-2" style="color:green"></i></span>(71) 9999-9999					
+				</div>
+									</div>
+			</div>
+			<div class="col-auto p-0 m-0 ">
+				<div class="col-auto float-right mr-0 pr-1" >
+					<div class="d-flex flex-nowrap">
+													<a href="https://salvador.colih.med.br/panel/users/207/edit" class="btn btn-sm btn-info ml-1" 
+			data-placement="top" data-tooltip="tooltip" title="Editar membro" data-delay=500>
+	<i class="fas fa-pen-to-square"></i>
+	
+</a>
+										
+											<div class="btn-group dropdown" >
+							<button type="button" class="btn btn-sm btn-secondary dropdown-toggle ml-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
+								<i class="fa fa-bars" aria-hidden="true"></i>
+							</button>
+							<div class="dropdown-menu">
+																										<a class="dropdown-item text-secondary" href="https://salvador.colih.med.br/panel/users/badge/207">
+										<i class="fas fa-id-badge mr-1"></i>
+										Crachá
+									</a>
+									<a class="dropdown-item text-secondary" href="javascript:;" onclick="$('#idUserCard').val( 207 );$('#formUserCard').submit();">
+										<i class="fas fa-id-card mr-1"></i>
+										Cartão de visita
+									</a>
+																																		<a class="dropdown-item text-secondary" href="https://salvador.colih.med.br/panel/users/audit?user=207">
+										<i class="fas fa-lock mr-1"></i>
+										Auditar mudanças
+									</a>
+									<a class="dropdown-item text-secondary" href="https://salvador.colih.med.br/panel/users/impersonate/207">
+										<i class="fas fa-retweet mr-1"></i>
+										Impersonar usuário
+									</a>
+															</div>
+						</div>
+					
+											<a href="#deleteItemModal" data-item-id="207" data-item-descr="svc_colih" class="delete-item btn btn-sm btn-danger ml-1" data-toggle="modal" data-placement="top" data-tooltip="tooltip" title="Excluir" data-delay=500>
+	<i class="fas fa-trash"></i>
+	
+</a>
+											</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+			</div>
+			<div class="mt-3 mb-0">  </div>
+		</div>
+	</div>
+
+
+</form>
+
+
+<div class="modal fade" id="deleteItemModal" role="dialog" aria-labelledby="deleteItemModal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header bg-danger">
+				<h5 class="modal-title text-white" id="deleteItemModal">Cuidado</h5>
+				<button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+					<span>×</span>
+				</button>
+			</div>
+			<div class="modal-body"><h4>Deseja realmente excluir o membro <span id="itemDescription" class="text-danger"></span>?</h4></div>
+			<div id="issues-list" class="modal-body mt-0 pt-0"></div>
+
+			<div class="modal-body mt-0 pt-0">Esta ação não pode ser desfeita.</div>
+
+			<div class="col-12 mt-3 mx-1 mb-2" id="reason-input">
+		<label for="" class="col-12 p-0">Motivo da Exclusão*</label>
+		<div class="col-12p-0">
+			<select class="form-control" id="reason" name="reason"><option value="" selected="selected">Informe o motivo</option><option value="1">Falecimento</option><option value="2">Não é mais ancião</option><option value="3">Renúncia</option><option value="4">Mudou de Cidade</option></select>
+		</div>
+		<div class="invalid-feedback">
+			Campo obrigatório.
+		</div>
+	</div>
+
+	<div class="col-12 mt-3">
+		<label for="" class="col-12 p-0">Detalhes</label>
+		<div class="col-12 p-0">
+			<textarea id="observations" class="form-control" style="height: 100px" name="observations" cols="50" rows="10"></textarea>
+		</div>
+	</div>
+
+			<div class="modal-footer">
+				<input id="itemId" name="itemId" type="hidden">
+				<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+				<a class="btn btn-danger" href="#" id="confirm-delete-modal-btn">Excluir</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<form method="POST" action="https://salvador.colih.med.br/panel/users/cardgenerate" accept-charset="UTF-8" id="formUserCard" autocomplete="off"><input name="_token" type="hidden" value="RGvhsOWlv0RdeJosbvmJvCXfHECX3nG3Q5Qn5pxU">
+	<input type="hidden" name="_method" value="POST">    <input type="hidden" id='idUserCard' name="iduser" value="">
+</form>
+
+				</div>
+			</div>
+
+			<footer class="sticky-footer bg-white">
+    <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+            <a class="mr-5" href="#" id="click-support" data-user-id="207">
+                Precisa de ajuda? 
+            </a>
+            <span>&copy; BA Salvador 2026
+                - Laravel 10.49.0 - php 8.2.31 </span>
+            <br/>
+            <br/>
+        </div>
+    </div>
+</footer>
+		</div>
+	</div>
+
+	<a class="rounded scroll-to-top" href="#page-top">
+		<i class="fas fa-angle-up"></i>
+	</a>
+
+				        	<script type="text/javascript" src="/js/app.js"></script>
+                <script src="https://salvador.colih.med.br/vendor/sweetalert/sweetalert.all.js"></script> 
+
+                <script>
+                    Swal.mixin({
+                        timer: false
+                    });
+                </script>
+		<script type="text/javascript" src="/js/common-index.js"></script> 
+	
+	<script type="text/javascript" src="/js/common-filters.js"></script>
+	<script type="text/javascript" src="/js/plugins/bootstrap-datetimepicker.min.js"></script>
+	<script type="text/javascript" src="/js/plugins/bootstrap-datepicker.pt-BR.min.js"></script>
+	<script type="text/javascript" src="/js/whatsapp.js"></script>
+	
+	<script src="/livewire/livewire.min.js?id=df3a17f2"   data-csrf="RGvhsOWlv0RdeJosbvmJvCXfHECX3nG3Q5Qn5pxU" data-update-uri="/livewire/update" data-navigate-once="true"></script>
+</body>
+
+</html>
