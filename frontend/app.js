@@ -4181,3 +4181,186 @@ function removerEscopoCnes(index) {
     renderEscopoCards();
 }
 // ---------------------------------
+
+
+// ==========================================
+// DASHBOARD DADOS COLIH
+// ==========================================
+let colihChart = null;
+let colihMedicosCache = null;
+
+async function renderColihDashboard(periodo = 'global') {
+    const canvas = document.getElementById('colih-growth-chart');
+    if (!canvas) return;
+
+    if (!colihMedicosCache) {
+        colihMedicosCache = await fetchAPI('/colih/medicos').catch(() => []);
+    }
+
+    if (!colihMedicosCache || colihMedicosCache.length === 0) {
+        return; // Sem dados
+    }
+
+    // Ordenar por data
+    const sorted = colihMedicosCache
+        .filter(m => m.created_at)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    if (sorted.length === 0) return;
+
+    // Agrupar por mês/ano (ex: 01/2026)
+    const countsPerMonth = {};
+    const monthsKeys = [];
+
+    // Preencher meses considerando min e max date (para não pular meses vazios)
+    let minDate = new Date(sorted[0].created_at);
+    let maxDate = new Date(); // Até hoje
+
+    // Filtragem de período
+    if (periodo !== 'global') {
+        const monthsSub = parseInt(periodo, 10);
+        const cutoff = new Date();
+        cutoff.setMonth(cutoff.getMonth() - monthsSub);
+        minDate = cutoff < minDate ? minDate : cutoff;
+    }
+
+    // Reset para dia 1
+    let curr = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+    const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+
+    while (curr <= end) {
+        const key = `${String(curr.getMonth() + 1).padStart(2, '0')}/${curr.getFullYear()}`;
+        countsPerMonth[key] = 0;
+        monthsKeys.push(key);
+        curr.setMonth(curr.getMonth() + 1);
+    }
+
+    // Contar cadastros por mês
+    let totalAteMinDate = 0;
+    
+    sorted.forEach(m => {
+        const d = new Date(m.created_at);
+        if (d < minDate) {
+            totalAteMinDate++;
+        } else {
+            const key = `${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            if (countsPerMonth[key] !== undefined) {
+                countsPerMonth[key]++;
+            }
+        }
+    });
+
+    // Fazer cumulativo
+    const labels = [];
+    const dataPoints = [];
+    let cumulative = totalAteMinDate;
+
+    monthsKeys.forEach(k => {
+        cumulative += countsPerMonth[k];
+        labels.push(k);
+        dataPoints.push(cumulative);
+    });
+
+    // Renderizar gráfico
+    const ctx = canvas.getContext('2d');
+    if (colihChart) colihChart.destroy();
+
+    // Registrar plugin datalabels localmente se existir
+    const plugins = [];
+    if (typeof ChartDataLabels !== 'undefined') {
+        plugins.push(ChartDataLabels);
+    }
+
+    colihChart = new Chart(ctx, {
+        type: 'line',
+        plugins: plugins,
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total de Médicos Cadastrados',
+                data: dataPoints,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 3,
+                pointBackgroundColor: '#10b981',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        color: 'var(--text-primary)',
+                        font: {
+                            family: 'Urbanist, sans-serif',
+                            size: 14,
+                            weight: '600'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleFont: { size: 14, family: 'Urbanist' },
+                    bodyFont: { size: 14, family: 'Urbanist' },
+                    padding: 12,
+                    cornerRadius: 8
+                },
+                datalabels: {
+                    align: 'top',
+                    anchor: 'end',
+                    offset: 4,
+                    color: 'var(--text-primary)',
+                    font: {
+                        weight: 'bold',
+                        family: 'Inter',
+                        size: 12
+                    },
+                    formatter: function(value, context) {
+                        return value;
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'var(--border-color)',
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        color: 'var(--text-secondary)',
+                        font: { family: 'Inter' }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'var(--border-color)',
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        color: 'var(--text-secondary)',
+                        font: { family: 'Inter' },
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
+
+const origOpenTabColihDashboard = window.openTab;
+window.openTab = function(tabId, element) {
+    if (origOpenTabColihDashboard) origOpenTabColihDashboard(tabId, element);
+    if (tabId === 'colih-dashboard') {
+        renderColihDashboard(document.getElementById('colih-dashboard-filter')?.value || 'global');
+    }
+};
