@@ -3255,11 +3255,11 @@ async function renderDashboardGamificacao() {
                 const coveredTargets = {};
                 const otherColihDocs = [];
                 const hospColihDocs = colihDocs.filter(d => {
-                    const norm = s => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const norm = s => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/hospital e maternidade/g, "hospital maternidade");
                     const hStr = norm(d.hospitais);
                     const hNome = norm(h.nome);
                     if (!hStr) return false;
-                    return hStr.includes(hNome) || (hNome.length > 8 && hNome.includes(hStr) && hStr.length > 8);
+                    return hStr.includes(hNome) || (hNome.length > 8 && hNome.includes(hStr) && hStr.length > 8) || (hStr.includes("luiz argolo") && hNome.includes("luiz argolo"));
                 });
                 
                 hospColihDocs.forEach(d => {
