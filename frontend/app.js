@@ -4118,6 +4118,9 @@ function renderEscopoCards() {
     const container = document.getElementById('escopo-cards-container');
     container.innerHTML = '';
     
+    const countEl = document.getElementById('escopo-count');
+    if (countEl) countEl.textContent = escopoAtual.length;
+    
     if (escopoAtual.length === 0) {
         container.innerHTML = `<div style="padding:15px; text-align:center; color:var(--text-muted); width:100%; border:1px dashed var(--border-color); border-radius:8px;">Nenhum município selecionado (todo o estado será lido).</div>`;
         return;
