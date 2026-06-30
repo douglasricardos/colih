@@ -3268,23 +3268,27 @@ async function renderDashboardGamificacao() {
                 
                 // Covered Targets
                 const hospTargets = new Set();
+                (h.especialidades || []).forEach(espStr => {
+                    const parts = espStr.split(' / ');
+                    parts.forEach(p => {
+                        const pUp = p.trim().toUpperCase();
+                        if (hlcDict[pUp]) hospTargets.add(hlcDict[pUp]);
+                    });
+                });
+
                 const hospTargetTotals = {};
                 if (h._cnes_counts) {
+                    const normStr = s => s.toUpperCase().normalize("NFD").replace(/[^A-Z]/g, '');
+                    const normHlc = {};
+                    Object.entries(hlcDict).forEach(([k, v]) => {
+                        normHlc[normStr(k)] = v;
+                    });
                     for (const [cboStr, count] of Object.entries(h._cnes_counts)) {
-                        const t = hlcDict[cboStr];
+                        const t = normHlc[normStr(cboStr)];
                         if (t) {
-                            hospTargets.add(t);
                             hospTargetTotals[t] = (hospTargetTotals[t] || 0) + count;
                         }
                     }
-                } else {
-                    (h.especialidades || []).forEach(espStr => {
-                        const parts = espStr.split(' / ');
-                        parts.forEach(p => {
-                            const pUp = p.trim().toUpperCase();
-                            if (hlcDict[pUp]) hospTargets.add(hlcDict[pUp]);
-                        });
-                    });
                 }
                 
                 // Build coverage maps
