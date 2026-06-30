@@ -3249,6 +3249,13 @@ async function renderDashboardGamificacao() {
 
         const estratComp = hospRes.estabelecimentos.filter(h => isEstrat(h));
         const highComp = hospRes.estabelecimentos.filter(h => !isEstrat(h) && h._altaComplexidade && Array.isArray(h._altaComplexidade) && h._altaComplexidade.length > 0);
+        highComp.sort((a, b) => {
+            const aHasTransplante = a._altaComplexidade.some(c => c.toLowerCase().includes('transplante'));
+            const bHasTransplante = b._altaComplexidade.some(c => c.toLowerCase().includes('transplante'));
+            if (aHasTransplante && !bHasTransplante) return -1;
+            if (!aHasTransplante && bHasTransplante) return 1;
+            return a.nome.localeCompare(b.nome);
+        });
         const medComp = hospRes.estabelecimentos.filter(h => !isEstrat(h) && h._complexidade && h._complexidade.includes('Média') && !(h._altaComplexidade && h._altaComplexidade.length > 0)).slice(0, 50);
         
         const renderHospCards = (hospitals, containerId, isMedium) => {
