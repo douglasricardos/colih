@@ -3250,8 +3250,14 @@ async function renderDashboardGamificacao() {
         const estratComp = hospRes.estabelecimentos.filter(h => isEstrat(h));
         const highComp = hospRes.estabelecimentos.filter(h => !isEstrat(h) && h._altaComplexidade && Array.isArray(h._altaComplexidade) && h._altaComplexidade.length > 0);
         highComp.sort((a, b) => {
-            const aHasTransplante = a._altaComplexidade.some(c => c.toLowerCase().includes('transplante'));
-            const bHasTransplante = b._altaComplexidade.some(c => c.toLowerCase().includes('transplante'));
+            const isTmo = (h) => {
+                if (window._tmoCustomData && (window._tmoCustomData[h.cnes] || window._tmoCustomData[h.id])) return true;
+                if (h._altaComplexidade && h._altaComplexidade.some(c => c.toLowerCase().includes('transplante') || c.toLowerCase().includes('medula'))) return true;
+                if ((h.servicosEspecializados || []).concat(h.classificacoesServicos || []).some(s => typeof s === 'string' ? s.toUpperCase().includes('MEDULA') || s.toUpperCase().includes('TRANSPLANTE') : s.nome && (s.nome.toUpperCase().includes('MEDULA') || s.nome.toUpperCase().includes('TRANSPLANTE')))) return true;
+                return false;
+            };
+            const aHasTransplante = isTmo(a);
+            const bHasTransplante = isTmo(b);
             if (aHasTransplante && !bHasTransplante) return -1;
             if (!aHasTransplante && bHasTransplante) return 1;
             return a.nome.localeCompare(b.nome);

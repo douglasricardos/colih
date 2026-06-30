@@ -546,6 +546,9 @@ def get_tmo_custom():
                 print("Error loading TMO custom config:", e)
     return _TMO_CUSTOM_CACHE
 
+@app.get("/api/tmo")
+def get_tmo_custom_api():
+    return get_tmo_custom()
 
 cnes_especialidades_cache = []
 
@@ -1899,6 +1902,8 @@ if __name__ == "__main__":
 
     import uvicorn
     uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+
+
 
 
 
