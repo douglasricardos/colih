@@ -1251,6 +1251,10 @@ async function buscarMedicos() {
   if (sus) params.set('atende_sus', sus);
 
   const data = await fetchAPI(`/medicos?${params}`).catch(() => null);
+  
+  // Abort if the user opened a doctor detail view while the search was in flight
+  if (document.getElementById('med-detail').style.display === 'block') return;
+
   if (!data) { el.innerHTML = '<div class="empty-state"><p>Erro ao buscar.</p></div>'; return; }
 
   const fonteBar = document.getElementById('med-fonte-bar');
