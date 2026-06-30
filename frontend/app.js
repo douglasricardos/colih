@@ -3276,20 +3276,7 @@ async function renderDashboardGamificacao() {
                     });
                 });
 
-                const hospTargetTotals = {};
-                if (h._cnes_counts) {
-                    const normStr = s => s.toUpperCase().normalize("NFD").replace(/[^A-Z]/g, '');
-                    const normHlc = {};
-                    Object.entries(hlcDict).forEach(([k, v]) => {
-                        normHlc[normStr(k)] = v;
-                    });
-                    for (const [cboStr, count] of Object.entries(h._cnes_counts)) {
-                        const t = normHlc[normStr(cboStr)];
-                        if (t) {
-                            hospTargetTotals[t] = (hospTargetTotals[t] || 0) + count;
-                        }
-                    }
-                }
+                const hospTargetTotals = h._cnes_counts || {};
                 
                 // Build coverage maps
                 const coveredTargets = {};
